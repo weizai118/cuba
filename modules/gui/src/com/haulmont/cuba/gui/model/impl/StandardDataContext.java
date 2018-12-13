@@ -33,6 +33,8 @@ import com.haulmont.cuba.gui.model.DataContext;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.persistence.queries.FetchGroup;
 import org.eclipse.persistence.queries.FetchGroupTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
@@ -48,6 +50,8 @@ import java.util.stream.Collectors;
  * Standard implementation of {@link DataContext} which commits data to {@link DataManager}.
  */
 public class StandardDataContext implements DataContext {
+
+    private static final Logger log = LoggerFactory.getLogger(StandardDataContext.class);
 
     private ApplicationContext applicationContext;
 
@@ -146,9 +150,10 @@ public class StandardDataContext implements DataContext {
         disableListeners = true;
         T result;
         try {
-            result = (T) internalMerge(entity);
+            Set<Entity> merged = Sets.newIdentityHashSet();
+            result = (T) internalMerge(entity, merged);
             if (deep) {
-                getMetadataTools().traverseAttributes(entity, new MergingAttributeVisitor());
+                getMetadataTools().traverseAttributes(entity, new MergingAttributeVisitor(merged));
             }
         } finally {
             disableListeners = false;
@@ -156,19 +161,56 @@ public class StandardDataContext implements DataContext {
         return result;
     }
 
-    protected Entity internalMerge(Entity entity) {
+    public <T extends Entity> T merge(T entity, boolean deep, Set<Entity> merged) {
+        Preconditions.checkNotNullArgument(entity, "entity is null");
+
+        disableListeners = true;
+        T result;
+        try {
+            result = (T) internalMerge(entity, merged);
+            if (deep) {
+                getMetadataTools().traverseAttributes(entity, new MergingAttributeVisitor(merged));
+            }
+        } finally {
+            disableListeners = false;
+        }
+        return result;
+    }
+
+    @Override
+    public EntitySet merge(Collection<? extends Entity> entities, boolean deep) {
+        Preconditions.checkNotNullArgument(entities, "entity collection is null");
+
+        Set<Entity> merged = Sets.newIdentityHashSet();
+//        Set<Entity> merged = new HashSet<>();
+        for (Entity entity : entities) {
+            merge(entity, deep, merged);
+        }
+        return EntitySet.of(merged);
+    }
+
+    protected Entity internalMerge(Entity entity, Set<Entity> merged) {
         Map<Object, Entity> entityMap = content.computeIfAbsent(entity.getClass(), aClass -> new HashMap<>());
         Entity managedInstance = entityMap.get(entity.getId());
+
+        if (merged.contains(entity)) {
+            if (managedInstance != null) {
+                return managedInstance;
+            } else {
+                // should never happen
+                log.debug("Instance was merged but managed instance is null: {}", entity);
+            }
+        }
+        merged.add(entity);
 
         if (managedInstance != null) {
             if (managedInstance != entity) {
                 copyState(entity, managedInstance);
-                copyReferences(entity, managedInstance);
+                copyReferences(entity, managedInstance, merged);
             }
             return managedInstance;
-
         } else {
-            mergeReferences(entity);
+            mergeReferences(entity, merged);
 
             entityMap.put(entity.getId(), entity);
 
@@ -182,7 +224,7 @@ public class StandardDataContext implements DataContext {
         }
     }
 
-    protected void copyReferences(Entity srcEntity, Entity dstEntity) {
+    protected void copyReferences(Entity srcEntity, Entity dstEntity, Set<Entity> merged) {
         EntityStates entityStates = getEntityStates();
 
         for (MetaProperty property : getMetadata().getClassNN(srcEntity.getClass()).getProperties()) {
@@ -200,7 +242,7 @@ public class StandardDataContext implements DataContext {
                     dstEntity.setValue(propertyName, null);
                 } else {
                     Entity srcRef = (Entity) value;
-                    Entity dstRef = internalMerge(srcRef);
+                    Entity dstRef = internalMerge(srcRef, merged);
                     ((AbstractInstance) dstEntity).setValue(propertyName, dstRef, false);
                     if (getMetadataTools().isEmbedded(property)) {
                         EmbeddedPropertyChangeListener listener = new EmbeddedPropertyChangeListener(dstEntity);
@@ -212,7 +254,7 @@ public class StandardDataContext implements DataContext {
         }
     }
 
-    protected void mergeReferences(Entity entity) {
+    protected void mergeReferences(Entity entity, Set<Entity> merged) {
         EntityStates entityStates = getEntityStates();
 
         for (MetaProperty property : getMetadata().getClassNN(entity.getClass()).getProperties()) {
@@ -226,7 +268,7 @@ public class StandardDataContext implements DataContext {
             Object value = entity.getValue(propertyName);
             if (value != null) {
                 Entity srcRef = (Entity) value;
-                Entity dstRef = internalMerge(srcRef);
+                Entity dstRef = internalMerge(srcRef, merged);
                 ((AbstractInstance) entity).setValue(propertyName, dstRef, false);
                 if (getMetadataTools().isEmbedded(property)) {
                     EmbeddedPropertyChangeListener listener = new EmbeddedPropertyChangeListener(entity);
@@ -589,11 +631,17 @@ public class StandardDataContext implements DataContext {
     }
 
     protected void mergeCommitted(Set<Entity> committed) {
+        List<Entity> toMerge = new ArrayList<>();
         for (Entity entity : committed) {
             if (contains(entity)) {
-                merge(entity, false);
+                toMerge.add(entity);
             }
         }
+        toMerge.sort(Comparator.comparing(Object::hashCode));
+        merge(toMerge, false);
+//        for (Entity entity : toMerge) {
+//            merge(entity, false);
+//        }
     }
 
     protected Collection<Entity> getAll() {
@@ -686,6 +734,12 @@ public class StandardDataContext implements DataContext {
 
     protected class MergingAttributeVisitor implements EntityAttributeVisitor {
 
+        private Set<Entity> merged;
+
+        public MergingAttributeVisitor(Set<Entity> merged) {
+            this.merged = merged;
+        }
+
         @Override
         public boolean skip(MetaProperty property) {
             return !property.getRange().isClass() || property.isReadOnly();
@@ -715,7 +769,7 @@ public class StandardDataContext implements DataContext {
         protected void mergeList(List list, Entity owningEntity, String propertyName) {
             for (ListIterator<Entity> it = list.listIterator(); it.hasNext();) {
                 Entity entity = it.next();
-                Entity managed = internalMerge(entity);
+                Entity managed = internalMerge(entity, merged);
                 if (managed != entity) {
                     it.set(managed);
                 }
@@ -729,7 +783,7 @@ public class StandardDataContext implements DataContext {
         @SuppressWarnings("unchecked")
         protected void mergeSet(Set set, Entity owningEntity, String propertyName) {
             for (Entity entity : new ArrayList<Entity>(set)) {
-                Entity managed = internalMerge(entity);
+                Entity managed = internalMerge(entity, merged);
                 if (managed != entity) {
                     set.remove(entity);
                     set.add(managed);
@@ -742,7 +796,7 @@ public class StandardDataContext implements DataContext {
         }
 
         protected void mergeInstance(Entity entity, Entity owningEntity, String propertyName) {
-            Entity managed = internalMerge(entity);
+            Entity managed = internalMerge(entity, merged);
             if (managed != entity) {
                 ((AbstractInstance) owningEntity).setValue(propertyName, managed, false);
             }

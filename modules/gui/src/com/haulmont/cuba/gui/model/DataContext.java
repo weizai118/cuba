@@ -19,6 +19,7 @@ package com.haulmont.cuba.gui.model;
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.EntitySet;
 import com.haulmont.cuba.gui.screen.InstallSubject;
 import com.haulmont.cuba.gui.screen.Subscribe;
 
@@ -75,6 +76,8 @@ public interface DataContext {
      * @return the instance which is tracked by the context
      */
     <T extends Entity> T merge(T entity, boolean deep);
+
+    EntitySet merge(Collection<? extends Entity> entities, boolean deep);
 
     /**
      * Removes the entity from the context and registers it as deleted. The entity will be removed from the data store

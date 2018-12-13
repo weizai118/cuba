@@ -20,9 +20,11 @@ import com.haulmont.bali.events.Subscription;
 import com.haulmont.bali.events.sys.VoidSubscription;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.CommitContext;
+import com.haulmont.cuba.core.global.EntitySet;
 import com.haulmont.cuba.gui.model.DataContext;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,6 +53,11 @@ public class NoopDataContext implements DataContext {
     @Override
     public <T extends Entity> T merge(T entity, boolean deep) {
         return entity;
+    }
+
+    @Override
+    public EntitySet merge(Collection<? extends Entity> entities, boolean deep) {
+        return EntitySet.of(entities);
     }
 
     @Override

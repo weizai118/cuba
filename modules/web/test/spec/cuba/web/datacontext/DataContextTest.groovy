@@ -16,6 +16,7 @@
 
 package spec.cuba.web.datacontext
 
+import com.haulmont.bali.util.StackTrace
 import com.haulmont.cuba.client.testsupport.TestSupport
 import com.haulmont.cuba.core.app.DataService
 import com.haulmont.cuba.core.entity.BaseEntityInternalAccess
@@ -935,6 +936,49 @@ class DataContextTest extends Specification {
         then:
 
         customer.address.__propertyChangeListeners.isEmpty()
+    }
+
+    def "recursive merge"(orderId, line1Id, line2Id) {
+        DataContext context = factory.createDataContext()
+
+        Order order1 = new Order(id: orderId, number: '1')
+        OrderLine line1 = new OrderLine(id: line1Id, quantity: 1, order: order1)
+        OrderLine line2 = new OrderLine(id: line2Id, quantity: 2, order: order1)
+        order1.orderLines = [line1, line2]
+
+        Map<String, Integer> events = [:]
+        order1.addPropertyChangeListener { e ->
+            events.compute(e.property, { k, v -> v == null ? 1 : v + 1 })
+        }
+        context.merge(order1)
+        println 'After merge: ' + events
+        events.clear()
+
+        when:
+
+        context.commit()
+        println 'After commit: ' + events
+
+        then:
+
+        def order11 = context.find(Order, order1.id)
+        order11.version == 1
+        def line11 = context.find(OrderLine, line1.id)
+        line11.version == 1
+        def line21 = context.find(OrderLine, line2.id)
+        line21.version == 1
+
+        events['orderLines'] == 1
+
+        where:
+
+        orderId << [uuid(0), uuid(1), uuid(2)]
+        line1Id << [uuid(1), uuid(0), uuid(1)]
+        line2Id << [uuid(2), uuid(2), uuid(0)]
+    }
+
+    private uuid(int val) {
+        new UUID((long) val, 0L)
     }
 
     private <T> T createDetached(Class<T> entityClass) {
