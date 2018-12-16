@@ -142,8 +142,12 @@ public class StandardDataContext implements DataContext {
         return merge(entity, true);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    public EntitySet merge(Collection<? extends Entity> entities) {
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     public <T extends Entity> T merge(T entity, boolean deep) {
         Preconditions.checkNotNullArgument(entity, "entity is null");
 
@@ -177,7 +181,6 @@ public class StandardDataContext implements DataContext {
         return result;
     }
 
-    @Override
     public EntitySet merge(Collection<? extends Entity> entities, boolean deep) {
         Preconditions.checkNotNullArgument(entities, "entity collection is null");
 

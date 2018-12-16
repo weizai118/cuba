@@ -48,7 +48,7 @@ public class DataComponents implements ApplicationContextAware {
      * Creates {@code DataContext}.
      */
     public DataContext createDataContext() {
-        return new StandardDataContext(applicationContext);
+        return new StandardDataContext2(applicationContext);
     }
 
     /**

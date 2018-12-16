@@ -75,7 +75,7 @@ public class GlobalPersistentAttributesLoadChecker implements PersistentAttribut
 
         MetaProperty metaProperty = metaClass.getPropertyNN(property);
 
-        if (!metadataTools.isPersistent(metaProperty)) {
+        if (!metadataTools.isPersistent(metaClass, metaProperty)) {
             List<String> relatedProperties = metadataTools.getRelatedProperties(metaProperty);
             if (relatedProperties.isEmpty()) {
                 return true;

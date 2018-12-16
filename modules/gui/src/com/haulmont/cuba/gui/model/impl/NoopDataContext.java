@@ -51,12 +51,7 @@ public class NoopDataContext implements DataContext {
     }
 
     @Override
-    public <T extends Entity> T merge(T entity, boolean deep) {
-        return entity;
-    }
-
-    @Override
-    public EntitySet merge(Collection<? extends Entity> entities, boolean deep) {
+    public EntitySet merge(Collection<? extends Entity> entities) {
         return EntitySet.of(entities);
     }
 

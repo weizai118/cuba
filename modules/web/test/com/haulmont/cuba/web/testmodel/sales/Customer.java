@@ -31,6 +31,9 @@ public class Customer extends StandardEntity {
     @Column(name = "NAME")
     private String name;
 
+    @Column(name = "EMAIL")
+    private String email;
+
     @Column(name = "STATUS")
     private String status;
 
@@ -50,6 +53,14 @@ public class Customer extends StandardEntity {
         this.name = name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public Status getStatus() {
         return EnumUtils.fromId(Status.class, status, null);
     }
@@ -66,13 +77,13 @@ public class Customer extends StandardEntity {
         this.address = address;
     }
 
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "id=" + id +
-                ", version=" + version +
-                ", name='" + name + '\'' +
-                ", status='" + status + '\'' +
-                "}@" + Integer.toHexString(System.identityHashCode(this));
-    }
+//    @Override
+//    public String toString() {
+//        return "Customer{" +
+//                "id=" + id +
+//                ", version=" + version +
+//                ", name='" + name + '\'' +
+//                ", status='" + status + '\'' +
+//                "}@" + Integer.toHexString(System.identityHashCode(this));
+//    }
 }
