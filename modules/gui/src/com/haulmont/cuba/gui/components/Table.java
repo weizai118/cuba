@@ -137,6 +137,9 @@ public interface Table<E extends Entity>
     void setSortable(boolean sortable);
     boolean isSortable();
 
+    void setAutoScrolling(boolean autoScroll);
+    boolean isAutoScrolling();
+
     void setAggregatable(boolean aggregatable);
     boolean isAggregatable();
 
