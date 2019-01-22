@@ -52,6 +52,9 @@ public interface LookupField extends OptionsField, LookupComponent,
      */
     void setTextInputAllowed(boolean textInputAllowed);
 
+    boolean isAutomaticPopupOnFocus();
+    void setAutomaticPopupOnFocus(boolean automaticPopupOnFocus);
+
     /**
      * @return current handler
      */
