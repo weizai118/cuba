@@ -1,5 +1,5 @@
-/*!
- * Copyright (c) 2008-2018 Haulmont.
+/*
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-@import "../halo/halo";
+package com.haulmont.cuba.core.sys.serialization;
 
-@import "app/table-paging";
+/**
+ * Exception while serialize/deserialize java objects
+ */
+public class SerializationException extends RuntimeException {
+    public SerializationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-@mixin hover {
-  @include halo;
-
-  @include hover-cuba-table-paging;
+    public SerializationException(Throwable cause) {
+        super(cause);
+    }
 }

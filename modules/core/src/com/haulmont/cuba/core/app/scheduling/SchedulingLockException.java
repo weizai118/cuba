@@ -1,5 +1,5 @@
-/*!
- * Copyright (c) 2008-2018 Haulmont.
+/*
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-@import "../halo/halo";
+package com.haulmont.cuba.core.app.scheduling;
 
-@import "app/table-paging";
-
-@mixin hover {
-  @include halo;
-
-  @include hover-cuba-table-paging;
+/**
+ * Thrown by the coordinator when acquiring tasks if tasks have already locked
+ */
+public class SchedulingLockException extends RuntimeException {
+    public SchedulingLockException(String message) {
+        super(message);
+    }
 }

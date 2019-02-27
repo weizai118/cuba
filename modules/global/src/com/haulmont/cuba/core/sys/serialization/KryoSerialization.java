@@ -59,6 +59,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -110,6 +111,7 @@ public class KryoSerialization implements Serialization {
         kryo.register(InvocationHandler.class, new JdkProxySerializer());
         UnmodifiableCollectionsSerializer.registerSerializers(kryo);
         SynchronizedCollectionsSerializer.registerSerializers(kryo);
+        kryo.register(Pattern.class, new RegexSerializer());
 
         kryo.register(CGLibProxySerializer.CGLibProxyMarker.class, new CGLibProxySerializer());
         ImmutableListSerializer.registerSerializers(kryo);
@@ -145,6 +147,8 @@ public class KryoSerialization implements Serialization {
                 BaseEntityInternalAccess.setDetached((BaseGenericIdEntity) object, true);
             }
             kryos.get().writeClassAndObject(output, object);
+        } catch (Exception e) {
+            throw new SerializationException(e);
         }
     }
 
@@ -152,6 +156,8 @@ public class KryoSerialization implements Serialization {
     public Object deserialize(InputStream is) {
         try (Input input = new Input(is)) {
             return kryos.get().readClassAndObject(input);
+        } catch (Exception e) {
+            throw new SerializationException(e);
         }
     }
 
