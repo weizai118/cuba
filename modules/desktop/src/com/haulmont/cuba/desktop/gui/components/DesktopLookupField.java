@@ -179,13 +179,12 @@ public class DesktopLookupField extends DesktopAbstractOptionsField<JComponent> 
                 }
         );
         comboBox.addFocusListener(
-                new FocusListener() {
-                    @Override public void focusGained(FocusEvent e) {
+                new FocusAdapter() {
+                    @Override
+                    public void focusGained(FocusEvent e) {
                         onFocusGainedEvent(e);
                     }
-                    @Override public void focusLost(FocusEvent e) {}
-                }
-        );
+                });
 
         setFilterMode(DEFAULT_FILTER_MODE);
 

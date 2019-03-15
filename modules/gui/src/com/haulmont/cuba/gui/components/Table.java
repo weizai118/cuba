@@ -137,6 +137,9 @@ public interface Table<E extends Entity>
     void setSortable(boolean sortable);
     boolean isSortable();
 
+    /**
+     * Enables or disables automatic scroll to a selected row after table update.
+     */
     void setAutoScrolling(boolean autoScroll);
     boolean isAutoScrolling();
 
