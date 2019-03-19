@@ -139,10 +139,12 @@ public interface Table<E extends Entity>
 
     /**
      * Enables or disables automatic scroll to a selected row after table update.
+     * This feature is only implemented in desktop version of this component.
      */
     void setAutoScrolling(boolean autoScroll);
 
     /**
+     * This feature is only implemented in desktop version of this component.
      * @return whether automatic scroll to a selected row is enabled for this table.
      */
     boolean isAutoScrolling();
