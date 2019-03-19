@@ -56,6 +56,10 @@ public interface LookupField extends OptionsField, LookupComponent,
      * When enabled popup automatically opens on focus.
      */
     void setAutomaticPopupOnFocus(boolean automaticPopupOnFocus);
+
+    /**
+     * @return whether popup is automatically shows on focus.
+     */
     boolean isAutomaticPopupOnFocus();
 
     /**
