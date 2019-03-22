@@ -17,9 +17,15 @@
 
 package com.haulmont.cuba.gui;
 
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.screen.FrameOwner;
+
+import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * Utility dialogs API.
@@ -124,6 +130,8 @@ public interface Dialogs {
      * @return builder
      */
     ExceptionDialogBuilder createExceptionDialog();
+
+    InputDialogBuilder createInputDialog(FrameOwner owner);
 
     /**
      * Builder of dialog with option buttons.
@@ -478,5 +486,36 @@ public interface Dialogs {
          * Warning message.
          */
         WARNING
+    }
+
+    interface InputDialogBuilder {
+
+        InputDialogBuilder withParameter(InputParameter parameter);
+
+        InputDialogBuilder withParameters(InputParameter... parameters);
+
+        Collection<InputParameter> getParameters();
+
+        InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener);
+
+        Consumer<InputDialog.InputDialogCloseEvent> getCloseListener();
+
+        InputDialogBuilder withActions(Action... actions);
+
+        Collection<Action> getActions();
+
+        InputDialogBuilder withActions(DialogActions actions);
+
+        InputDialog show();
+
+        InputDialog build();
+    }
+
+    enum DialogActions {
+        OK,
+        OK_CANCEL,
+        RETRY_CANCEL,
+        YES_NO,
+        YES_NO_CANCEL
     }
 }

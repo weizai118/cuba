@@ -17,12 +17,20 @@
 
 package com.haulmont.cuba.web.sys;
 
+import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.screen.FrameOwner;
+import com.haulmont.cuba.gui.screen.MapScreenOptions;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.gui.screen.ScreenOptions;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.exception.ExceptionDialog;
@@ -41,7 +49,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.util.EnumSet;
+import java.util.*;
+import java.util.function.Consumer;
 
 import static com.haulmont.cuba.web.gui.components.WebComponentsHelper.setClickShortcut;
 import static com.haulmont.cuba.web.gui.components.WebWrapperUtils.*;
@@ -60,9 +69,15 @@ public class WebDialogs implements Dialogs {
     protected Icons icons;
     @Inject
     protected ClientConfig clientConfig;
+    protected ScreenBuilders screenBuilders;
 
     public WebDialogs(AppUI ui) {
         this.ui = ui;
+    }
+
+    @Inject
+    public void setScreenBuilders(ScreenBuilders screenBuilders) {
+        this.screenBuilders = screenBuilders;
     }
 
     @Override
@@ -96,6 +111,11 @@ public class WebDialogs implements Dialogs {
         backgroundWorker.checkUIAccess();
 
         return new ExceptionDialogBuilderImpl();
+    }
+
+    @Override
+    public InputDialogBuilder createInputDialog(FrameOwner owner) {
+        return new InputDialogBuilderImpl(owner);
     }
 
     public CubaButton createButton(Action action) {
@@ -682,6 +702,97 @@ public class WebDialogs implements Dialogs {
             }
             ui.addWindow(dialog);
             dialog.focus();
+        }
+    }
+
+    public class InputDialogBuilderImpl implements InputDialogBuilder {
+
+        protected List<InputParameter> parameters = new ArrayList<>(2);
+        protected List<Action> actions;
+
+        protected Consumer<InputDialog.InputDialogCloseEvent> listener;
+
+        protected DialogActions dialogActions;
+        protected FrameOwner owner;
+
+        public InputDialogBuilderImpl(FrameOwner owner) {
+            this.owner = owner;
+        }
+
+        @Override
+        public InputDialogBuilder withParameter(InputParameter parameter) {
+            if (parameters.contains(parameter)) {
+                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id");
+            }
+            parameters.add(parameter);
+            return this;
+        }
+
+        @Override
+        public InputDialogBuilder withParameters(InputParameter... parameters) {
+            this.parameters.addAll(Arrays.asList(parameters));
+            return this;
+        }
+
+        @Override
+        public Collection<InputParameter> getParameters() {
+            return parameters;
+        }
+
+        @Override
+        public InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener) {
+            this.listener = listener;
+            return this;
+        }
+
+        @Override
+        public Consumer<InputDialog.InputDialogCloseEvent> getCloseListener() {
+            return listener;
+        }
+
+        @Override
+        public InputDialogBuilder withActions(Action... actions) {
+            this.actions = new ArrayList<>(Arrays.asList(actions));
+            return this;
+        }
+
+        @Override
+        public Collection<Action> getActions() {
+            if (actions == null) {
+                return Collections.emptyList();
+            }
+
+            return actions;
+        }
+
+        @Override
+        public InputDialogBuilder withActions(DialogActions actions) {
+            this.dialogActions = actions;
+            return this;
+        }
+
+        @Override
+        public InputDialog show() {
+            InputDialog dialog = build();
+            dialog.show();
+            return dialog;
+        }
+
+        @Override
+        public InputDialog build() {
+            ParamsMap paramsMap = ParamsMap.of()
+            .pair("parameters", parameters)
+                    .pair("actions", actions)
+                    .pair("dialogActions", dialogActions)
+                    .pair("closeListener", listener);
+
+            ScreenOptions options = new MapScreenOptions(paramsMap.create());
+
+            return screenBuilders.screen(owner)
+                    .withScreenClass(InputDialog.class)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withOptions(options)
+                    .build();
         }
     }
 }
