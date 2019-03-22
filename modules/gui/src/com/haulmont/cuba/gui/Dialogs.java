@@ -506,6 +506,8 @@ public interface Dialogs {
 
         InputDialogBuilder withActions(DialogActions actions);
 
+        DialogActions getDialogActions();
+
         InputDialog show();
 
         InputDialog build();

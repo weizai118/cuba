@@ -772,6 +772,11 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
+        public DialogActions getDialogActions() {
+            return dialogActions;
+        }
+
+        @Override
         public InputDialog show() {
             InputDialog dialog = build();
             dialog.show();

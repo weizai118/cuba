@@ -17,7 +17,6 @@
 package com.haulmont.cuba.gui.app.core.inputdialog;
 
 import com.haulmont.chile.core.datatypes.Datatype;
-import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.components.Field;
 
@@ -31,11 +30,11 @@ public class InputParameter {
     protected String caption;
     protected boolean required;
     protected Datatype datatype;
-    protected Class datatypeJavaClass;
     protected Supplier<Field> field;
     protected Object defaultValue;
     protected Class<? extends Entity> entityClass;
-    protected MetaClass metaClass;
+
+    protected Class datatypeJavaClass;
 
     public InputParameter(String id) {
         this.id = id;
@@ -73,6 +72,9 @@ public class InputParameter {
     }
 
     public InputParameter withDatatype(Datatype datatype) {
+        checkNullEntityClass("InputParameter cannot contain Datatype and entity class at the same time");
+        checkNullDatatypeJavaClass("Datatype cannot be used with a parameter that has already data type");
+
         this.datatype = datatype;
         return this;
     }
@@ -80,6 +82,10 @@ public class InputParameter {
     protected InputParameter withDatatypeJavaClass(Class javaClass) {
         this.datatypeJavaClass = javaClass;
         return this;
+    }
+
+    protected Class getDatatypeJavaClass() {
+        return datatypeJavaClass;
     }
 
     public Supplier<Field> getField() {
@@ -105,21 +111,11 @@ public class InputParameter {
     }
 
     public InputParameter withEntityClass(Class<? extends Entity> entityClass) {
+        checkNullDatatype("InputParameter cannot contain entity class and Datatype at the same time");
+        checkNullDatatypeJavaClass("Entity class cannot be used with a parameter that has data type");
+
         this.entityClass = entityClass;
         return this;
-    }
-
-    public MetaClass getMetaClass() {
-        return metaClass;
-    }
-
-    public InputParameter withMetaClass(MetaClass metaClass) {
-        this.metaClass = metaClass;
-        return this;
-    }
-
-    public static InputParameter parameter(String id) {
-        return stringParameter(id);
     }
 
     public static InputParameter stringParameter(String id) {
@@ -150,12 +146,27 @@ public class InputParameter {
         return new InputParameter(id).withDatatypeJavaClass(Date.class);
     }
 
-    public static InputParameter entityParameter(String id, MetaClass metaClass) {
-        return new InputParameter(id).withMetaClass(metaClass);
-    }
-
     public static InputParameter entityParameter(String id, Class<? extends Entity> entityClass) {
         return new InputParameter(id).withEntityClass(entityClass);
+    }
+
+
+    protected void checkNullDatatype(String message) {
+        if (datatype != null) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    protected void checkNullEntityClass(String message) {
+        if (entityClass != null) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    protected void checkNullDatatypeJavaClass(String message) {
+        if (datatypeJavaClass != null) {
+            throw new IllegalStateException(message);
+        }
     }
 
     @Override
