@@ -17,7 +17,7 @@
 
 package com.haulmont.cuba.gui;
 
-import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.ContentMode;
@@ -508,7 +508,7 @@ public interface Dialogs {
 
         DialogActions getDialogActions();
 
-        InputDialog show();
+        InputDialog showDialog();
 
         InputDialog build();
     }
@@ -516,7 +516,6 @@ public interface Dialogs {
     enum DialogActions {
         OK,
         OK_CANCEL,
-        RETRY_CANCEL,
         YES_NO,
         YES_NO_CANCEL
     }

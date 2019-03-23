@@ -22,7 +22,8 @@ import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialogScreen;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
@@ -777,24 +778,24 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
-        public InputDialog show() {
+        public InputDialog showDialog() {
             InputDialog dialog = build();
-            dialog.show();
+            dialog.showDialog();
             return dialog;
         }
 
         @Override
         public InputDialog build() {
             ParamsMap paramsMap = ParamsMap.of()
-            .pair("parameters", parameters)
-                    .pair("actions", actions)
+                    .pair("parameters", parameters)
+                    .pair("actions", actions == null ? Collections.emptyList() : actions)
                     .pair("dialogActions", dialogActions)
                     .pair("closeListener", listener);
 
             ScreenOptions options = new MapScreenOptions(paramsMap.create());
 
             return screenBuilders.screen(owner)
-                    .withScreenClass(InputDialog.class)
+                    .withScreenClass(InputDialogScreen.class)
                     .withOpenMode(OpenMode.DIALOG)
                     .withOptions(options)
                     .build();

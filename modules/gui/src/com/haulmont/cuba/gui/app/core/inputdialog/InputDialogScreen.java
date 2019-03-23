@@ -16,22 +16,26 @@
 
 package com.haulmont.cuba.gui.app.core.inputdialog;
 
+import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.chile.core.datatypes.impl.*;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Dialogs.DialogActions;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.picker.ClearAction;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @UiController("cuba_InputDialog")
-public class InputDialog extends Screen {
+public class InputDialogScreen extends Screen implements InputDialog {
 
     @Inject
     protected UiComponents uiComponents;
@@ -45,7 +49,11 @@ public class InputDialog extends Screen {
     @Inject
     private Actions actions;
 
+    protected CssLayout rootLayout;
     protected Form form;
+
+    protected DialogActions dialogActions = DialogActions.OK_CANCEL;
+    protected List<String> fieldIds;
 
     @Subscribe
     @SuppressWarnings("unchecked")
@@ -60,11 +68,22 @@ public class InputDialog extends Screen {
             if (!parameters.isEmpty()) {
                 initParameters(parameters);
             }
+
+            List<Action> actions = (List<Action>) values.get("actions");
+            if (!actions.isEmpty()) {
+                initActions(actions);
+            } else {
+                if (values.get("dialogActions") != null) {
+                    dialogActions = (DialogActions) values.get("dialogActions");
+                }
+
+                //todo init dialog actions
+            }
         }
     }
 
     protected void createFormLayout() {
-        CssLayout rootLayout = uiComponents.create(CssLayout.NAME);
+        rootLayout = uiComponents.create(CssLayout.NAME);
         rootLayout.setWidthFull();
         rootLayout.setHeightFull();
 
@@ -79,6 +98,8 @@ public class InputDialog extends Screen {
 
     @SuppressWarnings("unchecked")
     protected void initParameters(List<InputParameter> parameters) {
+        fieldIds = new ArrayList<>(parameters.size());
+
         for (InputParameter parameter : parameters) {
             Field field;
             if (parameter.getField() != null) {
@@ -94,6 +115,7 @@ public class InputDialog extends Screen {
             field.setValue(parameter.getDefaultValue());
 
             form.add(field);
+            fieldIds.add(field.getId());
         }
     }
 
@@ -136,7 +158,50 @@ public class InputDialog extends Screen {
         }
     }
 
-    public static class InputDialogCloseEvent {
+    protected void initActions(List<Action> actions) {
+        HBoxLayout actionsLayout = uiComponents.create(HBoxLayout.NAME);
+        actionsLayout.setWidthFull();
+        actionsLayout.setMargin(true, false, false, false);
 
+        for (Action action : actions) {
+            Button button = uiComponents.create(Button.NAME);
+            button.setAction(action);
+            actionsLayout.add(button);
+            //todo check other properties to set
+        }
+
+        rootLayout.add(actionsLayout);
+    }
+
+    @Override
+    public Object getValue(String id) {
+        Component component = form.getComponentNN(id);
+        if (component instanceof Field) {
+            return ((Field) component).getValue();
+        }
+
+        throw new IllegalArgumentException("InputDialog doesn't contains Field with id: '" + id + "'");
+    }
+
+    @Override
+    public void closeDialog(CloseAction closeAction) {
+        close(closeAction);
+    }
+
+    @Override
+    public InputDialog showDialog() {
+        return (InputDialog) super.show();
+    }
+
+    @Override
+    public Map<String, Object> getValues() {
+        ParamsMap paramsMap = ParamsMap.of();
+
+        for (String id : fieldIds) {
+            Component component = form.getComponentNN(id);
+            paramsMap.pair(id, ((Field) component).getValue());
+        }
+
+        return paramsMap.create();
     }
 }
