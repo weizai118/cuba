@@ -15,9 +15,8 @@
   -->
 
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd">
-    <dialogMode width="500px"/>
     <layout>
-        <cssLayout id="rootLayout" height="100%" width="100%" css="overflow:auto;">
+        <cssLayout id="rootLayout" height="100%" width="100%" stylename="c-app-input-dialog-layout">
             <form id="form" width="100%" height="100%"/>
         </cssLayout>
         <hbox id="actionsLayout" spacing="true" expand="spacer" height="100%" width="100%"

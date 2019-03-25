@@ -120,6 +120,7 @@ public class InputDialogScreen extends Screen implements InputDialog {
             field.setWidthFull();
             field.setRequired(parameter.isRequired());
             field.setValue(parameter.getDefaultValue());
+            field.setStyleName("input-parameter");
 
             form.add(field);
             fieldIds.add(field.getId());

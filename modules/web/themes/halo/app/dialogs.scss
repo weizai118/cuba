@@ -10,4 +10,14 @@
   .c-app-message-dialog-text.v-has-height {
     overflow-y: auto;
   }
+
+  .c-app-input-dialog-layout {
+    min-height: $v-unit-size;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    .input-parameter {
+      min-width: $v-unit-size * 6;
+    }
+  }
 }

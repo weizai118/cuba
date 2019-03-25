@@ -807,11 +807,17 @@ public class WebDialogs implements Dialogs {
 
             ScreenOptions options = new MapScreenOptions(paramsMap.create());
 
-            return screenBuilders.screen(owner)
+            InputDialogScreen screen = screenBuilders.screen(owner)
                     .withScreenClass(InputDialogScreen.class)
                     .withOpenMode(OpenMode.DIALOG)
                     .withOptions(options)
                     .build();
+
+            ThemeConstants theme = ui.getApp().getThemeConstants();
+            DialogWindow window = (DialogWindow) screen.getWindow();
+            window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
+
+            return screen;
         }
     }
 }
