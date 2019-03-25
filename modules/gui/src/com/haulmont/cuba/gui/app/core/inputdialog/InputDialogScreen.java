@@ -122,8 +122,12 @@ public class InputDialogScreen extends Screen implements InputDialog {
             field.setValue(parameter.getDefaultValue());
             field.setStyleName("input-parameter");
 
-            form.add(field);
+            if (fieldIds.contains(parameter.getId())) {
+                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id: " + parameter.getId());
+            }
+
             fieldIds.add(field.getId());
+            form.add(field);
         }
     }
 
@@ -230,7 +234,7 @@ public class InputDialogScreen extends Screen implements InputDialog {
             return ((Field) component).getValue();
         }
 
-        throw new IllegalArgumentException("InputDialog doesn't contains Field with id: '" + id + "'");
+        throw new IllegalArgumentException("InputDialog doesn't contains Field with id: " + id);
     }
 
     @Override
@@ -241,6 +245,11 @@ public class InputDialogScreen extends Screen implements InputDialog {
     @Override
     public InputDialog showDialog() {
         return (InputDialog) super.show();
+    }
+
+    @Override
+    public DialogWindow getDialogWindow() {
+        return (DialogWindow) getWindow();
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.components.Field;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.sql.Time;
 import java.util.function.Supplier;
@@ -130,6 +131,10 @@ public class InputParameter {
         return new InputParameter(id).withDatatypeJavaClass(Double.class);
     }
 
+    public static InputParameter bigDecimalParamater(String id) {
+        return new InputParameter(id).withDatatypeJavaClass(BigDecimal.class);
+    }
+
     public static InputParameter longParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Long.class);
     }
@@ -148,6 +153,10 @@ public class InputParameter {
 
     public static InputParameter entityParameter(String id, Class<? extends Entity> entityClass) {
         return new InputParameter(id).withEntityClass(entityClass);
+    }
+
+    public static InputParameter booleanParameter(String id) {
+        return new InputParameter(id).withDatatypeJavaClass(Boolean.class);
     }
 
 

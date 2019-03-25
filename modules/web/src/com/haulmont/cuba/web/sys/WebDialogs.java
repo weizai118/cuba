@@ -713,7 +713,7 @@ public class WebDialogs implements Dialogs {
 
         protected Consumer<InputDialog.InputDialogCloseEvent> listener;
 
-        protected DialogActions dialogActions;
+        protected DialogActions dialogActions = DialogActions.OK_CANCEL;
         protected FrameOwner owner;
         protected String caption;
 
@@ -723,9 +723,6 @@ public class WebDialogs implements Dialogs {
 
         @Override
         public InputDialogBuilder withParameter(InputParameter parameter) {
-            if (parameters.contains(parameter)) {
-                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id");
-            }
             parameters.add(parameter);
             return this;
         }

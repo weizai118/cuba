@@ -24,6 +24,7 @@ import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.SizeUnit;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.function.Consumer;
 
@@ -510,6 +511,7 @@ public interface Dialogs {
 
         InputDialogBuilder withCaption(String caption);
 
+        @Nullable
         String getCaption();
 
         InputDialog showDialog();

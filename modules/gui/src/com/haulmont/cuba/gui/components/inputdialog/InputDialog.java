@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.components.inputdialog;
 
-import com.haulmont.cuba.gui.components.Window;
+import com.haulmont.cuba.gui.components.DialogWindow;
 import com.haulmont.cuba.gui.screen.CloseAction;
 
 import javax.annotation.Nullable;
@@ -32,7 +32,7 @@ public interface InputDialog {
 
     InputDialog showDialog();
 
-    Window getWindow();
+    DialogWindow getDialogWindow();
 
     class InputDialogCloseEvent {
         protected CloseAction closeAction;
