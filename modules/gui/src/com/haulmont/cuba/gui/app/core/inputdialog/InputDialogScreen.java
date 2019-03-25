@@ -60,6 +60,9 @@ public class InputDialogScreen extends Screen implements InputDialog {
     protected Icons icons;
 
     @Inject
+    protected ScreenValidation screenValidation;
+
+    @Inject
     protected CssLayout rootLayout;
 
     @Inject
@@ -96,6 +99,7 @@ public class InputDialogScreen extends Screen implements InputDialog {
             }
 
             closeListener = (Consumer<InputDialogCloseEvent>) values.get("closeListener");
+            getWindow().setCaption((String) values.get("caption"));
         }
     }
 
@@ -162,8 +166,6 @@ public class InputDialogScreen extends Screen implements InputDialog {
     }
 
     protected void initActions(List<Action> actions) {
-        actionsLayout.setMargin(true, false, false, false);
-
         for (Action action : actions) {
             Button button = uiComponents.create(Button.NAME);
             button.setAction(action);
@@ -208,7 +210,15 @@ public class InputDialogScreen extends Screen implements InputDialog {
 
     protected DialogAction createDialogAction(DialogAction.Type type, CloseAction closeAction) {
         DialogAction dialogAction = new DialogAction(type);
-        dialogAction.withHandler(event -> close(closeAction));
+        if (type == DialogAction.Type.OK || type == DialogAction.Type.YES) {
+            dialogAction.withHandler(event -> {
+                if (validateFields()) {
+                    close(closeAction);
+                }
+            });
+        } else {
+            dialogAction.withHandler(event -> close(closeAction));
+        }
         return dialogAction;
     }
 
@@ -242,6 +252,15 @@ public class InputDialogScreen extends Screen implements InputDialog {
         }
 
         return paramsMap.create();
+    }
+
+    protected boolean validateFields() {
+        ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+        if (!validationErrors.isEmpty()) {
+            screenValidation.showValidationErrors(this, validationErrors);
+            return false;
+        }
+        return true;
     }
 
     @Subscribe

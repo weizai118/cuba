@@ -15,12 +15,14 @@
   -->
 
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd">
+    <dialogMode width="500px"/>
     <layout>
-        <cssLayout id="rootLayout" height="100%" width="100%">
+        <cssLayout id="rootLayout" height="100%" width="100%" css="overflow:auto;">
             <form id="form" width="100%" height="100%"/>
-            <hbox id="actionsLayout" spacing="true" expand="spacer" height="100%" width="100%">
-                <label id="spacer"/>
-            </hbox>
         </cssLayout>
+        <hbox id="actionsLayout" spacing="true" expand="spacer" height="100%" width="100%"
+              margin="true, false, false, false">
+            <label id="spacer"/>
+        </hbox>
     </layout>
 </window>

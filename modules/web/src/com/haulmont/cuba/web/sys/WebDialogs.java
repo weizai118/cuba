@@ -715,6 +715,7 @@ public class WebDialogs implements Dialogs {
 
         protected DialogActions dialogActions;
         protected FrameOwner owner;
+        protected String caption;
 
         public InputDialogBuilderImpl(FrameOwner owner) {
             this.owner = owner;
@@ -778,6 +779,17 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
+        public InputDialogBuilder withCaption(String caption) {
+            this.caption = caption;
+            return this;
+        }
+
+        @Override
+        public String getCaption() {
+            return caption;
+        }
+
+        @Override
         public InputDialog showDialog() {
             InputDialog dialog = build();
             dialog.showDialog();
@@ -790,6 +802,7 @@ public class WebDialogs implements Dialogs {
                     .pair("parameters", parameters)
                     .pair("actions", actions == null ? Collections.emptyList() : actions)
                     .pair("dialogActions", dialogActions)
+                    .pair("caption", caption)
                     .pair("closeListener", listener);
 
             ScreenOptions options = new MapScreenOptions(paramsMap.create());

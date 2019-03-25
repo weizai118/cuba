@@ -508,6 +508,10 @@ public interface Dialogs {
 
         DialogActions getDialogActions();
 
+        InputDialogBuilder withCaption(String caption);
+
+        String getCaption();
+
         InputDialog showDialog();
 
         InputDialog build();
