@@ -15,12 +15,11 @@
   -->
 
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd">
-    <layout>
-        <cssLayout id="rootLayout" height="100%" width="100%" stylename="c-app-input-dialog-layout">
+    <layout expand="rootLayout" spacing="true">
+        <cssLayout id="rootLayout" width="100%" stylename="c-app-input-dialog-form-layout">
             <form id="form" width="100%" height="100%"/>
         </cssLayout>
-        <hbox id="actionsLayout" spacing="true" expand="spacer" height="100%" width="100%"
-              margin="true, false, false, false">
+        <hbox id="actionsLayout" spacing="true" expand="spacer" width="100%" stylename="c-app-input-dialog-actions-layout">
             <label id="spacer"/>
         </hbox>
     </layout>

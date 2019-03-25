@@ -11,13 +11,16 @@
     overflow-y: auto;
   }
 
-  .c-app-input-dialog-layout {
+  .c-app-input-dialog-form-layout {
     min-height: $v-unit-size;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: auto;
 
     .input-parameter {
       min-width: $v-unit-size * 6;
     }
+  }
+
+  .c-app-input-dialog-actions-layout {
+    min-height: $v-unit-size;
   }
 }
