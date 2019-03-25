@@ -20,6 +20,7 @@ import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.chile.core.datatypes.impl.*;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs.DialogActions;
 import com.haulmont.cuba.gui.UiComponents;
@@ -27,6 +28,7 @@ import com.haulmont.cuba.gui.actions.picker.ClearAction;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
@@ -34,7 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@UiController("cuba_InputDialog")
+@UiDescriptor("inputdialog-screen.xml")
+@UiController("cuba_InputDialogScreen")
 public class InputDialogScreen extends Screen implements InputDialog {
 
     @Inject
@@ -47,10 +50,22 @@ public class InputDialogScreen extends Screen implements InputDialog {
     protected Metadata metadata;
 
     @Inject
-    private Actions actions;
+    protected Actions actions;
 
+    @Inject
+    protected Messages messages;
+
+    @Inject
+    protected Icons icons;
+
+    @Inject
     protected CssLayout rootLayout;
+
+    @Inject
     protected Form form;
+
+    @Inject
+    protected HBoxLayout actionsLayout;
 
     protected DialogActions dialogActions = DialogActions.OK_CANCEL;
     protected List<String> fieldIds;
@@ -58,8 +73,6 @@ public class InputDialogScreen extends Screen implements InputDialog {
     @Subscribe
     @SuppressWarnings("unchecked")
     private void onInit(InitEvent event) {
-        createFormLayout();
-
         ScreenOptions screenOptions = event.getOptions();
         if (screenOptions instanceof MapScreenOptions) {
             Map<String, Object> values = ((MapScreenOptions) screenOptions).getParams();
@@ -77,23 +90,9 @@ public class InputDialogScreen extends Screen implements InputDialog {
                     dialogActions = (DialogActions) values.get("dialogActions");
                 }
 
-                //todo init dialog actions
+                initDialogActions();
             }
         }
-    }
-
-    protected void createFormLayout() {
-        rootLayout = uiComponents.create(CssLayout.NAME);
-        rootLayout.setWidthFull();
-        rootLayout.setHeightFull();
-
-        form = uiComponents.create(Form.NAME);
-        form.setWidthFull();
-        form.setHeightFull();
-
-        rootLayout.add(form);
-
-        getWindow().add(rootLayout);
     }
 
     @SuppressWarnings("unchecked")
@@ -159,18 +158,54 @@ public class InputDialogScreen extends Screen implements InputDialog {
     }
 
     protected void initActions(List<Action> actions) {
-        HBoxLayout actionsLayout = uiComponents.create(HBoxLayout.NAME);
-        actionsLayout.setWidthFull();
         actionsLayout.setMargin(true, false, false, false);
 
         for (Action action : actions) {
             Button button = uiComponents.create(Button.NAME);
             button.setAction(action);
-            actionsLayout.add(button);
-            //todo check other properties to set
-        }
 
-        rootLayout.add(actionsLayout);
+            if (action instanceof DialogAction) {
+                DialogAction.Type type = ((DialogAction) action).getType();
+                button.setCaption(messages.getMainMessage(type.getMsgKey()));
+
+                String iconPath = icons.get(type.getIconKey());
+                button.setIcon(iconPath);
+            } else {
+                button.setIcon(action.getIcon());
+                button.setCaption(action.getCaption());
+            }
+
+            actionsLayout.add(button);
+        }
+    }
+
+    protected void initDialogActions() {
+        List<Action> actions = new ArrayList<>(2);
+        switch (dialogActions) {
+            case OK:
+                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
+                break;
+            case YES_NO:
+                actions.add(createDialogAction(DialogAction.Type.YES, WINDOW_COMMIT_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.NO, WINDOW_DISCARD_AND_CLOSE_ACTION));
+                break;
+            case OK_CANCEL:
+                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.CANCEL, WINDOW_CLOSE_ACTION));
+                break;
+            case YES_NO_CANCEL:
+                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.NO, WINDOW_DISCARD_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.CANCEL, WINDOW_CLOSE_ACTION));
+                break;
+        }
+        initActions(actions);
+    }
+
+    protected DialogAction createDialogAction(DialogAction.Type type, CloseAction closeAction) {
+        DialogAction dialogAction = new DialogAction(type);
+        dialogAction.withHandler(event -> close(closeAction));
+        return dialogAction;
     }
 
     @Override
