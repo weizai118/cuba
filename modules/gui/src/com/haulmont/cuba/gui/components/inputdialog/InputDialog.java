@@ -18,6 +18,7 @@ package com.haulmont.cuba.gui.components.inputdialog;
 
 import com.haulmont.cuba.gui.screen.CloseAction;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public interface InputDialog {
@@ -31,6 +32,25 @@ public interface InputDialog {
     InputDialog showDialog();
 
     class InputDialogCloseEvent {
+        protected CloseAction closeAction;
+        protected Map<String, Object> values;
 
+        public InputDialogCloseEvent(Map<String, Object> values, CloseAction closeAction) {
+            this.values = values;
+            this.closeAction = closeAction;
+        }
+
+        public CloseAction getCloseAction() {
+            return closeAction;
+        }
+
+        public Map<String, Object> getValues() {
+            return values;
+        }
+
+        @Nullable
+        public Object getValue(String key) {
+            return values.get(key);
+        }
     }
 }

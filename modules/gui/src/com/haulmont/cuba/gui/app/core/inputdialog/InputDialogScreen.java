@@ -35,6 +35,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @UiDescriptor("inputdialog-screen.xml")
 @UiController("cuba_InputDialogScreen")
@@ -69,10 +70,11 @@ public class InputDialogScreen extends Screen implements InputDialog {
 
     protected DialogActions dialogActions = DialogActions.OK_CANCEL;
     protected List<String> fieldIds;
+    protected Consumer<InputDialogCloseEvent> closeListener;
 
     @Subscribe
     @SuppressWarnings("unchecked")
-    private void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         ScreenOptions screenOptions = event.getOptions();
         if (screenOptions instanceof MapScreenOptions) {
             Map<String, Object> values = ((MapScreenOptions) screenOptions).getParams();
@@ -92,6 +94,8 @@ public class InputDialogScreen extends Screen implements InputDialog {
 
                 initDialogActions();
             }
+
+            closeListener = (Consumer<InputDialogCloseEvent>) values.get("closeListener");
         }
     }
 
@@ -238,5 +242,13 @@ public class InputDialogScreen extends Screen implements InputDialog {
         }
 
         return paramsMap.create();
+    }
+
+    @Subscribe
+    protected void onAfterClose(AfterCloseEvent event) {
+        if (closeListener != null) {
+            InputDialogCloseEvent inputDialogCloseEvent = new InputDialogCloseEvent(getValues(), event.getCloseAction());
+            closeListener.accept(inputDialogCloseEvent);
+        }
     }
 }
