@@ -27,19 +27,19 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.picker.ClearAction;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@UiDescriptor("inputdialog-screen.xml")
-@UiController("cuba_InputDialogScreen")
-public class InputDialogScreen extends Screen implements InputDialog {
+@UiDescriptor("inputdialog.xml")
+@UiController("cuba_InputDialog")
+public class InputDialog extends Screen {
 
     @Inject
     protected UiComponents uiComponents;
@@ -227,7 +227,13 @@ public class InputDialogScreen extends Screen implements InputDialog {
         return dialogAction;
     }
 
-    @Override
+    /**
+     * Returns value from field by id.
+     *
+     * @param id field id
+     * @return field value
+     * @throws IllegalArgumentException exception if wrong id is sent
+     */
     public Object getValue(String id) {
         Component component = form.getComponentNN(id);
         if (component instanceof Field) {
@@ -237,22 +243,18 @@ public class InputDialogScreen extends Screen implements InputDialog {
         throw new IllegalArgumentException("InputDialog doesn't contains Field with id: " + id);
     }
 
-    @Override
-    public void closeDialog(CloseAction closeAction) {
-        close(closeAction);
-    }
-
-    @Override
-    public InputDialog showDialog() {
-        return (InputDialog) super.show();
-    }
-
-    @Override
+    /**
+     * @return dialog window in which you can set dialog properties (e.g. modal, resizable, etc)
+     */
     public DialogWindow getDialogWindow() {
         return (DialogWindow) getWindow();
     }
 
-    @Override
+    /**
+     * Returns mapped values from fields. String - field id, Object - field value.
+     *
+     * @return values
+     */
     public Map<String, Object> getValues() {
         ParamsMap paramsMap = ParamsMap.of();
 
@@ -278,6 +280,46 @@ public class InputDialogScreen extends Screen implements InputDialog {
         if (closeListener != null) {
             InputDialogCloseEvent inputDialogCloseEvent = new InputDialogCloseEvent(getValues(), event.getCloseAction());
             closeListener.accept(inputDialogCloseEvent);
+        }
+    }
+
+    /**
+     * Describes InputDialog close event.
+     */
+    public static class InputDialogCloseEvent {
+        protected CloseAction closeAction;
+        protected Map<String, Object> values;
+
+        public InputDialogCloseEvent(Map<String, Object> values, CloseAction closeAction) {
+            this.values = values;
+            this.closeAction = closeAction;
+        }
+
+        /**
+         * @return close action
+         */
+        public CloseAction getCloseAction() {
+            return closeAction;
+        }
+
+        /**
+         * Returns mapped values from fields. String - field id, Object - field value.
+         *
+         * @return values
+         */
+        public Map<String, Object> getValues() {
+            return values;
+        }
+
+        /**
+         * Returns value from field by id.
+         *
+         * @param id field id
+         * @return field value
+         */
+        @Nullable
+        public Object getValue(String id) {
+            return values.get(id);
         }
     }
 }

@@ -17,11 +17,12 @@
 
 package com.haulmont.cuba.gui;
 
-import com.haulmont.cuba.gui.components.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 
 import javax.annotation.Nullable;
@@ -132,6 +133,27 @@ public interface Dialogs {
      */
     ExceptionDialogBuilder createExceptionDialog();
 
+    /**
+     * Creates input dialog builder.
+     * <p>
+     * Example of showing an input dialog:
+     * <pre>{@code
+     * dialogs.createInputDialog(this)
+     *         .withParameters(
+     *                 stringParameter("name").withCaption("Name"),
+     *                 intParameter("count").withCaption("Count"))
+     *         .withActions(Dialogs.DialogActions.OK_CANCEL)
+     *         .withCloseListener(closeEvent ->
+     *                 notifications.create(Notifications.NotificationType.TRAY)
+     *                         .withCaption("Dialog is closed")
+     *                         .show())
+     *         .withCaption("Products")
+     *         .show();
+     * }</pre>
+     *
+     * @param owner origin screen from input dialog is invoked
+     * @return builder
+     */
     InputDialogBuilder createInputDialog(FrameOwner owner);
 
     /**
@@ -489,33 +511,84 @@ public interface Dialogs {
         WARNING
     }
 
+    /**
+     * Builder for dialogs with inputs.
+     *
+     */
     interface InputDialogBuilder {
 
+        /**
+         * Add input parameter to the dialog. Input parameter will be represented as a field.
+         *
+         * @param parameter input parameter that will be added to the dialog
+         * @return builder
+         */
         InputDialogBuilder withParameter(InputParameter parameter);
 
+        /**
+         * Sets input parameters.
+         *
+         * @param parameters input parameters
+         * @return builder
+         */
         InputDialogBuilder withParameters(InputParameter... parameters);
 
         Collection<InputParameter> getParameters();
 
+        /**
+         * Add close listener to the dialog.
+         *
+         * @param listener close listener to add
+         * @return builder
+         */
         InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener);
 
         Consumer<InputDialog.InputDialogCloseEvent> getCloseListener();
 
+        /**
+         * Sets dialog action.
+         *
+         * @param actions actions
+         * @return builder
+         * @see InputDialogAction
+         */
         InputDialogBuilder withActions(Action... actions);
 
         Collection<Action> getActions();
 
+        /**
+         * Sets default dialog action.
+         *
+         * @param actions actions
+         * @return builder
+         */
         InputDialogBuilder withActions(DialogActions actions);
 
         DialogActions getDialogActions();
 
+        /**
+         * Sets dialog screen caption
+         *
+         * @param caption dialog screen caption
+         * @return builder
+         */
         InputDialogBuilder withCaption(String caption);
 
         @Nullable
         String getCaption();
 
-        InputDialog showDialog();
+        /**
+         * Shows the dialog.
+         *
+         * @return opened input dialog
+         */
+        InputDialog show();
 
+        /**
+         * Builds the input dialog.
+         *
+         * @return input dialog
+         */
         InputDialog build();
     }
 

@@ -17,11 +17,20 @@
 package com.haulmont.cuba.gui.components.inputdialog;
 
 import com.haulmont.cuba.gui.ComponentsHelper;
+import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 
+/**
+ * Action can be used in {@link InputDialog}. It can handle specific {@link InputDialogActionPerformed} event for
+ * managing opened dialog.
+ *
+ * @see InputDialog
+ * @see Dialogs.InputDialogBuilder
+ */
 public class InputDialogAction extends BaseAction {
 
     public InputDialogAction(String id) {
@@ -45,6 +54,9 @@ public class InputDialogAction extends BaseAction {
         }
     }
 
+    /**
+     * Describes action performed event from {@link InputDialogAction}. It contains opened {@link InputDialog} .
+     */
     static public class InputDialogActionPerformed extends Action.ActionPerformedEvent {
 
         protected InputDialog inputDialog;
@@ -55,6 +67,9 @@ public class InputDialogAction extends BaseAction {
             this.inputDialog = inputDialog;
         }
 
+        /**
+         * @return opened input dialog
+         */
         public InputDialog getInputDialog() {
             return inputDialog;
         }
