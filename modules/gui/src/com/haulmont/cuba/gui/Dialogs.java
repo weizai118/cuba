@@ -546,7 +546,7 @@ public interface Dialogs {
         Consumer<InputDialog.InputDialogCloseEvent> getCloseListener();
 
         /**
-         * Sets dialog action.
+         * Sets dialog actions. If there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
          *
          * @param actions actions
          * @return builder
@@ -557,7 +557,8 @@ public interface Dialogs {
         Collection<Action> getActions();
 
         /**
-         * Sets default dialog action.
+         * Sets predefined dialog actions. By default if there is no actions are set using {@link #withActions(Action...)}
+         * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
          *
          * @param actions actions
          * @return builder

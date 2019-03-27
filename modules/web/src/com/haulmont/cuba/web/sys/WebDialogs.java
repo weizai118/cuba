@@ -17,7 +17,6 @@
 
 package com.haulmont.cuba.web.sys;
 
-import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Dialogs;
@@ -28,9 +27,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.FrameOwner;
-import com.haulmont.cuba.gui.screen.MapScreenOptions;
 import com.haulmont.cuba.gui.screen.OpenMode;
-import com.haulmont.cuba.gui.screen.ScreenOptions;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.exception.ExceptionDialog;
@@ -707,82 +704,77 @@ public class WebDialogs implements Dialogs {
 
     public class InputDialogBuilderImpl implements InputDialogBuilder {
 
-        protected List<InputParameter> parameters = new ArrayList<>(2);
-        protected List<Action> actions;
+        protected InputDialog inputDialog;
 
-        protected Consumer<InputDialog.InputDialogCloseEvent> listener;
-
-        protected DialogActions dialogActions = DialogActions.OK_CANCEL;
         protected FrameOwner owner;
-        protected String caption;
 
         public InputDialogBuilderImpl(FrameOwner owner) {
             this.owner = owner;
+            inputDialog = screenBuilders.screen(owner)
+                    .withScreenClass(InputDialog.class)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .build();
         }
 
         @Override
         public InputDialogBuilder withParameter(InputParameter parameter) {
-            parameters.add(parameter);
+            inputDialog.setParameter(parameter);
             return this;
         }
 
         @Override
         public InputDialogBuilder withParameters(InputParameter... parameters) {
-            this.parameters.addAll(Arrays.asList(parameters));
+            inputDialog.setParameters(parameters);
             return this;
         }
 
         @Override
         public Collection<InputParameter> getParameters() {
-            return parameters;
+            return inputDialog.getParameters();
         }
 
         @Override
         public InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener) {
-            this.listener = listener;
+            inputDialog.setCloseListener(listener);
             return this;
         }
 
         @Override
         public Consumer<InputDialog.InputDialogCloseEvent> getCloseListener() {
-            return listener;
+            return inputDialog.getCloseListener();
         }
 
         @Override
         public InputDialogBuilder withActions(Action... actions) {
-            this.actions = new ArrayList<>(Arrays.asList(actions));
+            inputDialog.setActions(actions);
             return this;
         }
 
         @Override
         public Collection<Action> getActions() {
-            if (actions == null) {
-                return Collections.emptyList();
-            }
-
-            return actions;
+            return inputDialog.getActions();
         }
 
         @Override
         public InputDialogBuilder withActions(DialogActions actions) {
-            this.dialogActions = actions;
+            inputDialog.setDialogActions(actions);
             return this;
         }
 
         @Override
         public DialogActions getDialogActions() {
-            return dialogActions;
+            return inputDialog.getDialogActions();
         }
 
         @Override
         public InputDialogBuilder withCaption(String caption) {
-            this.caption = caption;
+            inputDialog.getDialogWindow().setCaption(caption);
             return this;
         }
 
         @Override
         public String getCaption() {
-            return caption;
+            return inputDialog.getDialogWindow().getCaption();
         }
 
         @Override
@@ -793,26 +785,11 @@ public class WebDialogs implements Dialogs {
 
         @Override
         public InputDialog build() {
-            ParamsMap paramsMap = ParamsMap.of()
-                    .pair("parameters", parameters)
-                    .pair("actions", actions == null ? Collections.emptyList() : actions)
-                    .pair("dialogActions", dialogActions)
-                    .pair("caption", caption)
-                    .pair("closeListener", listener);
-
-            ScreenOptions options = new MapScreenOptions(paramsMap.create());
-
-            InputDialog screen = screenBuilders.screen(owner)
-                    .withScreenClass(InputDialog.class)
-                    .withOpenMode(OpenMode.DIALOG)
-                    .withOptions(options)
-                    .build();
-
             ThemeConstants theme = ui.getApp().getThemeConstants();
-            DialogWindow window = (DialogWindow) screen.getWindow();
+            DialogWindow window = inputDialog.getDialogWindow();
             window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
 
-            return screen;
+            return inputDialog;
         }
     }
 }
