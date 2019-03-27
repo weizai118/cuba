@@ -706,10 +706,7 @@ public class WebDialogs implements Dialogs {
 
         protected InputDialog inputDialog;
 
-        protected FrameOwner owner;
-
         public InputDialogBuilderImpl(FrameOwner owner) {
-            this.owner = owner;
             inputDialog = screenBuilders.screen(owner)
                     .withScreenClass(InputDialog.class)
                     .withOpenMode(OpenMode.DIALOG)
