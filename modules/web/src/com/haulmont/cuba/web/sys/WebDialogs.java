@@ -24,6 +24,7 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.FrameOwner;
@@ -742,7 +743,7 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
-        public InputDialogBuilder withActions(Action... actions) {
+        public InputDialogBuilder withActions(InputDialogAction... actions) {
             inputDialog.setActions(actions);
             return this;
         }

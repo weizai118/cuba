@@ -192,7 +192,7 @@ public class InputDialog extends Screen {
      * @param actions actions
      * @see InputDialogAction
      */
-    public void setActions(Action... actions) {
+    public void setActions(InputDialogAction... actions) {
         this.actionsList.addAll(Arrays.asList(actions));
     }
 
@@ -204,7 +204,7 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Sets predefined dialog actions. By default if there is no actions are set using {@link #setActions(Action...)}
+     * Sets predefined dialog actions. By default if there is no actions are set using {@link #setActions(InputDialogAction...)}
      * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
      *
      * @param actions actions
@@ -301,9 +301,6 @@ public class InputDialog extends Screen {
 
                 String iconPath = icons.get(type.getIconKey());
                 button.setIcon(iconPath);
-            } else {
-                button.setIcon(action.getIcon());
-                button.setCaption(action.getCaption());
             }
 
             actionsLayout.add(button);

@@ -552,12 +552,12 @@ public interface Dialogs {
          * @return builder
          * @see InputDialogAction
          */
-        InputDialogBuilder withActions(Action... actions);
+        InputDialogBuilder withActions(InputDialogAction... actions);
 
         Collection<Action> getActions();
 
         /**
-         * Sets predefined dialog actions. By default if there is no actions are set using {@link #withActions(Action...)}
+         * Sets predefined dialog actions. By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
          * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
          *
          * @param actions actions

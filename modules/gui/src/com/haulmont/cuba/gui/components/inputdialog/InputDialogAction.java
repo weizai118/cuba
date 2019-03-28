@@ -19,10 +19,9 @@ package com.haulmont.cuba.gui.components.inputdialog;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
-import com.haulmont.cuba.gui.components.Action;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.Window;
-import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.*;
+
+import java.util.function.Consumer;
 
 /**
  * Action can be used in {@link InputDialog}. It can handle specific {@link InputDialogActionPerformed} event for
@@ -31,7 +30,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
  * @see InputDialog
  * @see Dialogs.InputDialogBuilder
  */
-public class InputDialogAction extends BaseAction {
+public class InputDialogAction extends AbstractAction {
 
     public InputDialogAction(String id) {
         super(id);
@@ -49,15 +48,84 @@ public class InputDialogAction extends BaseAction {
                 }
             }
 
-            ActionPerformedEvent event = new InputDialogActionPerformed(this, component, inputDialog);
-            eventHub.publish(ActionPerformedEvent.class, event);
+            InputDialogActionPerformed event = new InputDialogActionPerformed(this, component, inputDialog);
+            eventHub.publish(InputDialogActionPerformed.class, event);
         }
     }
 
     /**
-     * Describes action performed event from {@link InputDialogAction}. It contains opened {@link InputDialog} .
+     * Set caption using fluent API method.
+     *
+     * @param caption caption
+     * @return current instance of action
      */
-    static public class InputDialogActionPerformed extends Action.ActionPerformedEvent {
+    public InputDialogAction withCaption(String caption) {
+        this.caption = caption;
+        return this;
+    }
+
+    /**
+     * Set description using fluent API method.
+     *
+     * @param description description
+     * @return current instance of action
+     */
+    public InputDialogAction withDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
+     * Set icon using fluent API method.
+     *
+     * @param icon icon
+     * @return current instance of action
+     */
+    public InputDialogAction withIcon(String icon) {
+        this.icon = icon;
+        return this;
+    }
+
+    /**
+     * Set shortcut using fluent API method.
+     *
+     * @param shortcut shortcut
+     * @return current instance of action
+     */
+    public InputDialogAction withShortcut(String shortcut) {
+        if (shortcut != null) {
+            this.shortcut = KeyCombination.create(shortcut);
+        }
+        return this;
+    }
+
+    /**
+     * Set action performed event handler using fluent API method. Can be used instead of subclassing BaseAction class.
+     *
+     * @param handler action performed handler
+     * @return current instance of action
+     */
+    public InputDialogAction withHandler(Consumer<InputDialogActionPerformed> handler) {
+        getEventHub().subscribe(InputDialogActionPerformed.class, handler);
+
+        return this;
+    }
+
+    /**
+     * Set whether this action is primary using fluent API method. Can be used instead of subclassing BaseAction class.
+     *
+     * @param primary primary
+     * @return current instance of action
+     */
+    public InputDialogAction withPrimary(boolean primary) {
+        this.primary = primary;
+        return this;
+    }
+
+    /**
+     * Describes action performed event from {@link InputDialogAction}. It contains opened {@link InputDialog}.
+     */
+    public static class InputDialogActionPerformed extends Action.ActionPerformedEvent {
 
         protected InputDialog inputDialog;
 
