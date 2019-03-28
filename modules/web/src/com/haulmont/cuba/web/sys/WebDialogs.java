@@ -777,15 +777,12 @@ public class WebDialogs implements Dialogs {
         @Override
         public InputDialog show() {
             InputDialog dialog = build();
-            return (InputDialog) dialog.show();
+            dialog.show();
+            return dialog;
         }
 
         @Override
         public InputDialog build() {
-            ThemeConstants theme = ui.getApp().getThemeConstants();
-            DialogWindow window = inputDialog.getDialogWindow();
-            window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
-
             return inputDialog;
         }
     }

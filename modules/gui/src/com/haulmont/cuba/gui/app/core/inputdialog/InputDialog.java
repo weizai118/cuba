@@ -31,6 +31,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.theme.ThemeConstants;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -41,7 +42,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @UiDescriptor("inputdialog.xml")
-@UiController("inputDialogScreen")
+@UiController("inputDialog")
 public class InputDialog extends Screen {
 
     @Inject
@@ -66,7 +67,7 @@ public class InputDialog extends Screen {
     protected ScreenValidation screenValidation;
 
     @Inject
-    protected CssLayout rootLayout;
+    protected ThemeConstants theme;
 
     @Inject
     protected Form form;
@@ -80,6 +81,12 @@ public class InputDialog extends Screen {
     protected DialogActions dialogActions = DialogActions.OK_CANCEL;
     protected List<String> fieldIds;
     protected Consumer<InputDialogCloseEvent> closeListener;
+
+    @Subscribe
+    private void onInit(InitEvent event) {
+        DialogWindow window = getDialogWindow();
+        window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
+    }
 
     @Subscribe
     private void onBeforeShow(BeforeShowEvent event) {
@@ -250,6 +257,7 @@ public class InputDialog extends Screen {
             datatype = datatypeRegistry.get(parameter.getDatatypeJavaClass());
         } else if (parameter.getDatatype() != null) {
             datatype = parameter.getDatatype();
+            // if there is no type is defined, set StringDatatype
         } else if (parameter.getEntityClass() == null) {
             datatype = datatypeRegistry.get(String.class);
         }
