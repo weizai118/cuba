@@ -45,6 +45,27 @@ import java.util.function.Consumer;
 @UiController("inputDialog")
 public class InputDialog extends Screen {
 
+    /**
+     * Action is sent when user click on "OK" button.
+     */
+    public static final CloseAction INPUT_DIALOG_OK_ACTION = new StandardCloseAction(InputDialogCloseAction.OK.getId());
+
+    /**
+     * Action is sent when user click on "CANCEL" button.
+     */
+    public static final CloseAction INPUT_DIALOG_CANCEL_ACTION = new StandardCloseAction(InputDialogCloseAction.CANCEL.getId());
+
+    /**
+     * Action is sent when user click on "YES" button.
+     */
+    public static final CloseAction INPUT_DIALOG_APPLY_ACTION = new StandardCloseAction(InputDialogCloseAction.YES.getId());
+
+    /**
+     * Action is sent when user click on "NO" button.
+     */
+    public static final CloseAction INPUT_DIALOG_REJECT_ACTION = new StandardCloseAction(InputDialogCloseAction.NO.getId());
+
+
     @Inject
     protected UiComponents uiComponents;
 
@@ -80,16 +101,18 @@ public class InputDialog extends Screen {
 
     protected DialogActions dialogActions = DialogActions.OK_CANCEL;
     protected List<String> fieldIds;
+
     protected Consumer<InputDialogCloseEvent> closeListener;
+    protected Consumer<InputDialogResult> resultHandler;
 
     @Subscribe
-    private void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         DialogWindow window = getDialogWindow();
         window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
     }
 
     @Subscribe
-    private void onBeforeShow(BeforeShowEvent event) {
+    protected void onBeforeShow(BeforeShowEvent event) {
         initParameters();
         if (actionsList.isEmpty()) {
             initDialogActions();
@@ -101,8 +124,7 @@ public class InputDialog extends Screen {
     @Subscribe
     protected void onAfterClose(AfterCloseEvent event) {
         if (closeListener != null) {
-            InputDialogCloseEvent inputDialogCloseEvent = new InputDialogCloseEvent(getValues(), event.getCloseAction());
-            closeListener.accept(inputDialogCloseEvent);
+            closeListener.accept(new InputDialogCloseEvent(getValues(), event.getCloseAction()));
         }
     }
 
@@ -130,7 +152,7 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Returns mapped values from fields. String - field id, Object - field value.
+     * Returns values from fields. String - field id, Object - field value.
      *
      * @return values
      */
@@ -222,6 +244,26 @@ public class InputDialog extends Screen {
         return dialogActions;
     }
 
+    /**
+     * Sets handler for dialog actions (e.g. OK, CANCEL, etc) that are used in the dialog. Handler is invoked after
+     * close event and can be used instead of {@link #setCloseListener(Consumer)}.
+     * <p>
+     * Note, it is worked only with {@link #setDialogActions(DialogActions)}. Custom actions are not handled.
+     *
+     * @param resultHandler result handler
+     */
+    public void setResultHandler(Consumer<InputDialogResult> resultHandler) {
+        this.resultHandler = resultHandler;
+    }
+
+    /**
+     * @return result handler
+     */
+    @Nullable
+    public Consumer<InputDialogResult> getResultHandler() {
+        return resultHandler;
+    }
+
     @SuppressWarnings("unchecked")
     protected void initParameters() {
         fieldIds = new ArrayList<>(parameters.size());
@@ -242,7 +284,7 @@ public class InputDialog extends Screen {
             field.setStyleName("input-parameter");
 
             if (fieldIds.contains(parameter.getId())) {
-                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id: " + parameter.getId());
+                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id: '" + parameter.getId() + "'");
             }
 
             fieldIds.add(field.getId());
@@ -311,20 +353,20 @@ public class InputDialog extends Screen {
         List<Action> actions = new ArrayList<>(2);
         switch (dialogActions) {
             case OK:
-                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.OK, INPUT_DIALOG_OK_ACTION));
                 break;
             case YES_NO:
-                actions.add(createDialogAction(DialogAction.Type.YES, WINDOW_COMMIT_AND_CLOSE_ACTION));
-                actions.add(createDialogAction(DialogAction.Type.NO, WINDOW_DISCARD_AND_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.YES, INPUT_DIALOG_APPLY_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.NO, INPUT_DIALOG_REJECT_ACTION));
                 break;
             case OK_CANCEL:
-                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
-                actions.add(createDialogAction(DialogAction.Type.CANCEL, WINDOW_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.OK, INPUT_DIALOG_OK_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.CANCEL, INPUT_DIALOG_CANCEL_ACTION));
                 break;
             case YES_NO_CANCEL:
-                actions.add(createDialogAction(DialogAction.Type.OK, WINDOW_COMMIT_AND_CLOSE_ACTION));
-                actions.add(createDialogAction(DialogAction.Type.NO, WINDOW_DISCARD_AND_CLOSE_ACTION));
-                actions.add(createDialogAction(DialogAction.Type.CANCEL, WINDOW_CLOSE_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.OK, INPUT_DIALOG_OK_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.NO, INPUT_DIALOG_REJECT_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.CANCEL, INPUT_DIALOG_CANCEL_ACTION));
                 break;
         }
         initActions(actions);
@@ -335,13 +377,21 @@ public class InputDialog extends Screen {
         if (type == DialogAction.Type.OK || type == DialogAction.Type.YES) {
             dialogAction.withHandler(event -> {
                 if (validateFields()) {
-                    close(closeAction);
+                    fireCloseAndResultEvents(closeAction);
                 }
             });
         } else {
-            dialogAction.withHandler(event -> close(closeAction));
+            dialogAction.withHandler(event -> fireCloseAndResultEvents(closeAction));
         }
         return dialogAction;
+    }
+
+    protected void fireCloseAndResultEvents(CloseAction closeAction) {
+        close(closeAction);
+
+        if (resultHandler != null) {
+            resultHandler.accept(new InputDialogResult(getValues(), closeAction));
+        }
     }
 
     protected boolean validateFields() {
@@ -390,6 +440,90 @@ public class InputDialog extends Screen {
         @Nullable
         public Object getValue(String id) {
             return values.get(id);
+        }
+    }
+
+    /**
+     * Describes result of handler that can be used with {@link DialogActions} in the input dialog.
+     *
+     * @see Dialogs.InputDialogBuilder#withActions(DialogActions, Consumer)
+     */
+    public static class InputDialogResult {
+
+        protected Map<String, Object> values;
+        protected CloseAction closeAction;
+
+        public InputDialogResult(Map<String, Object> values, CloseAction closeAction) {
+            this.values = values;
+            this.closeAction = closeAction;
+        }
+
+        /**
+         * Returns values from fields. String - field id, Object - field value.
+         *
+         * @return values
+         */
+        public Map<String, Object> getValues() {
+            return values;
+        }
+
+        /**
+         * @param id field id
+         * @return field value
+         */
+        @Nullable
+        public Object getValue(String id) {
+            return values.get(id);
+        }
+
+        /**
+         * @return close action
+         * @see #INPUT_DIALOG_OK_ACTION
+         * @see #INPUT_DIALOG_CANCEL_ACTION
+         * @see #INPUT_DIALOG_APPLY_ACTION
+         * @see #INPUT_DIALOG_REJECT_ACTION
+         */
+        public CloseAction getCloseAction() {
+            return closeAction;
+        }
+
+        /**
+         * Returns enum value for predefined input dialog action which was clicked in the dialog, e.g. OK, CANCEL, etc.
+         *
+         * @return input dialog close action
+         */
+        public InputDialogCloseAction getInputDialogCloseAction() {
+            return InputDialogCloseAction.fromId(((StandardCloseAction) closeAction).getActionId());
+        }
+    }
+
+    /**
+     * Predefined actions that can be used in the input dialog.
+     */
+    public enum InputDialogCloseAction {
+
+        OK("inputDialogOk"),
+        CANCEL("inputDialogCancel"),
+        YES("inputDialogYes"),
+        NO("inputDialogNo");
+
+        protected String id;
+
+        InputDialogCloseAction(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public static InputDialogCloseAction fromId(String id) {
+            for (InputDialogCloseAction action : values()) {
+                if (action.getId().equals(id)) {
+                    return action;
+                }
+            }
+            return null;
         }
     }
 }

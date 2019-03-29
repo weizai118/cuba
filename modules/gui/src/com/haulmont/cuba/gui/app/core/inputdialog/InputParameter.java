@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.app.core.inputdialog;
 
+import com.haulmont.bali.util.Preconditions;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.components.Field;
@@ -25,6 +26,9 @@ import java.util.Date;
 import java.sql.Time;
 import java.util.function.Supplier;
 
+/**
+ * Describes field that can be used in {@link InputDialog}.
+ */
 public class InputParameter {
 
     protected String id;
@@ -37,41 +41,84 @@ public class InputParameter {
 
     protected Class datatypeJavaClass;
 
+    /**
+     * @param id field id
+     */
     public InputParameter(String id) {
+        Preconditions.checkNotNullArgument(id);
+
         this.id = id;
     }
 
+    /**
+     * @return field id
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Sets field id.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public InputParameter withId(String id) {
+        Preconditions.checkNotNullArgument(id);
+
         this.id = id;
         return this;
     }
 
+    /**
+     * @return field caption
+     */
     public String getCaption() {
         return caption;
     }
 
+    /**
+     * Sets caption to the field.
+     *
+     * @param caption caption
+     * @return input parameter
+     */
     public InputParameter withCaption(String caption) {
         this.caption = caption;
         return this;
     }
 
+    /**
+     * @return true if field is required
+     */
     public boolean isRequired() {
         return required;
     }
 
+    /**
+     * Sets required for the field.
+     *
+     * @param required required option
+     * @return input parameter
+     */
     public InputParameter withRequired(boolean required) {
         this.required = required;
         return this;
     }
 
+    /**
+     * @return field Datatype
+     */
     public Datatype getDatatype() {
         return datatype;
     }
 
+    /**
+     * Sets datatype to the field. Cannot be used with {@link #withEntityClass(Class)} and with predefined static methods.
+     *
+     * @param datatype datatype
+     * @return input parameter
+     */
     public InputParameter withDatatype(Datatype datatype) {
         checkNullEntityClass("InputParameter cannot contain Datatype and entity class at the same time");
         checkNullDatatypeJavaClass("Datatype cannot be used with a parameter that has already data type");
@@ -89,28 +136,58 @@ public class InputParameter {
         return datatypeJavaClass;
     }
 
+    /**
+     * @return field supplier
+     */
     public Supplier<Field> getField() {
         return field;
     }
 
+    /**
+     * Sets field supplier.
+     * <p>
+     * Note, in order to get value from this field you must use an id that is set to the InputParameter, not to the
+     * created field.
+     *
+     * @param field supplier
+     * @return input parameter
+     */
     public InputParameter withField(Supplier<Field> field) {
         this.field = field;
         return this;
     }
 
+    /**
+     * @return default value
+     */
     public Object getDefaultValue() {
         return defaultValue;
     }
 
+    /**
+     * Sets default value to the field.
+     *
+     * @param defaultValue default value
+     * @return input parameter
+     */
     public InputParameter withDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
+    /**
+     * @return entity class
+     */
     public Class<? extends Entity> getEntityClass() {
         return entityClass;
     }
 
+    /**
+     * Sets entity class. Cannot be used with {@link #withDatatype(Datatype)} and with predefined static methods.
+     *
+     * @param entityClass entity class
+     * @return input parameter
+     */
     public InputParameter withEntityClass(Class<? extends Entity> entityClass) {
         checkNullDatatype("InputParameter cannot contain entity class and Datatype at the same time");
         checkNullDatatypeJavaClass("Entity class cannot be used with a parameter that has data type");
@@ -119,42 +196,113 @@ public class InputParameter {
         return this;
     }
 
+    /**
+     * Creates parameter with String type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
+    public static InputParameter parameter(String id) {
+        return new InputParameter(id);
+    }
+
+    /**
+     * Creates parameter with String type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter stringParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(String.class);
     }
 
+    /**
+     * Creates parameter with Integer type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter intParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Integer.class);
     }
 
+    /**
+     * Creates parameter with Double type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter doubleParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Double.class);
     }
 
+    /**
+     * Creates parameter with BigDecimal type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter bigDecimalParamater(String id) {
         return new InputParameter(id).withDatatypeJavaClass(BigDecimal.class);
     }
 
+    /**
+     * Creates parameter with Long type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter longParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Long.class);
     }
 
+    /**
+     * Creates parameter with Date type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter dateParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(java.sql.Date.class);
     }
 
+    /**
+     * Creates parameter with Time type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter timeParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Time.class);
     }
 
+    /**
+     * Creates parameter with DateTime type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter dateTimeParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Date.class);
     }
 
+    /**
+     * Creates parameter with Entity type.
+     *
+     * @param id          field id
+     * @param entityClass entity class
+     * @return input parameter
+     */
     public static InputParameter entityParameter(String id, Class<? extends Entity> entityClass) {
         return new InputParameter(id).withEntityClass(entityClass);
     }
 
+    /**
+     * Creates parameter with Boolean type.
+     *
+     * @param id field id
+     * @return input parameter
+     */
     public static InputParameter booleanParameter(String id) {
         return new InputParameter(id).withDatatypeJavaClass(Boolean.class);
     }

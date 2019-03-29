@@ -726,7 +726,6 @@ public class WebDialogs implements Dialogs {
             return this;
         }
 
-        @Override
         public Collection<InputParameter> getParameters() {
             return inputDialog.getParameters();
         }
@@ -737,7 +736,6 @@ public class WebDialogs implements Dialogs {
             return this;
         }
 
-        @Override
         public Consumer<InputDialog.InputDialogCloseEvent> getCloseListener() {
             return inputDialog.getCloseListener();
         }
@@ -748,7 +746,6 @@ public class WebDialogs implements Dialogs {
             return this;
         }
 
-        @Override
         public Collection<Action> getActions() {
             return inputDialog.getActions();
         }
@@ -760,8 +757,19 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
+        public InputDialogBuilder withActions(DialogActions actions, Consumer<InputDialog.InputDialogResult> resultHandler) {
+            inputDialog.setDialogActions(actions);
+            inputDialog.setResultHandler(resultHandler);
+            return this;
+        }
+
         public DialogActions getDialogActions() {
             return inputDialog.getDialogActions();
+        }
+
+        @Nullable
+        public Consumer<InputDialog.InputDialogResult> getResultHandler() {
+            return inputDialog.getResultHandler();
         }
 
         @Override
@@ -770,7 +778,7 @@ public class WebDialogs implements Dialogs {
             return this;
         }
 
-        @Override
+        @Nullable
         public String getCaption() {
             return inputDialog.getDialogWindow().getCaption();
         }

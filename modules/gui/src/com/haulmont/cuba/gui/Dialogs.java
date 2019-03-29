@@ -513,7 +513,6 @@ public interface Dialogs {
 
     /**
      * Builder for dialogs with inputs.
-     *
      */
     interface InputDialogBuilder {
 
@@ -533,8 +532,6 @@ public interface Dialogs {
          */
         InputDialogBuilder withParameters(InputParameter... parameters);
 
-        Collection<InputParameter> getParameters();
-
         /**
          * Add close listener to the dialog.
          *
@@ -542,8 +539,6 @@ public interface Dialogs {
          * @return builder
          */
         InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener);
-
-        Consumer<InputDialog.InputDialogCloseEvent> getCloseListener();
 
         /**
          * Sets dialog actions. If there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
@@ -554,8 +549,6 @@ public interface Dialogs {
          */
         InputDialogBuilder withActions(InputDialogAction... actions);
 
-        Collection<Action> getActions();
-
         /**
          * Sets predefined dialog actions. By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
          * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
@@ -565,7 +558,14 @@ public interface Dialogs {
          */
         InputDialogBuilder withActions(DialogActions actions);
 
-        DialogActions getDialogActions();
+        /**
+         * Sets dialog actions and result handler. Handler is invoked after close event and can be used instead of
+         * {@link #withCloseListener(Consumer)}.
+         *
+         * @param actions       dialog actions
+         * @param resultHandler result handler
+         */
+        InputDialogBuilder withActions(DialogActions actions, Consumer<InputDialog.InputDialogResult> resultHandler);
 
         /**
          * Sets dialog screen caption
@@ -574,9 +574,6 @@ public interface Dialogs {
          * @return builder
          */
         InputDialogBuilder withCaption(String caption);
-
-        @Nullable
-        String getCaption();
 
         /**
          * Shows the dialog.
@@ -593,6 +590,9 @@ public interface Dialogs {
         InputDialog build();
     }
 
+    /**
+     * Default options for input dialog
+     */
     enum DialogActions {
         OK,
         OK_CANCEL,
