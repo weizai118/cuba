@@ -11,11 +11,7 @@
     overflow-y: auto;
   }
 
-  .input-dialog-layout {
-    height: auto !important;
-
-    .input-parameter {
-      min-width: $v-unit-size * 6;
-    }
+  .input-parameter {
+    min-width: $v-unit-size * 6;
   }
 }
