@@ -323,6 +323,8 @@ public class InputDialog extends Screen {
             TimeField timeField = uiComponents.create(TimeField.NAME);
             timeField.setDatatype(datatype);
             return timeField;
+        } else if (datatype instanceof BooleanDatatype) {
+            return uiComponents.create(CheckBox.NAME);
         } else {
             PickerField pickerField = uiComponents.create(PickerField.NAME);
             pickerField.setMetaClass(metadata.getClass(parameter.getEntityClass()));
@@ -364,7 +366,7 @@ public class InputDialog extends Screen {
                 actions.add(createDialogAction(DialogAction.Type.CANCEL, INPUT_DIALOG_CANCEL_ACTION));
                 break;
             case YES_NO_CANCEL:
-                actions.add(createDialogAction(DialogAction.Type.OK, INPUT_DIALOG_OK_ACTION));
+                actions.add(createDialogAction(DialogAction.Type.YES, INPUT_DIALOG_APPLY_ACTION));
                 actions.add(createDialogAction(DialogAction.Type.NO, INPUT_DIALOG_REJECT_ACTION));
                 actions.add(createDialogAction(DialogAction.Type.CANCEL, INPUT_DIALOG_CANCEL_ACTION));
                 break;
