@@ -16,6 +16,7 @@
 
 package spec.cuba.web.dialogs
 
+import com.haulmont.chile.core.datatypes.DatatypeRegistry
 import com.haulmont.chile.core.datatypes.impl.BigDecimalDatatype
 import com.haulmont.chile.core.datatypes.impl.DateDatatype
 import com.haulmont.chile.core.datatypes.impl.DateTimeDatatype
@@ -26,6 +27,7 @@ import com.haulmont.chile.core.datatypes.impl.TimeDatatype
 import com.haulmont.cuba.gui.ComponentsHelper
 import com.haulmont.cuba.gui.Dialogs
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog
+import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter
 import com.haulmont.cuba.gui.components.Button
 import com.haulmont.cuba.gui.components.CheckBox
 import com.haulmont.cuba.gui.components.DateField
@@ -37,12 +39,17 @@ import com.haulmont.cuba.gui.components.TextField
 import com.haulmont.cuba.gui.components.TimeField
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction
 import com.haulmont.cuba.gui.screen.OpenMode
+import com.haulmont.cuba.gui.screen.Screen
 import com.haulmont.cuba.security.app.UserManagementService
+import com.haulmont.cuba.web.gui.components.WebTextField
 import com.haulmont.cuba.web.testmodel.sample.GoodInfo
 import com.haulmont.cuba.web.testsupport.TestServiceProxy
 import spec.cuba.web.UiScreenSpec
 
+import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_APPLY_ACTION
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_CANCEL_ACTION
+import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_OK_ACTION
+import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_REJECT_ACTION
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.bigDecimalParamater
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.booleanParameter
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.dateParameter
@@ -57,19 +64,21 @@ import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.timePara
 
 class InputDialogTest extends UiScreenSpec {
 
+    DatatypeRegistry datatypeRegistry
+
     void setup() {
         TestServiceProxy.mock(UserManagementService, Mock(UserManagementService) {
             getSubstitutedUsers(_) >> Collections.emptyList()
         })
+
+        datatypeRegistry = cont.getBean(DatatypeRegistry)
     }
 
     def cleanup() {
         TestServiceProxy.clear()
-
-        resetScreensConfig()
     }
 
-    def "check input parameter ids"() {
+    def "input parameter ids should be different"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
@@ -98,8 +107,7 @@ class InputDialogTest extends UiScreenSpec {
         dialog.show()
     }
 
-    /*
-    def "check input parameter types are presented"() {
+    def "input parameter types are presented"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
@@ -123,37 +131,37 @@ class InputDialogTest extends UiScreenSpec {
                 dateTimeParameter("dateTime"))
                 .show()
         then:
-        def form = dialog.getWindow().getComponentNN("form") as Form
+        def form = (Form) dialog.getWindow().getComponentNN("form")
 
-        def defaultField = form.getComponentNN("default") as TextField
+        def defaultField = (TextField) form.getComponentNN("default")
         defaultField.getDatatype().getClass() == StringDatatype
 
-        def stringField = form.getComponentNN("string") as TextField
+        def stringField = (TextField) form.getComponentNN("string")
         stringField.getDatatype().getClass() == StringDatatype
 
-        def intField = form.getComponentNN("int") as TextField
+        def intField = (TextField) form.getComponentNN("int")
         intField.getDatatype().getClass() == IntegerDatatype
 
-        def doubleField = form.getComponentNN("double") as TextField
+        def doubleField = (TextField) form.getComponentNN("double")
         doubleField.getDatatype().getClass() == DoubleDatatype
 
-        def bigDecimalField = form.getComponentNN("bigDecimal") as TextField
+        def bigDecimalField = (TextField) form.getComponentNN("bigDecimal")
         bigDecimalField.getDatatype().getClass() == BigDecimalDatatype
 
-        form.getComponentNN("bigDecimal") as CheckBox
-        form.getComponentNN("entity") as PickerField
+        (CheckBox) form.getComponentNN("boolean")
+        (PickerField) form.getComponentNN("entity")
 
-        def timeField = form.getComponentNN("time") as TimeField
+        def timeField = (TimeField) form.getComponentNN("time")
         timeField.getDatatype().getClass() == TimeDatatype
 
-        def dateField = form.getComponentNN("date") as DateField
+        def dateField = (DateField) form.getComponentNN("date")
         dateField.getDatatype().getClass() == DateDatatype
 
-        def dateTimeField = form.getComponentNN("dateTime") as DateField
+        def dateTimeField = (DateField) form.getComponentNN("dateTime")
         dateTimeField.getDatatype().getClass() == DateTimeDatatype
     }
 
-    def "check default actions are created"() {
+    def "default actions are created"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
@@ -169,30 +177,70 @@ class InputDialogTest extends UiScreenSpec {
                 .withActions(Dialogs.DialogActions.YES_NO_CANCEL)
                 .show()
         then:
-        def actionsLayout = dialog.getWindow().getComponentNN("actionsLayout") as HBoxLayout
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
         actionsLayout.getComponents().size() == 4
 
         // YES action
-        def yesBtn = actionsLayout.getComponent(1) as Button
+        def yesBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
         def yesAction = yesBtn.getAction() as DialogAction
         yesAction.getType() == DialogAction.Type.YES
 
         // NO action
-        def noBtn = actionsLayout.getComponent(2) as Button
-        def noAction = noBtn.getAction() as DialogAction
+        def noBtn = (Button) actionsLayout.getComponent(2)
+        def noAction = (DialogAction) noBtn.getAction()
         noAction.getType() == DialogAction.Type.NO
 
         // CANCEL action
-        def cancelBtn = actionsLayout.getComponent(3) as Button
-        def cancelAction = cancelBtn.getAction() as DialogAction
+        def cancelBtn = (Button) actionsLayout.getComponent(3)
+        def cancelAction = (DialogAction) cancelBtn.getAction()
         cancelAction.getType() == DialogAction.Type.CANCEL
     }
 
-    def "check default actions with result handler"() {
+    def "default actions with result handler"() {
+        def screens = vaadinUi.screens
 
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+
+        def goodInfo = new GoodInfo()
+        def defaultString = "default value"
+
+        when: "dialog uses result handler"
+        InputDialog dialog = dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                parameter("string").withDefaultValue(defaultString),
+                entityParameter("entity", GoodInfo).withDefaultValue(goodInfo))
+                .withActions(Dialogs.DialogActions.YES_NO, { result ->
+            switch (result.getCloseActionType()) {
+                case InputDialog.CloseActionType.YES:
+                    assert result.getValue("string") == defaultString
+                    assert result.getValue("entity") == goodInfo
+                    assert result.getCloseAction() == INPUT_DIALOG_APPLY_ACTION
+                    break
+                case InputDialog.CloseActionType.NO:
+                    assert result.getCloseAction() == INPUT_DIALOG_REJECT_ACTION
+                    break
+            }
+        })
+                .show()
+        then:
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        def yesBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        yesBtn.getAction().actionPerform(yesBtn)
+
+        !screens.getOpenedScreens().getActiveScreens().contains(dialog)
+
+        dialog.show() // we can show again because in this case we don't use code in Subscribe events
+        def reopenedActionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        def noBtn = (Button) reopenedActionsLayout.getComponent(2)
+        noBtn.getAction().actionPerform(noBtn)
+
+        !screens.getOpenedScreens().getActiveScreens().contains(dialog)
     }
 
-    def "check custom input dialog actions"() {
+    def "custom input dialog actions"() {
         def screens = vaadinUi.screens
 
         def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
@@ -205,15 +253,15 @@ class InputDialogTest extends UiScreenSpec {
         when: "created custom action"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("string").withDefaultValue(),
+                parameter("string").withDefaultValue(stringValue),
                 dateParameter("date").withDefaultValue(dateValue))
                 .withActions(
                 new InputDialogAction("ok").withHandler({
                     InputDialogAction.InputDialogActionPerformed event ->
                         InputDialog dialog = event.getInputDialog()
 
-                        dialog.getValue("string") == stringValue
-                        dialog.getValue("date") == dateValue
+                        assert dialog.getValue("string") == stringValue
+                        assert dialog.getValue("date") == dateValue
                 }),
                 new InputDialogAction("cancel").withHandler({
                     InputDialogAction.InputDialogActionPerformed event ->
@@ -222,16 +270,135 @@ class InputDialogTest extends UiScreenSpec {
                 .show()
 
         then:
-        def actionsLayout = dialog.getWindow().getComponentNN("actionsLayout") as HBoxLayout
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
         actionsLayout.getComponents().size() == 3
 
-        def okBtn = actionsLayout.getComponent(1) as Button
+        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
         okBtn.getAction().actionPerform(okBtn)
 
-        def cancelBtn = actionsLayout.getComponent(2) as Button
+        def cancelBtn = (Button) actionsLayout.getComponent(2)
         cancelBtn.getAction().actionPerform(cancelBtn)
 
         !screens.getOpenedScreens().getActiveScreens().contains(dialog)
     }
-    */
+
+    def "open with close listener"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        when: "check closing with OK action"
+        def dialog = (InputDialog) createDialogWithCloseListener(mainWindow)
+
+        then:
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        okBtn.getAction().actionPerform(okBtn)
+
+        !screens.getOpenedScreens().getActiveScreens().contains(dialog)
+
+        when: "check closing with CANCEL action"
+        def cancelDialog = (InputDialog) createDialogWithCloseListener(mainWindow)
+
+        then:
+        def cancelActionsLayout = (HBoxLayout) cancelDialog.getWindow().getComponentNN("actionsLayout")
+        def cancelBtn = (Button) cancelActionsLayout.getComponent(2)
+        cancelBtn.getAction().actionPerform(cancelBtn)
+
+        !screens.getOpenedScreens().getActiveScreens().contains(dialog)
+    }
+
+    protected InputDialog createDialogWithCloseListener(Screen mainWindow) {
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+        def bigDecimalValue = 1234
+
+        return dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                bigDecimalParamater("bigDecimal").withDefaultValue(bigDecimalValue),
+                booleanParameter("boolean").withDefaultValue(true))
+                .withCloseListener(
+                { event ->
+                    if (event.getCloseAction() == INPUT_DIALOG_OK_ACTION) {
+                        assert event.getValue("bigDecimal") == bigDecimalValue
+                        assert event.getValue("boolean") == true
+                    } else {
+                        assert event.getCloseAction() == INPUT_DIALOG_CANCEL_ACTION
+                    }
+                })
+                .show()
+    }
+
+
+    def "input parameter with custom field"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+        def customValue = "default value"
+        def dateTimeValue = new Date()
+
+        when: "get value from custom field"
+        InputDialog dialog = dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                dateTimeParameter("dateTime").withDefaultValue(dateTimeValue),
+                new InputParameter("custom").withField({
+                    TextField field = new WebTextField()
+                    field.setValue(customValue)
+                    return field
+                })).withCloseListener(
+                { event ->
+                    if (event.getCloseAction() == INPUT_DIALOG_OK_ACTION) {
+                        assert event.getValue("dateTime") == dateTimeValue
+                        assert event.getValue("custom") == customValue
+                    }
+                }).show()
+        then:
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        okBtn.getAction().actionPerform(okBtn)
+    }
+
+    def "field validation"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+
+        when: "custom field has incorrect value"
+        InputDialog dialog = dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                dateParameter("date"),
+                new InputParameter("custom").withField({
+                    TextField field = uiComponents.create(TextField)
+                    field.setValue("sda")
+                    field.setDatatype(datatypeRegistry.getNN(Integer))
+                    return field
+                }))
+                .show()
+        then:
+        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        okBtn.getAction().actionPerform(okBtn)
+
+        // shouldn't be closed
+        screens.getOpenedScreens().getActiveScreens().contains(dialog)
+
+        when: "field is required"
+        InputDialog reqDialog = dialogs.createInputDialog(mainWindow)
+                .withParameters(intParameter("int").withRequired(true))
+                .show()
+
+        then:
+        def reqActionsLayout = (HBoxLayout) reqDialog.getWindow().getComponentNN("actionsLayout")
+        def reqOkBtn = (Button) reqActionsLayout.getComponent(1) // because 0 - spacer
+        reqOkBtn.getAction().actionPerform(reqOkBtn)
+
+        // shouldn't be closed
+        screens.getOpenedScreens().getActiveScreens().contains(reqDialog)
+    }
 }

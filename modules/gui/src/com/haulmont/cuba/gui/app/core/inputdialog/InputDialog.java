@@ -48,22 +48,22 @@ public class InputDialog extends Screen {
     /**
      * Action is sent when user click on "OK" button.
      */
-    public static final CloseAction INPUT_DIALOG_OK_ACTION = new StandardCloseAction(InputDialogCloseAction.OK.getId());
+    public static final CloseAction INPUT_DIALOG_OK_ACTION = new StandardCloseAction(CloseActionType.OK.getId());
 
     /**
      * Action is sent when user click on "CANCEL" button.
      */
-    public static final CloseAction INPUT_DIALOG_CANCEL_ACTION = new StandardCloseAction(InputDialogCloseAction.CANCEL.getId());
+    public static final CloseAction INPUT_DIALOG_CANCEL_ACTION = new StandardCloseAction(CloseActionType.CANCEL.getId());
 
     /**
      * Action is sent when user click on "YES" button.
      */
-    public static final CloseAction INPUT_DIALOG_APPLY_ACTION = new StandardCloseAction(InputDialogCloseAction.YES.getId());
+    public static final CloseAction INPUT_DIALOG_APPLY_ACTION = new StandardCloseAction(CloseActionType.YES.getId());
 
     /**
      * Action is sent when user click on "NO" button.
      */
-    public static final CloseAction INPUT_DIALOG_REJECT_ACTION = new StandardCloseAction(InputDialogCloseAction.NO.getId());
+    public static final CloseAction INPUT_DIALOG_REJECT_ACTION = new StandardCloseAction(CloseActionType.NO.getId());
 
 
     @Inject
@@ -274,13 +274,12 @@ public class InputDialog extends Screen {
                 field = parameter.getField().get();
             } else {
                 field = createField(parameter);
+                field.setCaption(parameter.getCaption());
+                field.setWidthFull();
+                field.setValue(parameter.getDefaultValue());
+                field.setRequired(parameter.isRequired());
             }
-
             field.setId(parameter.getId());
-            field.setCaption(parameter.getCaption());
-            field.setWidthFull();
-            field.setRequired(parameter.isRequired());
-            field.setValue(parameter.getDefaultValue());
             field.setStyleName("input-parameter");
 
             if (fieldIds.contains(parameter.getId())) {
@@ -494,15 +493,15 @@ public class InputDialog extends Screen {
          *
          * @return input dialog close action
          */
-        public InputDialogCloseAction getInputDialogCloseAction() {
-            return InputDialogCloseAction.fromId(((StandardCloseAction) closeAction).getActionId());
+        public CloseActionType getCloseActionType() {
+            return CloseActionType.fromId(((StandardCloseAction) closeAction).getActionId());
         }
     }
 
     /**
      * Predefined actions that can be used in the input dialog.
      */
-    public enum InputDialogCloseAction {
+    public enum CloseActionType {
 
         OK("inputDialogOk"),
         CANCEL("inputDialogCancel"),
@@ -511,7 +510,7 @@ public class InputDialog extends Screen {
 
         protected String id;
 
-        InputDialogCloseAction(String id) {
+        CloseActionType(String id) {
             this.id = id;
         }
 
@@ -519,8 +518,8 @@ public class InputDialog extends Screen {
             return id;
         }
 
-        public static InputDialogCloseAction fromId(String id) {
-            for (InputDialogCloseAction action : values()) {
+        public static CloseActionType fromId(String id) {
+            for (CloseActionType action : values()) {
                 if (action.getId().equals(id)) {
                     return action;
                 }
