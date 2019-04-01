@@ -54,6 +54,16 @@ public class InputDialogAction extends AbstractAction {
     }
 
     /**
+     * Creates new instance of InputDialogAction.
+     *
+     * @param id action id
+     * @return input dialog action
+     */
+    public static InputDialogAction action(String id) {
+        return new InputDialogAction(id);
+    }
+
+    /**
      * Set caption using fluent API method.
      *
      * @param caption caption

@@ -46,24 +46,24 @@ import java.util.function.Consumer;
 public class InputDialog extends Screen {
 
     /**
-     * Action is sent when user click on "OK" button.
+     * Action is sent when user click on "OK" button and fields validation is successful.
      */
-    public static final CloseAction INPUT_DIALOG_OK_ACTION = new StandardCloseAction(CloseActionType.OK.getId());
+    public static final CloseAction INPUT_DIALOG_OK_ACTION = new StandardCloseAction("inputDialogOk");
 
     /**
      * Action is sent when user click on "CANCEL" button.
      */
-    public static final CloseAction INPUT_DIALOG_CANCEL_ACTION = new StandardCloseAction(CloseActionType.CANCEL.getId());
+    public static final CloseAction INPUT_DIALOG_CANCEL_ACTION = new StandardCloseAction("inputDialogCancel");
 
     /**
-     * Action is sent when user click on "YES" button.
+     * Action is sent when user click on "YES" button and fields validation is successful.
      */
-    public static final CloseAction INPUT_DIALOG_APPLY_ACTION = new StandardCloseAction(CloseActionType.YES.getId());
+    public static final CloseAction INPUT_DIALOG_APPLY_ACTION = new StandardCloseAction("inputDialogYes");
 
     /**
      * Action is sent when user click on "NO" button.
      */
-    public static final CloseAction INPUT_DIALOG_REJECT_ACTION = new StandardCloseAction(CloseActionType.NO.getId());
+    public static final CloseAction INPUT_DIALOG_REJECT_ACTION = new StandardCloseAction("inputDialogNo");
 
 
     @Inject
@@ -451,6 +451,10 @@ public class InputDialog extends Screen {
      */
     public static class InputDialogResult {
 
+        public enum ActionType {
+            OK, CANCEL, YES, NO
+        }
+
         protected Map<String, Object> values;
         protected CloseAction closeAction;
 
@@ -489,42 +493,20 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * Returns enum value for predefined input dialog action which was clicked in the dialog, e.g. OK, CANCEL, etc.
+         * Returns result action which was clicked in the dialog, e.g. OK, CANCEL, etc.
          *
-         * @return input dialog close action
+         * @return dialog result
          */
-        public CloseActionType getCloseActionType() {
-            return CloseActionType.fromId(((StandardCloseAction) closeAction).getActionId());
-        }
-    }
-
-    /**
-     * Predefined actions that can be used in the input dialog.
-     */
-    public enum CloseActionType {
-
-        OK("inputDialogOk"),
-        CANCEL("inputDialogCancel"),
-        YES("inputDialogYes"),
-        NO("inputDialogNo");
-
-        protected String id;
-
-        CloseActionType(String id) {
-            this.id = id;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public static CloseActionType fromId(String id) {
-            for (CloseActionType action : values()) {
-                if (action.getId().equals(id)) {
-                    return action;
-                }
+        public ActionType getCloseActionType() {
+            if (closeAction.equals(INPUT_DIALOG_OK_ACTION)) {
+                return ActionType.OK;
+            } else if (closeAction.equals(INPUT_DIALOG_REJECT_ACTION)) {
+                return ActionType.NO;
+            } else if (closeAction.equals(INPUT_DIALOG_APPLY_ACTION)) {
+                return ActionType.YES;
+            } else {
+                return ActionType.CANCEL;
             }
-            return null;
         }
     }
 }

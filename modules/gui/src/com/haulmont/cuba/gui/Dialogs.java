@@ -23,10 +23,9 @@ import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.SizeUnit;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
+import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction.InputDialogActionPerformed;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.function.Consumer;
 
 /**
@@ -517,18 +516,45 @@ public interface Dialogs {
     interface InputDialogBuilder {
 
         /**
-         * Add input parameter to the dialog. Input parameter will be represented as a field.
+         * Adds input parameter to the dialog. InputParameter describes field which will be in the input dialog.
+         * <p>
+         * Example:
+         * <pre>{@code
+         *  dialogs.createInputDialog(this)
+         *         .withParameter(
+         *                 entityParameter("userField", User.class)
+         *                         .withCaption("User field")
+         *                         .withRequired(true)
+         *         )
+         *         .show();
+         * } </pre>
          *
          * @param parameter input parameter that will be added to the dialog
          * @return builder
+         * @see InputParameter#entityParameter(String, Class)
          */
         InputDialogBuilder withParameter(InputParameter parameter);
 
         /**
-         * Sets input parameters.
+         * Sets input parameters. InputParameter describes field which will be in the input dialog.
+         * <p>
+         * Example:
+         * <pre>{@code
+         *  dialogs.createInputDialog(this)
+         *          .withParameters(
+         *                  stringParameter("nameField")
+         *                          .withCaption("Name field caption")
+         *                          .withDefaultValue("default value"),
+         *                  intParameter("countField").
+         *                          withCaption("Count field caption")
+         *                          .withRequired(true))
+         *          .show();
+         *  } </pre>
          *
          * @param parameters input parameters
          * @return builder
+         * @see InputParameter#stringParameter(String)
+         * @see InputParameter#intParameter(String)
          */
         InputDialogBuilder withParameters(InputParameter... parameters);
 
@@ -541,16 +567,46 @@ public interface Dialogs {
         InputDialogBuilder withCloseListener(Consumer<InputDialog.InputDialogCloseEvent> listener);
 
         /**
-         * Sets dialog actions. If there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
+         * Sets dialog actions. {@link InputDialogAction} provides access to input dialog in {@link InputDialogActionPerformed}
+         * where it is possible to get values form the fields and implement logic to close dialog.
+         * <p>
+         * Note, if there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL} by default.
+         * </p>
+         * Example:
+         * <pre>{@code
+         *  dialogs.createInputDialog(this)
+         *         .withCaption("Dialog caption")
+         *         .withParameter(parameter("nameField").withCaption("Name"))
+         *         .withActions(
+         *                 action("okAction")
+         *                         .withCaption("OK")
+         *                         .withIcon(CubaIcon.DIALOG_OK.source())
+         *                         .withHandler(event -> {
+         *                             InputDialog inputDialog = event.getInputDialog();
+         *                             String name = (String) inputDialog.getValue("nameField");
+         *                             // do logic
+         *                             inputDialog.close(InputDialog.INPUT_DIALOG_OK_ACTION);
+         *                         }),
+         *                 action("cancelAction")
+         *                         .withCaption("Cancel")
+         *                         .withIcon(CubaIcon.DIALOG_CANCEL.source())
+         *                         .withHandler(event -> {
+         *                             InputDialog inputDialog = event.getInputDialog();
+         *                             inputDialog.close(InputDialog.INPUT_DIALOG_CANCEL_ACTION);
+         *                         }))
+         *         .show();
+         * }
+         * </pre>
          *
          * @param actions actions
          * @return builder
-         * @see InputDialogAction
+         * @see InputDialogAction#action(String)
          */
         InputDialogBuilder withActions(InputDialogAction... actions);
 
         /**
-         * Sets predefined dialog actions. By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
+         * Sets predefined dialog actions. "OK" and "YES" actions always check fields validation before close the dialog.
+         * By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
          * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
          *
          * @param actions actions
@@ -559,8 +615,27 @@ public interface Dialogs {
         InputDialogBuilder withActions(DialogActions actions);
 
         /**
-         * Sets dialog actions and result handler. Handler is invoked after close event and can be used instead of
+         * Sets dialog actions and result handler. "OK" and "YES" actions always check fields validation before close
+         * the dialog. Handler is invoked after close event and can be used instead of
          * {@link #withCloseListener(Consumer)}.
+         * Example
+         * <pre>{@code
+         *  dialogs.createInputDialog(this)
+         *         .withCaption("Dialog caption")
+         *         .withParameter(parameter("nameField").withCaption("Name"))
+         *         .withActions(Dialogs.DialogActions.OK_CANCEL, result -> {
+         *             switch (result.getCloseActionType()) {
+         *                 case OK:
+         *                     String name = (String) result.getValue("nameField");
+         *                     // do logic
+         *                     break;
+         *                 case CANCEL:
+         *                     // do logic
+         *                     break;
+         *             }
+         *         })
+         *         .show();
+         * } </pre>
          *
          * @param actions       dialog actions
          * @param resultHandler result handler

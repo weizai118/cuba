@@ -50,6 +50,8 @@ import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALO
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_CANCEL_ACTION
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_OK_ACTION
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.INPUT_DIALOG_REJECT_ACTION
+import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.InputDialogResult.ActionType.NO
+import static com.haulmont.cuba.gui.app.core.inputdialog.InputDialog.InputDialogResult.ActionType.YES
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.bigDecimalParamater
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.booleanParameter
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.dateParameter
@@ -61,6 +63,7 @@ import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.longPara
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.parameter
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.stringParameter
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.timeParameter
+import static com.haulmont.cuba.gui.components.inputdialog.InputDialogAction.action
 
 class InputDialogTest extends UiScreenSpec {
 
@@ -214,12 +217,12 @@ class InputDialogTest extends UiScreenSpec {
                 entityParameter("entity", GoodInfo).withDefaultValue(goodInfo))
                 .withActions(Dialogs.DialogActions.YES_NO, { result ->
             switch (result.getCloseActionType()) {
-                case InputDialog.CloseActionType.YES:
+                case YES:
                     assert result.getValue("string") == defaultString
                     assert result.getValue("entity") == goodInfo
                     assert result.getCloseAction() == INPUT_DIALOG_APPLY_ACTION
                     break
-                case InputDialog.CloseActionType.NO:
+                case NO:
                     assert result.getCloseAction() == INPUT_DIALOG_REJECT_ACTION
                     break
             }
@@ -256,17 +259,21 @@ class InputDialogTest extends UiScreenSpec {
                 parameter("string").withDefaultValue(stringValue),
                 dateParameter("date").withDefaultValue(dateValue))
                 .withActions(
-                new InputDialogAction("ok").withHandler({
-                    InputDialogAction.InputDialogActionPerformed event ->
-                        InputDialog dialog = event.getInputDialog()
+                action("ok")
+                        .withHandler(
+                        {
+                            InputDialogAction.InputDialogActionPerformed event ->
+                                InputDialog dialog = event.getInputDialog()
 
-                        assert dialog.getValue("string") == stringValue
-                        assert dialog.getValue("date") == dateValue
-                }),
-                new InputDialogAction("cancel").withHandler({
-                    InputDialogAction.InputDialogActionPerformed event ->
-                        event.getInputDialog().close(INPUT_DIALOG_CANCEL_ACTION)
-                }))
+                                assert dialog.getValue("string") == stringValue
+                                assert dialog.getValue("date") == dateValue
+                        }),
+                action("cancel")
+                        .withHandler(
+                        {
+                            InputDialogAction.InputDialogActionPerformed event ->
+                                event.getInputDialog().close(INPUT_DIALOG_CANCEL_ACTION)
+                        }))
                 .show()
 
         then:
