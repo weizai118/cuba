@@ -20,6 +20,7 @@ import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.Icons;
 
 import java.util.function.Consumer;
 
@@ -93,6 +94,17 @@ public class InputDialogAction extends AbstractAction {
      */
     public InputDialogAction withIcon(String icon) {
         this.icon = icon;
+        return this;
+    }
+
+    /**
+     * Sets icon from icons set to the action (e.g. CubaIcon.DIALOG_OK).
+     *
+     * @param iconKey icon
+     * @return current instance of action
+     */
+    public InputDialogAction withIcon(Icons.Icon iconKey) {
+        this.icon = iconKey.source();
         return this;
     }
 

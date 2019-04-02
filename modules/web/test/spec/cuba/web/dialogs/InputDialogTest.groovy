@@ -73,12 +73,15 @@ class InputDialogTest extends UiScreenSpec {
         TestServiceProxy.mock(UserManagementService, Mock(UserManagementService) {
             getSubstitutedUsers(_) >> Collections.emptyList()
         })
+        exportScreensPackages(['com.haulmont.cuba.gui.app'])
 
         datatypeRegistry = cont.getBean(DatatypeRegistry)
     }
 
     def cleanup() {
         TestServiceProxy.clear()
+
+        resetScreensConfig()
     }
 
     def "input parameter ids should be different"() {
@@ -92,9 +95,9 @@ class InputDialogTest extends UiScreenSpec {
         when: "the same id is used"
         dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("same"),
-                parameter("same"),
-                parameter("not the same"))
+                        parameter("same"),
+                        parameter("same"),
+                        parameter("not the same"))
                 .show()
         then:
         thrown(IllegalArgumentException)
@@ -102,9 +105,9 @@ class InputDialogTest extends UiScreenSpec {
         when: "different ids are used"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("not the same 1"),
-                parameter("not the same 2"),
-                parameter("not the same 3"))
+                        parameter("not the same 1"),
+                        parameter("not the same 2"),
+                        parameter("not the same 3"))
                 .build()
         then:
         dialog.show()
@@ -121,17 +124,17 @@ class InputDialogTest extends UiScreenSpec {
         when: "all types are used"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("default"),
-                stringParameter("string"),
-                intParameter("int"),
-                doubleParameter("double"),
-                longParameter("long"),
-                bigDecimalParamater("bigDecimal"),
-                booleanParameter("boolean"),
-                entityParameter("entity", GoodInfo),
-                timeParameter("time"),
-                dateParameter("date"),
-                dateTimeParameter("dateTime"))
+                        parameter("default"),
+                        stringParameter("string"),
+                        intParameter("int"),
+                        doubleParameter("double"),
+                        longParameter("long"),
+                        bigDecimalParamater("bigDecimal"),
+                        booleanParameter("boolean"),
+                        entityParameter("entity", GoodInfo),
+                        timeParameter("time"),
+                        dateParameter("date"),
+                        dateTimeParameter("dateTime"))
                 .show()
         then:
         def form = (Form) dialog.getWindow().getComponentNN("form")
@@ -175,8 +178,8 @@ class InputDialogTest extends UiScreenSpec {
         when: "YES NO CANCEL are created"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("default"),
-                stringParameter("string"))
+                        parameter("default"),
+                        stringParameter("string"))
                 .withActions(Dialogs.DialogActions.YES_NO_CANCEL)
                 .show()
         then:
@@ -213,20 +216,20 @@ class InputDialogTest extends UiScreenSpec {
         when: "dialog uses result handler"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("string").withDefaultValue(defaultString),
-                entityParameter("entity", GoodInfo).withDefaultValue(goodInfo))
+                        parameter("string").withDefaultValue(defaultString),
+                        entityParameter("entity", GoodInfo).withDefaultValue(goodInfo))
                 .withActions(Dialogs.DialogActions.YES_NO, { result ->
-            switch (result.getCloseActionType()) {
-                case YES:
-                    assert result.getValue("string") == defaultString
-                    assert result.getValue("entity") == goodInfo
-                    assert result.getCloseAction() == INPUT_DIALOG_APPLY_ACTION
-                    break
-                case NO:
-                    assert result.getCloseAction() == INPUT_DIALOG_REJECT_ACTION
-                    break
-            }
-        })
+                    switch (result.getCloseActionType()) {
+                        case YES:
+                            assert result.getValue("string") == defaultString
+                            assert result.getValue("entity") == goodInfo
+                            assert result.getCloseAction() == INPUT_DIALOG_APPLY_ACTION
+                            break
+                        case NO:
+                            assert result.getCloseAction() == INPUT_DIALOG_REJECT_ACTION
+                            break
+                    }
+                })
                 .show()
         then:
         def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
@@ -256,24 +259,22 @@ class InputDialogTest extends UiScreenSpec {
         when: "created custom action"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                parameter("string").withDefaultValue(stringValue),
-                dateParameter("date").withDefaultValue(dateValue))
+                        parameter("string").withDefaultValue(stringValue),
+                        dateParameter("date").withDefaultValue(dateValue))
                 .withActions(
-                action("ok")
-                        .withHandler(
-                        {
-                            InputDialogAction.InputDialogActionPerformed event ->
-                                InputDialog dialog = event.getInputDialog()
+                        action("ok")
+                                .withHandler({
+                                    InputDialogAction.InputDialogActionPerformed event ->
+                                        InputDialog dialog = event.getInputDialog()
 
-                                assert dialog.getValue("string") == stringValue
-                                assert dialog.getValue("date") == dateValue
-                        }),
-                action("cancel")
-                        .withHandler(
-                        {
-                            InputDialogAction.InputDialogActionPerformed event ->
-                                event.getInputDialog().close(INPUT_DIALOG_CANCEL_ACTION)
-                        }))
+                                        assert dialog.getValue("string") == stringValue
+                                        assert dialog.getValue("date") == dateValue
+                                }),
+                        action("cancel")
+                                .withHandler({
+                                    InputDialogAction.InputDialogActionPerformed event ->
+                                        event.getInputDialog().close(INPUT_DIALOG_CANCEL_ACTION)
+                                }))
                 .show()
 
         then:
@@ -322,10 +323,9 @@ class InputDialogTest extends UiScreenSpec {
 
         return dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                bigDecimalParamater("bigDecimal").withDefaultValue(bigDecimalValue),
-                booleanParameter("boolean").withDefaultValue(true))
-                .withCloseListener(
-                { event ->
+                        bigDecimalParamater("bigDecimal").withDefaultValue(bigDecimalValue),
+                        booleanParameter("boolean").withDefaultValue(true))
+                .withCloseListener({ event ->
                     if (event.getCloseAction() == INPUT_DIALOG_OK_ACTION) {
                         assert event.getValue("bigDecimal") == bigDecimalValue
                         assert event.getValue("boolean") == true
@@ -335,7 +335,6 @@ class InputDialogTest extends UiScreenSpec {
                 })
                 .show()
     }
-
 
     def "input parameter with custom field"() {
         def screens = vaadinUi.screens
@@ -350,18 +349,18 @@ class InputDialogTest extends UiScreenSpec {
         when: "get value from custom field"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                dateTimeParameter("dateTime").withDefaultValue(dateTimeValue),
-                new InputParameter("custom").withField({
-                    TextField field = new WebTextField()
-                    field.setValue(customValue)
-                    return field
-                })).withCloseListener(
-                { event ->
+                        dateTimeParameter("dateTime").withDefaultValue(dateTimeValue),
+                        new InputParameter("custom")
+                            .withField({
+                                TextField field = new WebTextField()
+                                field.setValue(customValue)
+                                return field}))
+                .withCloseListener({ event ->
                     if (event.getCloseAction() == INPUT_DIALOG_OK_ACTION) {
                         assert event.getValue("dateTime") == dateTimeValue
                         assert event.getValue("custom") == customValue
-                    }
-                }).show()
+                    }})
+                .show()
         then:
         def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
         def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
@@ -379,13 +378,13 @@ class InputDialogTest extends UiScreenSpec {
         when: "custom field has incorrect value"
         InputDialog dialog = dialogs.createInputDialog(mainWindow)
                 .withParameters(
-                dateParameter("date"),
-                new InputParameter("custom").withField({
-                    TextField field = uiComponents.create(TextField)
-                    field.setValue("sda")
-                    field.setDatatype(datatypeRegistry.getNN(Integer))
-                    return field
-                }))
+                        dateParameter("date"),
+                        new InputParameter("custom")
+                                .withField({
+                                    TextField field = uiComponents.create(TextField)
+                                    field.setValue("sda")
+                                    field.setDatatype(datatypeRegistry.getNN(Integer))
+                                    return field}))
                 .show()
         then:
         def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")

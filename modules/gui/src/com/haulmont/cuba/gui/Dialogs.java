@@ -580,7 +580,7 @@ public interface Dialogs {
          *         .withActions(
          *                 action("okAction")
          *                         .withCaption("OK")
-         *                         .withIcon(CubaIcon.DIALOG_OK.source())
+         *                         .withIcon(CubaIcon.DIALOG_OK)
          *                         .withHandler(event -> {
          *                             InputDialog inputDialog = event.getInputDialog();
          *                             String name = (String) inputDialog.getValue("nameField");
@@ -589,7 +589,7 @@ public interface Dialogs {
          *                         }),
          *                 action("cancelAction")
          *                         .withCaption("Cancel")
-         *                         .withIcon(CubaIcon.DIALOG_CANCEL.source())
+         *                         .withIcon(CubaIcon.DIALOG_CANCEL)
          *                         .withHandler(event -> {
          *                             InputDialog inputDialog = event.getInputDialog();
          *                             inputDialog.close(InputDialog.INPUT_DIALOG_CANCEL_ACTION);
