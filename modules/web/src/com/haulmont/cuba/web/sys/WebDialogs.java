@@ -21,6 +21,7 @@ import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
@@ -776,6 +777,18 @@ public class WebDialogs implements Dialogs {
         public InputDialogBuilder withCaption(String caption) {
             inputDialog.getDialogWindow().setCaption(caption);
             return this;
+        }
+
+        @Override
+        public InputDialogBuilder withWidth(String width) {
+            inputDialog.getDialogWindow().setDialogWidth(width);
+            return this;
+        }
+
+        @Override
+        public InputDialogBuilder withHeight(String height) {
+            inputDialog.getDialogWindow().setDialogHeight(height);
+            return null;
         }
 
         @Nullable

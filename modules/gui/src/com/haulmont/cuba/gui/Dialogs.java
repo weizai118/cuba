@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.gui;
 
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.Action;
@@ -570,7 +571,7 @@ public interface Dialogs {
          * Sets dialog actions. {@link InputDialogAction} provides access to input dialog in {@link InputDialogActionPerformed}
          * where it is possible to get values form the fields and implement logic to close dialog.
          * <p>
-         * Note, if there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL} by default.
+         * Note, if there is no actions are set input dialog will use {@link DialogActions#OK_CANCEL} by default.
          * </p>
          * Example:
          * <pre>{@code
@@ -607,7 +608,7 @@ public interface Dialogs {
         /**
          * Sets predefined dialog actions. "OK" and "YES" actions always check fields validation before close the dialog.
          * By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
-         * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
+         * input dialog will use {@link DialogActions#OK_CANCEL}.
          *
          * @param actions actions
          * @return builder
@@ -623,7 +624,7 @@ public interface Dialogs {
          *  dialogs.createInputDialog(this)
          *         .withCaption("Dialog caption")
          *         .withParameter(parameter("nameField").withCaption("Name"))
-         *         .withActions(Dialogs.DialogActions.OK_CANCEL, result -> {
+         *         .withActions(DialogActions.OK_CANCEL, result -> {
          *             switch (result.getCloseActionType()) {
          *                 case OK:
          *                     String name = (String) result.getValue("nameField");
@@ -651,6 +652,22 @@ public interface Dialogs {
         InputDialogBuilder withCaption(String caption);
 
         /**
+         * Sets dialog width.
+         *
+         * @param width dialog width
+         * @return builder
+         */
+        InputDialogBuilder withWidth(String width);
+
+        /**
+         * Sets dialog height.
+         *
+         * @param height dialog height
+         * @return builder
+         */
+        InputDialogBuilder withHeight(String height);
+
+        /**
          * Shows the dialog.
          *
          * @return opened input dialog
@@ -663,15 +680,5 @@ public interface Dialogs {
          * @return input dialog
          */
         InputDialog build();
-    }
-
-    /**
-     * Default options for input dialog
-     */
-    enum DialogActions {
-        OK,
-        OK_CANCEL,
-        YES_NO,
-        YES_NO_CANCEL
     }
 }

@@ -23,7 +23,6 @@ import com.haulmont.chile.core.datatypes.impl.*;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.Dialogs.DialogActions;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.picker.ClearAction;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
@@ -104,12 +103,6 @@ public class InputDialog extends Screen {
 
     protected Consumer<InputDialogCloseEvent> closeListener;
     protected Consumer<InputDialogResult> resultHandler;
-
-    @Subscribe
-    protected void onInit(InitEvent event) {
-        DialogWindow window = getDialogWindow();
-        window.setDialogWidth(theme.get("cuba.web.WebWindowManager.inputDialog.width"));
-    }
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
@@ -209,7 +202,7 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Sets dialog actions. If there is no actions are set input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
+     * Sets dialog actions. If there is no actions are set input dialog will use {@link DialogActions#OK_CANCEL}.
      *
      * @param actions actions
      * @see InputDialogAction
@@ -227,7 +220,7 @@ public class InputDialog extends Screen {
 
     /**
      * Sets predefined dialog actions. By default if there is no actions are set using {@link #setActions(InputDialogAction...)}
-     * input dialog will use {@link Dialogs.DialogActions#OK_CANCEL}.
+     * input dialog will use {@link DialogActions#OK_CANCEL}.
      *
      * @param actions actions
      */
@@ -236,7 +229,7 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Returns predefined dialog actions. {@link Dialogs.DialogActions#OK_CANCEL} by default.
+     * Returns predefined dialog actions. {@link DialogActions#OK_CANCEL} by default.
      *
      * @return dialog actions
      */
@@ -275,12 +268,10 @@ public class InputDialog extends Screen {
             } else {
                 field = createField(parameter);
                 field.setCaption(parameter.getCaption());
-                field.setWidthFull();
                 field.setValue(parameter.getDefaultValue());
                 field.setRequired(parameter.isRequired());
             }
             field.setId(parameter.getId());
-            field.setStyleName("input-parameter");
 
             if (fieldIds.contains(parameter.getId())) {
                 throw new IllegalArgumentException("InputDialog cannot contain fields with the same id: '" + parameter.getId() + "'");
@@ -306,6 +297,7 @@ public class InputDialog extends Screen {
         if (datatype instanceof NumberDatatype
                 || datatype instanceof StringDatatype) {
             TextField field = uiComponents.create(TextField.NAME);
+            field.setWidthFull();
             field.setDatatype(datatype);
             return field;
         } else if (datatype instanceof DateDatatype) {
@@ -329,6 +321,7 @@ public class InputDialog extends Screen {
             pickerField.setMetaClass(metadata.getClass(parameter.getEntityClass()));
             pickerField.addAction(actions.create(LookupAction.ID));
             pickerField.addAction(actions.create(ClearAction.ID));
+            pickerField.setWidthFull();
             return pickerField;
         }
     }

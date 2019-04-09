@@ -15,6 +15,7 @@
   -->
 
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd">
+    <dialogMode width="theme://cuba.web.WebWindowManager.inputDialog.width"/>
     <layout expand="actionsLayout" spacing="true">
         <form id="form" width="100%"/>
         <hbox id="actionsLayout" width="100%" expand="spacer" spacing="true" align="BOTTOM_RIGHT"
