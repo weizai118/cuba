@@ -785,10 +785,18 @@ public class WebDialogs implements Dialogs {
             return this;
         }
 
+        public float getWidth() {
+            return inputDialog.getDialogWindow().getDialogWidth();
+        }
+
         @Override
         public InputDialogBuilder withHeight(String height) {
             inputDialog.getDialogWindow().setDialogHeight(height);
-            return null;
+            return this;
+        }
+
+        public float getHeight() {
+            return inputDialog.getDialogWindow().getDialogHeight();
         }
 
         @Nullable

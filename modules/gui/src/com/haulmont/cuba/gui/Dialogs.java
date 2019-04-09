@@ -142,7 +142,7 @@ public interface Dialogs {
      *         .withParameters(
      *                 stringParameter("name").withCaption("Name"),
      *                 intParameter("count").withCaption("Count"))
-     *         .withActions(Dialogs.DialogActions.OK_CANCEL)
+     *         .withActions(DialogActions.OK_CANCEL)
      *         .withCloseListener(closeEvent ->
      *                 notifications.create(Notifications.NotificationType.TRAY)
      *                         .withCaption("Dialog is closed")
@@ -517,7 +517,7 @@ public interface Dialogs {
     interface InputDialogBuilder {
 
         /**
-         * Adds input parameter to the dialog. InputParameter describes field which will be in the input dialog.
+         * Adds input parameter to the dialog. InputParameter describes field which will be used in the input dialog.
          * <p>
          * Example:
          * <pre>{@code
@@ -537,7 +537,7 @@ public interface Dialogs {
         InputDialogBuilder withParameter(InputParameter parameter);
 
         /**
-         * Sets input parameters. InputParameter describes field which will be in the input dialog.
+         * Sets input parameters. InputParameter describes field which will be used in the input dialog.
          * <p>
          * Example:
          * <pre>{@code
@@ -607,8 +607,7 @@ public interface Dialogs {
 
         /**
          * Sets predefined dialog actions. "OK" and "YES" actions always check fields validation before close the dialog.
-         * By default if there is no actions are set using {@link #withActions(InputDialogAction...)}
-         * input dialog will use {@link DialogActions#OK_CANCEL}.
+         * By default if there is no actions are set input dialog will use {@link DialogActions#OK_CANCEL}.
          *
          * @param actions actions
          * @return builder
@@ -644,7 +643,7 @@ public interface Dialogs {
         InputDialogBuilder withActions(DialogActions actions, Consumer<InputDialog.InputDialogResult> resultHandler);
 
         /**
-         * Sets dialog screen caption
+         * Sets dialog screen caption.
          *
          * @param caption dialog screen caption
          * @return builder

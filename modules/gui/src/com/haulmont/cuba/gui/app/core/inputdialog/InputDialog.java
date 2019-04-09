@@ -219,8 +219,8 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Sets predefined dialog actions. By default if there is no actions are set using {@link #setActions(InputDialogAction...)}
-     * input dialog will use {@link DialogActions#OK_CANCEL}.
+     * Sets predefined dialog actions. By default if there is no actions are input dialog will use
+     * {@link DialogActions#OK_CANCEL}.
      *
      * @param actions actions
      */

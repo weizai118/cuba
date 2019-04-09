@@ -25,7 +25,7 @@ import com.haulmont.chile.core.datatypes.impl.IntegerDatatype
 import com.haulmont.chile.core.datatypes.impl.StringDatatype
 import com.haulmont.chile.core.datatypes.impl.TimeDatatype
 import com.haulmont.cuba.gui.ComponentsHelper
-import com.haulmont.cuba.gui.Dialogs
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter
 import com.haulmont.cuba.gui.components.Button
@@ -180,7 +180,7 @@ class InputDialogTest extends UiScreenSpec {
                 .withParameters(
                         parameter("default"),
                         stringParameter("string"))
-                .withActions(Dialogs.DialogActions.YES_NO_CANCEL)
+                .withActions(DialogActions.YES_NO_CANCEL)
                 .show()
         then:
         def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
@@ -218,7 +218,7 @@ class InputDialogTest extends UiScreenSpec {
                 .withParameters(
                         parameter("string").withDefaultValue(defaultString),
                         entityParameter("entity", GoodInfo).withDefaultValue(goodInfo))
-                .withActions(Dialogs.DialogActions.YES_NO, { result ->
+                .withActions(DialogActions.YES_NO, { result ->
                     switch (result.getCloseActionType()) {
                         case YES:
                             assert result.getValue("string") == defaultString
