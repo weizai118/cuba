@@ -20,15 +20,22 @@ import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.chile.core.datatypes.impl.*;
+import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.cuba.core.app.PersistenceManagerService;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.picker.ClearAction;
 import com.haulmont.cuba.gui.actions.picker.LookupAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.options.ContainerOptions;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataComponents;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 
@@ -88,6 +95,12 @@ public class InputDialog extends Screen {
 
     @Inject
     protected ThemeConstants theme;
+
+    @Inject
+    private PersistenceManagerService persistenceManagerService;
+
+    @Inject
+    private DataComponents dataComponents;
 
     @Inject
     protected Form form;
@@ -317,12 +330,38 @@ public class InputDialog extends Screen {
         } else if (datatype instanceof BooleanDatatype) {
             return uiComponents.create(CheckBox.NAME);
         } else {
+            return createEntityField(parameter);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Field createEntityField(InputParameter parameter) {
+        MetaClass metaClass = metadata.getClassNN(parameter.getEntityClass());
+        Action lookupAction = actions.create(LookupAction.ID);
+        Action clearAction = actions.create(ClearAction.ID);
+
+        if (persistenceManagerService.useLookupScreen(metaClass.getName())) {
             PickerField pickerField = uiComponents.create(PickerField.NAME);
             pickerField.setMetaClass(metadata.getClass(parameter.getEntityClass()));
-            pickerField.addAction(actions.create(LookupAction.ID));
-            pickerField.addAction(actions.create(ClearAction.ID));
+            pickerField.addAction(lookupAction);
+            pickerField.addAction(clearAction);
             pickerField.setWidthFull();
             return pickerField;
+        } else {
+            LookupPickerField lookupPickerField = uiComponents.create(LookupPickerField.NAME);
+            lookupPickerField.addAction(lookupAction);
+            lookupPickerField.addAction(clearAction);
+            lookupPickerField.setWidthFull();
+
+            CollectionContainer container = dataComponents.createCollectionContainer(parameter.getEntityClass());
+            CollectionLoader loader = dataComponents.createCollectionLoader();
+            loader.setQuery("select e from " + metaClass.getName() + " e");
+            loader.setView(View.MINIMAL);
+            loader.setContainer(container);
+            loader.load();
+
+            lookupPickerField.setOptions(new ContainerOptions(container));
+            return lookupPickerField;
         }
     }
 
