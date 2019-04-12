@@ -97,10 +97,10 @@ public class InputDialog extends Screen {
     protected ThemeConstants theme;
 
     @Inject
-    private PersistenceManagerService persistenceManagerService;
+    protected PersistenceManagerService persistenceManagerService;
 
     @Inject
-    private DataComponents dataComponents;
+    protected DataComponents dataComponents;
 
     @Inject
     protected Form form;
