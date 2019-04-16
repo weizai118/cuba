@@ -329,6 +329,8 @@ public class InputDialog extends Screen {
             return timeField;
         } else if (datatype instanceof BooleanDatatype) {
             return uiComponents.create(CheckBox.NAME);
+        } else if (datatype != null) {
+            throw new IllegalArgumentException("InputDialog doesn't support custom datatype: " + datatype.getClass());
         } else {
             return createEntityField(parameter);
         }
@@ -409,7 +411,7 @@ public class InputDialog extends Screen {
         DialogAction dialogAction = new DialogAction(type);
         if (type == DialogAction.Type.OK || type == DialogAction.Type.YES) {
             dialogAction.withHandler(event -> {
-                if (validateFields()) {
+                if (validateAndShowErrors()) {
                     fireCloseAndResultEvents(closeAction);
                 }
             });
@@ -427,8 +429,8 @@ public class InputDialog extends Screen {
         }
     }
 
-    protected boolean validateFields() {
-        ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+    protected boolean validateAndShowErrors() {
+        ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
         if (!validationErrors.isEmpty()) {
             screenValidation.showValidationErrors(this, validationErrors);
             return false;

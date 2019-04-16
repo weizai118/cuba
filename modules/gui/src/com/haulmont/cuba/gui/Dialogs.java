@@ -546,8 +546,8 @@ public interface Dialogs {
          *                  stringParameter("nameField")
          *                          .withCaption("Name field caption")
          *                          .withDefaultValue("default value"),
-         *                  intParameter("countField").
-         *                          withCaption("Count field caption")
+         *                  intParameter("countField")
+         *                          .withCaption("Count field caption")
          *                          .withRequired(true))
          *          .show();
          *  } </pre>
@@ -560,7 +560,7 @@ public interface Dialogs {
         InputDialogBuilder withParameters(InputParameter... parameters);
 
         /**
-         * Add close listener to the dialog.
+         * Add close listener to the dialog. See close actions for {@link DialogActions} in {@link InputDialog}.
          *
          * @param listener close listener to add
          * @return builder

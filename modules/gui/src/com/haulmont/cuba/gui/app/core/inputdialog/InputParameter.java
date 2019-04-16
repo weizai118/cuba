@@ -115,6 +115,8 @@ public class InputParameter {
 
     /**
      * Sets datatype to the field. Cannot be used with {@link #withEntityClass(Class)} and with predefined static methods.
+     * <p>
+     * Note, it doesn't support custom Datatype. Use {@link #withField(Supplier)}.
      *
      * @param datatype datatype
      * @return input parameter

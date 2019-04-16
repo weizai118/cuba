@@ -16,11 +16,13 @@
 
 package com.haulmont.cuba.gui.components.inputdialog;
 
+import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.screen.ScreenValidation;
 
 import java.util.function.Consumer;
 
@@ -33,8 +35,14 @@ import java.util.function.Consumer;
  */
 public class InputDialogAction extends AbstractAction {
 
+    protected ScreenValidation screenValidation;
+
+    protected boolean validationRequired = true;
+
     public InputDialogAction(String id) {
         super(id);
+
+        screenValidation = AppBeans.get(ScreenValidation.NAME);
     }
 
     @Override
@@ -49,8 +57,10 @@ public class InputDialogAction extends AbstractAction {
                 }
             }
 
-            InputDialogActionPerformed event = new InputDialogActionPerformed(this, component, inputDialog);
-            eventHub.publish(InputDialogActionPerformed.class, event);
+            if (isValidationSuccessful(inputDialog)) {
+                InputDialogActionPerformed event = new InputDialogActionPerformed(this, component, inputDialog);
+                eventHub.publish(InputDialogActionPerformed.class, event);
+            }
         }
     }
 
@@ -142,6 +152,44 @@ public class InputDialogAction extends AbstractAction {
     public InputDialogAction withPrimary(boolean primary) {
         this.primary = primary;
         return this;
+    }
+
+    /**
+     * Set to true if handler should be invoked after successful validation. False - validation won't be preformed and
+     * handler will be invoked. Default value is true.
+     *
+     * @param validationRequired validation required option
+     * @return current instance of action
+     */
+    public InputDialogAction withValidationRequired(boolean validationRequired) {
+        this.validationRequired = validationRequired;
+        return this;
+    }
+
+    /**
+     * @return true if handler should be invoked after successful validation
+     */
+    public boolean isValidationRequired() {
+        return validationRequired;
+    }
+
+    /**
+     * Validates form components and show errors.
+     *
+     * @param inputDialog input dialog
+     * @return true if validation is successful
+     */
+    protected boolean isValidationSuccessful(InputDialog inputDialog) {
+        if (validationRequired && inputDialog != null) {
+            Form form = (Form) inputDialog.getWindow().getComponent("form");
+
+            ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
+            if (!validationErrors.isEmpty()) {
+                screenValidation.showValidationErrors(inputDialog, validationErrors);
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
