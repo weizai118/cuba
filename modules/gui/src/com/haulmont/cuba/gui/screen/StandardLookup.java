@@ -109,6 +109,12 @@ public class StandardLookup<T extends Entity> extends Screen implements LookupSc
             lookupActionsLayout.setVisible(true);
 
             Component lookupComponent = getLookupComponent();
+
+            if (lookupComponent instanceof DataGrid) {
+                DataGrid dataGrid = (DataGrid) lookupComponent;
+                dataGrid.setEditorEnabled(dataGrid.isEditorEnabled() && selectHandler == null);
+            }
+
             if (lookupComponent instanceof LookupSelectionChangeNotifier) {
                 LookupSelectionChangeNotifier selectionNotifier = (LookupSelectionChangeNotifier) lookupComponent;
 

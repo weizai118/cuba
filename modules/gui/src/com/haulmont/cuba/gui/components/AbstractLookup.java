@@ -157,6 +157,11 @@ public class AbstractLookup extends AbstractWindow implements Lookup {
     public void setSelectHandler(Consumer lookupHandler) {
         this.lookupHandler = lookupHandler;
 
+        if (lookupComponent instanceof DataGrid) {
+            DataGrid dataGrid = (DataGrid) lookupComponent;
+            dataGrid.setEditorEnabled(dataGrid.isEditorEnabled() && lookupHandler == null);
+        }
+
         if (lookupHandler != null) {
             getComponentNN("lookupWindowActions").setVisible(true);
         }
