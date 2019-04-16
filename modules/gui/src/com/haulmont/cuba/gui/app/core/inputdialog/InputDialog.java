@@ -117,7 +117,7 @@ public class InputDialog extends Screen {
 
     protected Consumer<InputDialogCloseEvent> closeListener;
     protected Consumer<InputDialogResult> resultHandler;
-    protected Function<InputDialogValidationContext, ValidationErrors> validator;
+    protected Function<ValidationContext, ValidationErrors> validator;
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
@@ -137,19 +137,20 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Returns value from field by id.
+     * Returns value from parameter by its id.
      *
-     * @param id field id
-     * @return field value
-     * @throws IllegalArgumentException exception if wrong id is sent
+     * @param parameterId parameter id
+     * @return parameter value
+     * @throws IllegalArgumentException exception if wrong parameter id is sent
      */
-    public Object getValue(String id) {
-        Component component = form.getComponentNN(id);
+    @SuppressWarnings("unchecked")
+    public <T> T getValue(String parameterId) {
+        Component component = form.getComponentNN(parameterId);
         if (component instanceof Field) {
-            return ((Field) component).getValue();
+            return (T) ((Field) component).getValue();
         }
 
-        throw new IllegalArgumentException("InputDialog doesn't contains Field with id: " + id);
+        throw new IllegalArgumentException("InputDialog doesn't contains parameter with id: " + parameterId);
     }
 
     /**
@@ -160,7 +161,7 @@ public class InputDialog extends Screen {
     }
 
     /**
-     * Returns values from fields. String - field id, Object - field value.
+     * Returns values from parameters. String - parameter id, Object - parameter value.
      *
      * @return values
      */
@@ -280,7 +281,7 @@ public class InputDialog extends Screen {
     public boolean isValid() {
         ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
         if (validator != null) {
-            validationErrors.addAll(validator.apply(new InputDialogValidationContext(getValues())));
+            validationErrors.addAll(validator.apply(new ValidationContext(getValues(), this)));
         }
 
         if (!validationErrors.isEmpty()) {
@@ -296,14 +297,14 @@ public class InputDialog extends Screen {
      *
      * @param validator validator
      */
-    public void setValidator(Function<InputDialogValidationContext, ValidationErrors> validator) {
+    public void setValidator(Function<ValidationContext, ValidationErrors> validator) {
         this.validator = validator;
     }
 
     /**
      * @return additional field validator
      */
-    public Function<InputDialogValidationContext, ValidationErrors> getValidator() {
+    public Function<ValidationContext, ValidationErrors> getValidator() {
         return validator;
     }
 
@@ -324,7 +325,7 @@ public class InputDialog extends Screen {
             field.setId(parameter.getId());
 
             if (fieldIds.contains(parameter.getId())) {
-                throw new IllegalArgumentException("InputDialog cannot contain fields with the same id: '" + parameter.getId() + "'");
+                throw new IllegalArgumentException("InputDialog cannot contain parameters with the same id: '" + parameter.getId() + "'");
             }
 
             fieldIds.add(field.getId());
@@ -486,7 +487,7 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * Returns mapped values from fields. String - field id, Object - field value.
+         * Returns values from parameters. String - parameter id, Object - parameter value.
          *
          * @return values
          */
@@ -495,14 +496,13 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * Returns value from field by id.
-         *
-         * @param id field id
-         * @return field value
+         * @param parameterId parameter id
+         * @return parameter value
          */
+        @SuppressWarnings("unchecked")
         @Nullable
-        public Object getValue(String id) {
-            return values.get(id);
+        public <T> T getValue(String parameterId) {
+            return (T) values.get(parameterId);
         }
     }
 
@@ -526,7 +526,7 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * Returns values from fields. String - field id, Object - field value.
+         * Returns values from parameters. String - parameter id, Object - parameter value.
          *
          * @return values
          */
@@ -535,12 +535,13 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * @param id field id
-         * @return field value
+         * @param parameterId parameter id
+         * @return parameter value
          */
+        @SuppressWarnings("unchecked")
         @Nullable
-        public Object getValue(String id) {
-            return values.get(id);
+        public <T> T getValue(String parameterId) {
+            return (T) values.get(parameterId);
         }
 
         /**
@@ -575,16 +576,18 @@ public class InputDialog extends Screen {
     /**
      * Describes input dialog validation context.
      */
-    public static class InputDialogValidationContext {
+    public static class ValidationContext {
 
         protected Map<String, Object> values;
+        protected InputDialog source;
 
-        public InputDialogValidationContext(Map<String, Object> values) {
+        public ValidationContext(Map<String, Object> values, InputDialog source) {
             this.values = values;
+            this.source = source;
         }
 
         /**
-         * Returns values from fields. String - field id, Object - field value.
+         * Returns values from parameters. String - parameter id, Object - parameter value.
          *
          * @return values
          */
@@ -593,12 +596,20 @@ public class InputDialog extends Screen {
         }
 
         /**
-         * @param id field id
-         * @return field value
+         * @param parameterId parameter id
+         * @return parameter value
          */
+        @SuppressWarnings("unchecked")
         @Nullable
-        public Object getValue(String id) {
-            return values.get(id);
+        public <T> T getValue(String parameterId) {
+            return (T) values.get(parameterId);
+        }
+
+        /**
+         * @return input dialog
+         */
+        public InputDialog getSource() {
+            return source;
         }
     }
 }

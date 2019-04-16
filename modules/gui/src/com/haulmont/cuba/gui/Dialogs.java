@@ -149,7 +149,7 @@ public interface Dialogs {
      *                 notifications.create(Notifications.NotificationType.TRAY)
      *                         .withCaption("Dialog is closed")
      *                         .show())
-     *         .withCaption("Products")
+     *         .withCaption("Goods")
      *         .show();
      * }</pre>
      *
@@ -586,7 +586,7 @@ public interface Dialogs {
          *                         .withIcon(CubaIcon.DIALOG_OK)
          *                         .withHandler(event -> {
          *                             InputDialog inputDialog = event.getInputDialog();
-         *                             String name = (String) inputDialog.getValue("nameField");
+         *                             String name = inputDialog.getValue("nameField");
          *                             // do logic
          *                             inputDialog.close(InputDialog.INPUT_DIALOG_OK_ACTION);
          *                         }),
@@ -629,7 +629,7 @@ public interface Dialogs {
          *         .withActions(DialogActions.OK_CANCEL, result -> {
          *             switch (result.getCloseActionType()) {
          *                 case OK:
-         *                     String name = (String) result.getValue("nameField");
+         *                     String name = result.getValue("nameField");
          *                     // do logic
          *                     break;
          *                 case CANCEL:
@@ -655,9 +655,9 @@ public interface Dialogs {
          *         .withParameters(
          *                 stringParameter("phoneField").withCaption("Phone"),
          *                 stringParameter("addressField").withCaption("Address"))
-         *         .withValidator(values -> {
-         *             String phone = (String) values.get("phoneField");
-         *             String address = (String) values.get("addressField");
+         *         .withValidator(context -> {
+         *             String phone = context.getValue("phoneField");
+         *             String address = context.getValue("addressField");
          *             if (Strings.isNullOrEmpty(phone) && Strings.isNullOrEmpty(address)) {
          *                 return ValidationErrors.of("Phone or Address should be filled");
          *             }
@@ -669,7 +669,7 @@ public interface Dialogs {
          * @param validator validator
          * @return builder
          */
-        InputDialogBuilder withValidator(Function<InputDialog.InputDialogValidationContext, ValidationErrors> validator);
+        InputDialogBuilder withValidator(Function<InputDialog.ValidationContext, ValidationErrors> validator);
 
         /**
          * Sets dialog screen caption.

@@ -43,7 +43,6 @@ import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction
 import com.haulmont.cuba.gui.screen.OpenMode
 import com.haulmont.cuba.gui.screen.Screen
 import com.haulmont.cuba.security.app.UserManagementService
-import com.haulmont.cuba.web.gui.components.WebTextField
 import com.haulmont.cuba.web.testmodel.sample.GoodInfo
 import com.haulmont.cuba.web.testsupport.TestServiceProxy
 import spec.cuba.web.UiScreenSpec
@@ -416,13 +415,11 @@ class InputDialogTest extends UiScreenSpec {
                 .withParameters(
                     stringParameter("phoneField"),
                     stringParameter("addressField"))
-                .withValidator({ values ->
-                    def phone = (String) values.get("phoneField")
-                    def address = (String) values.get("addressField")
+                .withValidator({ context ->
+                    def phone = (String) context.getValue("phoneField")
+                    def address = (String) context.getValue("addressField")
                     if (Strings.isNullOrEmpty(phone) && Strings.isNullOrEmpty(address)) {
-                        ValidationErrors errors = new ValidationErrors()
-                        errors.add("Phone or Address should be filled")
-                        return errors
+                        return ValidationErrors.of("Phone or Address should be filled")
                     }
                     return ValidationErrors.none()
                 })
@@ -452,20 +449,18 @@ class InputDialogTest extends UiScreenSpec {
                         dateParameter("expirationDate").withDefaultValue(date))
                 .withActions(
                         action("okAction")
-                                .withHandler({ handlerEvent ->
-                                    handlerEvent.inputDialog.close(WINDOW_CLOSE_ACTION)
+                                .withHandler({ event ->
+                                    event.getInputDialog().close(WINDOW_CLOSE_ACTION)
                                 }),
                         action("cancelAction")
                                 .withValidationRequired(false)
-                                .withHandler({ handleEvent ->
-                                    handleEvent.getInputDialog().close(WINDOW_CLOSE_ACTION)
+                                .withHandler({ event ->
+                                    event.getInputDialog().close(WINDOW_CLOSE_ACTION)
                                 }))
                 .withValidator({ values ->
-                    def expDate = (Date) values.get("expirationDate")
+                    def expDate = (Date) values.getValue("expirationDate")
                     if (expDate.getTime() < targetValue + 1) {
-                        ValidationErrors errors = new ValidationErrors()
-                        errors.add("Wrong expiration date")
-                        return errors
+                        return ValidationErrors.of("Wrong expiration date")
                     }
                     return ValidationErrors.none()
                 })

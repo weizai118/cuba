@@ -775,12 +775,12 @@ public class WebDialogs implements Dialogs {
         }
 
         @Override
-        public InputDialogBuilder withValidator(Function<InputDialog.InputDialogValidationContext, ValidationErrors> validator) {
+        public InputDialogBuilder withValidator(Function<InputDialog.ValidationContext, ValidationErrors> validator) {
             inputDialog.setValidator(validator);
             return this;
         }
 
-        public Function<InputDialog.InputDialogValidationContext, ValidationErrors> getValidator() {
+        public Function<InputDialog.ValidationContext, ValidationErrors> getValidator() {
             return inputDialog.getValidator();
         }
 
