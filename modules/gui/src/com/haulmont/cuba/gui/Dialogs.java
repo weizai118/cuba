@@ -28,7 +28,6 @@ import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction.InputDialogActionPerformed;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -648,10 +647,10 @@ public interface Dialogs {
         InputDialogBuilder withActions(DialogActions actions, Consumer<InputDialog.InputDialogResult> resultHandler);
 
         /**
-         * Sets additional handler for field validation. It takes values map and must return {@link ValidationErrors}
+         * Sets additional handler for field validation. It receives values map and must return {@link ValidationErrors}
          * instance. Returned validation errors will be shown with another errors from fields.
          * Example
-         *  <pre>{@code
+         * <pre>{@code
          *  dialogs.createInputDialog(this)
          *         .withParameters(
          *                 stringParameter("phoneField").withCaption("Phone"),
@@ -660,9 +659,7 @@ public interface Dialogs {
          *             String phone = (String) values.get("phoneField");
          *             String address = (String) values.get("addressField");
          *             if (Strings.isNullOrEmpty(phone) && Strings.isNullOrEmpty(address)) {
-         *                 ValidationErrors errors = new ValidationErrors();
-         *                 errors.add("Phone or Address should be filled");
-         *                 return errors;
+         *                 return ValidationErrors.of("Phone or Address should be filled");
          *             }
          *             return ValidationErrors.none();
          *         })
@@ -672,7 +669,7 @@ public interface Dialogs {
          * @param validator validator
          * @return builder
          */
-        InputDialogBuilder withValidator(Function<Map<String, Object>, ValidationErrors> validator);
+        InputDialogBuilder withValidator(Function<InputDialog.InputDialogValidationContext, ValidationErrors> validator);
 
         /**
          * Sets dialog screen caption.

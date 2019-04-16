@@ -117,7 +117,7 @@ public class InputDialog extends Screen {
 
     protected Consumer<InputDialogCloseEvent> closeListener;
     protected Consumer<InputDialogResult> resultHandler;
-    protected Function<Map<String, Object>, ValidationErrors> validator;
+    protected Function<InputDialogValidationContext, ValidationErrors> validator;
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
@@ -280,7 +280,7 @@ public class InputDialog extends Screen {
     public boolean isValid() {
         ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
         if (validator != null) {
-            validationErrors.addAll(validator.apply(getValues()));
+            validationErrors.addAll(validator.apply(new InputDialogValidationContext(getValues())));
         }
 
         if (!validationErrors.isEmpty()) {
@@ -296,14 +296,14 @@ public class InputDialog extends Screen {
      *
      * @param validator validator
      */
-    public void setValidator(Function<Map<String, Object>, ValidationErrors> validator) {
+    public void setValidator(Function<InputDialogValidationContext, ValidationErrors> validator) {
         this.validator = validator;
     }
 
     /**
      * @return additional field validator
      */
-    public Function<Map<String, Object>, ValidationErrors> getValidator() {
+    public Function<InputDialogValidationContext, ValidationErrors> getValidator() {
         return validator;
     }
 
@@ -569,6 +569,36 @@ public class InputDialog extends Screen {
             } else {
                 return ActionType.CANCEL;
             }
+        }
+    }
+
+    /**
+     * Describes input dialog validation context.
+     */
+    public static class InputDialogValidationContext {
+
+        protected Map<String, Object> values;
+
+        public InputDialogValidationContext(Map<String, Object> values) {
+            this.values = values;
+        }
+
+        /**
+         * Returns values from fields. String - field id, Object - field value.
+         *
+         * @return values
+         */
+        public Map<String, Object> getValues() {
+            return values;
+        }
+
+        /**
+         * @param id field id
+         * @return field value
+         */
+        @Nullable
+        public Object getValue(String id) {
+            return values.get(id);
         }
     }
 }
