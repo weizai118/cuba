@@ -50,6 +50,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.haulmont.cuba.web.gui.components.WebComponentsHelper.setClickShortcut;
 import static com.haulmont.cuba.web.gui.components.WebWrapperUtils.*;
@@ -771,6 +772,16 @@ public class WebDialogs implements Dialogs {
         @Nullable
         public Consumer<InputDialog.InputDialogResult> getResultHandler() {
             return inputDialog.getResultHandler();
+        }
+
+        @Override
+        public InputDialogBuilder withValidator(Function<Map<String, Object>, ValidationErrors> validator) {
+            inputDialog.setValidator(validator);
+            return this;
+        }
+
+        public Function<Map<String, Object>, ValidationErrors> getValidator() {
+            return inputDialog.getValidator();
         }
 
         @Override

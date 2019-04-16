@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @UiDescriptor("inputdialog.xml")
 @UiController("inputDialog")
@@ -116,6 +117,7 @@ public class InputDialog extends Screen {
 
     protected Consumer<InputDialogCloseEvent> closeListener;
     protected Consumer<InputDialogResult> resultHandler;
+    protected Function<Map<String, Object>, ValidationErrors> validator;
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
@@ -270,6 +272,41 @@ public class InputDialog extends Screen {
         return resultHandler;
     }
 
+    /**
+     * Validates form components and conditions from custom validation supplier and show errors.
+     *
+     * @return true if validation is successful
+     */
+    public boolean isValid() {
+        ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
+        if (validator != null) {
+            validationErrors.addAll(validator.apply(getValues()));
+        }
+
+        if (!validationErrors.isEmpty()) {
+            screenValidation.showValidationErrors(this, validationErrors);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Sets additional handler for field validation. It takes values map and must return {@link ValidationErrors}
+     * instance. Returned validation errors will be shown with another errors from fields.
+     *
+     * @param validator validator
+     */
+    public void setValidator(Function<Map<String, Object>, ValidationErrors> validator) {
+        this.validator = validator;
+    }
+
+    /**
+     * @return additional field validator
+     */
+    public Function<Map<String, Object>, ValidationErrors> getValidator() {
+        return validator;
+    }
+
     @SuppressWarnings("unchecked")
     protected void initParameters() {
         fieldIds = new ArrayList<>(parameters.size());
@@ -411,7 +448,7 @@ public class InputDialog extends Screen {
         DialogAction dialogAction = new DialogAction(type);
         if (type == DialogAction.Type.OK || type == DialogAction.Type.YES) {
             dialogAction.withHandler(event -> {
-                if (validateAndShowErrors()) {
+                if (isValid()) {
                     fireCloseAndResultEvents(closeAction);
                 }
             });
@@ -427,15 +464,6 @@ public class InputDialog extends Screen {
         if (resultHandler != null) {
             resultHandler.accept(new InputDialogResult(getValues(), closeAction));
         }
-    }
-
-    protected boolean validateAndShowErrors() {
-        ValidationErrors validationErrors = screenValidation.validateUiComponents(form);
-        if (!validationErrors.isEmpty()) {
-            screenValidation.showValidationErrors(this, validationErrors);
-            return false;
-        }
-        return true;
     }
 
     /**

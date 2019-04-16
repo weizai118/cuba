@@ -89,4 +89,11 @@ public class ValidationErrors {
 
         return items.get(0).component;
     }
+
+    /**
+     * @return new empty instance
+     */
+    public static ValidationErrors none() {
+        return new ValidationErrors();
+    }
 }

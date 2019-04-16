@@ -16,6 +16,7 @@
 
 package spec.cuba.web.dialogs
 
+import com.google.common.base.Strings
 import com.haulmont.chile.core.datatypes.DatatypeRegistry
 import com.haulmont.chile.core.datatypes.impl.BigDecimalDatatype
 import com.haulmont.chile.core.datatypes.impl.DateDatatype
@@ -37,6 +38,7 @@ import com.haulmont.cuba.gui.components.HBoxLayout
 import com.haulmont.cuba.gui.components.PickerField
 import com.haulmont.cuba.gui.components.TextField
 import com.haulmont.cuba.gui.components.TimeField
+import com.haulmont.cuba.gui.components.ValidationErrors
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction
 import com.haulmont.cuba.gui.screen.OpenMode
 import com.haulmont.cuba.gui.screen.Screen
@@ -64,6 +66,7 @@ import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.paramete
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.stringParameter
 import static com.haulmont.cuba.gui.app.core.inputdialog.InputParameter.timeParameter
 import static com.haulmont.cuba.gui.components.inputdialog.InputDialogAction.action
+import static com.haulmont.cuba.gui.screen.FrameOwner.WINDOW_CLOSE_ACTION
 
 class InputDialogTest extends UiScreenSpec {
 
@@ -232,15 +235,13 @@ class InputDialogTest extends UiScreenSpec {
                 })
                 .show()
         then:
-        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
-        def yesBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        def yesBtn = getButtonFromDialog(dialog, 1) // because 0 - spacer
         yesBtn.getAction().actionPerform(yesBtn)
 
         !screens.getOpenedScreens().getActiveScreens().contains(dialog)
 
         dialog.show() // we can show again because in this case we don't use code in Subscribe events
-        def reopenedActionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
-        def noBtn = (Button) reopenedActionsLayout.getComponent(2)
+        def noBtn = getButtonFromDialog(dialog, 2)
         noBtn.getAction().actionPerform(noBtn)
 
         !screens.getOpenedScreens().getActiveScreens().contains(dialog)
@@ -300,8 +301,7 @@ class InputDialogTest extends UiScreenSpec {
         def dialog = (InputDialog) createDialogWithCloseListener(mainWindow)
 
         then:
-        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
-        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        def okBtn = getButtonFromDialog(dialog, 1) // because 0 - spacer
         okBtn.getAction().actionPerform(okBtn)
 
         !screens.getOpenedScreens().getActiveScreens().contains(dialog)
@@ -310,8 +310,7 @@ class InputDialogTest extends UiScreenSpec {
         def cancelDialog = (InputDialog) createDialogWithCloseListener(mainWindow)
 
         then:
-        def cancelActionsLayout = (HBoxLayout) cancelDialog.getWindow().getComponentNN("actionsLayout")
-        def cancelBtn = (Button) cancelActionsLayout.getComponent(2)
+        def cancelBtn = getButtonFromDialog(cancelDialog, 2)
         cancelBtn.getAction().actionPerform(cancelBtn)
 
         !screens.getOpenedScreens().getActiveScreens().contains(dialog)
@@ -352,7 +351,7 @@ class InputDialogTest extends UiScreenSpec {
                         dateTimeParameter("dateTime").withDefaultValue(dateTimeValue),
                         new InputParameter("custom")
                             .withField({
-                                TextField field = new WebTextField()
+                                TextField field = uiComponents.create(TextField)
                                 field.setValue(customValue)
                                 return field}))
                 .withCloseListener({ event ->
@@ -362,8 +361,7 @@ class InputDialogTest extends UiScreenSpec {
                     }})
                 .show()
         then:
-        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
-        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        def okBtn = getButtonFromDialog(dialog, 1) // because 0 - spacer
         okBtn.getAction().actionPerform(okBtn)
     }
 
@@ -387,8 +385,7 @@ class InputDialogTest extends UiScreenSpec {
                                     return field}))
                 .show()
         then:
-        def actionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
-        def okBtn = (Button) actionsLayout.getComponent(1) // because 0 - spacer
+        def okBtn = getButtonFromDialog(dialog, 1) // because 0 - spacer
         okBtn.getAction().actionPerform(okBtn)
 
         // shouldn't be closed
@@ -400,11 +397,95 @@ class InputDialogTest extends UiScreenSpec {
                 .show()
 
         then:
-        def reqActionsLayout = (HBoxLayout) reqDialog.getWindow().getComponentNN("actionsLayout")
-        def reqOkBtn = (Button) reqActionsLayout.getComponent(1) // because 0 - spacer
+        def reqOkBtn = getButtonFromDialog(reqDialog, 1) // because 0 - spacer
         reqOkBtn.getAction().actionPerform(reqOkBtn)
 
         // shouldn't be closed
         screens.getOpenedScreens().getActiveScreens().contains(reqDialog)
+    }
+
+    def "validator and default DialogActions"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+        when: "create dialog with default actions and custom validator"
+        InputDialog dialog = dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                    stringParameter("phoneField"),
+                    stringParameter("addressField"))
+                .withValidator({ values ->
+                    def phone = (String) values.get("phoneField")
+                    def address = (String) values.get("addressField")
+                    if (Strings.isNullOrEmpty(phone) && Strings.isNullOrEmpty(address)) {
+                        ValidationErrors errors = new ValidationErrors()
+                        errors.add("Phone or Address should be filled")
+                        return errors
+                    }
+                    return ValidationErrors.none()
+                })
+                .show()
+        then:
+        def okBtn = getButtonFromDialog(dialog, 1)
+        okBtn.getAction().actionPerform(okBtn)
+
+        // shouldn't be closed
+        screens.getOpenedScreens().getActiveScreens().contains(dialog)
+    }
+
+    def "validator and validationRequired in InputDialogAction"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        when: "validator and validationRequired in InputDialogAction"
+        def dialogs = ComponentsHelper.getScreenContext(mainWindow.getWindow().getFrame()).getDialogs()
+        def targetValue = 100100
+        def date = new Date(targetValue)
+
+        InputDialog dialogA = dialogs.createInputDialog(mainWindow)
+                .withParameters(
+                        stringParameter("descriptionField"),
+                        dateParameter("expirationDate").withDefaultValue(date))
+                .withActions(
+                        action("okAction")
+                                .withHandler({ handlerEvent ->
+                                    handlerEvent.inputDialog.close(WINDOW_CLOSE_ACTION)
+                                }),
+                        action("cancelAction")
+                                .withValidationRequired(false)
+                                .withHandler({ handleEvent ->
+                                    handleEvent.getInputDialog().close(WINDOW_CLOSE_ACTION)
+                                }))
+                .withValidator({ values ->
+                    def expDate = (Date) values.get("expirationDate")
+                    if (expDate.getTime() < targetValue + 1) {
+                        ValidationErrors errors = new ValidationErrors()
+                        errors.add("Wrong expiration date")
+                        return errors
+                    }
+                    return ValidationErrors.none()
+                })
+                .show()
+
+        then:
+        def okBtnA = getButtonFromDialog(dialogA, 1)
+        okBtnA.getAction().actionPerform(okBtnA)
+        // shouldn't be closed
+        screens.getOpenedScreens().getActiveScreens().contains(dialogA)
+
+        def cancelBtnA = getButtonFromDialog(dialogA, 2)
+        cancelBtnA.getAction().actionPerform(cancelBtnA)
+
+        // must be closed
+        !screens.getOpenedScreens().getActiveScreens().contains(dialogA)
+    }
+
+    protected Button getButtonFromDialog(InputDialog dialog, int index) {
+        def reqActionsLayout = (HBoxLayout) dialog.getWindow().getComponentNN("actionsLayout")
+        return (Button) reqActionsLayout.getComponent(index) // 0 - spacer
     }
 }

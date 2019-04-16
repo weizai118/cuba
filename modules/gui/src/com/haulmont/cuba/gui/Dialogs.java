@@ -23,11 +23,14 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.ValidationErrors;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction;
 import com.haulmont.cuba.gui.components.inputdialog.InputDialogAction.InputDialogActionPerformed;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Utility dialogs API.
@@ -591,6 +594,7 @@ public interface Dialogs {
          *                 action("cancelAction")
          *                         .withCaption("Cancel")
          *                         .withIcon(CubaIcon.DIALOG_CANCEL)
+         *                         .withValidationRequired(false)
          *                         .withHandler(event -> {
          *                             InputDialog inputDialog = event.getInputDialog();
          *                             inputDialog.close(InputDialog.INPUT_DIALOG_CANCEL_ACTION);
@@ -639,8 +643,36 @@ public interface Dialogs {
          *
          * @param actions       dialog actions
          * @param resultHandler result handler
+         * @return builder
          */
         InputDialogBuilder withActions(DialogActions actions, Consumer<InputDialog.InputDialogResult> resultHandler);
+
+        /**
+         * Sets additional handler for field validation. It takes values map and must return {@link ValidationErrors}
+         * instance. Returned validation errors will be shown with another errors from fields.
+         * Example
+         *  <pre>{@code
+         *  dialogs.createInputDialog(this)
+         *         .withParameters(
+         *                 stringParameter("phoneField").withCaption("Phone"),
+         *                 stringParameter("addressField").withCaption("Address"))
+         *         .withValidator(values -> {
+         *             String phone = (String) values.get("phoneField");
+         *             String address = (String) values.get("addressField");
+         *             if (Strings.isNullOrEmpty(phone) && Strings.isNullOrEmpty(address)) {
+         *                 ValidationErrors errors = new ValidationErrors();
+         *                 errors.add("Phone or Address should be filled");
+         *                 return errors;
+         *             }
+         *             return ValidationErrors.none();
+         *         })
+         *         .show();
+         *  }</pre>
+         *
+         * @param validator validator
+         * @return builder
+         */
+        InputDialogBuilder withValidator(Function<Map<String, Object>, ValidationErrors> validator);
 
         /**
          * Sets dialog screen caption.
