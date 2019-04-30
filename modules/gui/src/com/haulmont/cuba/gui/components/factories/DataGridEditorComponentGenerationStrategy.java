@@ -94,8 +94,8 @@ public class DataGridEditorComponentGenerationStrategy extends AbstractComponent
         if ((lookupAnnotation = mpp.getMetaProperty().getAnnotatedElement().getAnnotation(Lookup.class)) != null
                 && lookupAnnotation.type() == LookupType.DROPDOWN) {
             MetaClass metaClass = mpp.getMetaProperty().getRange().asClass();
-            CollectionContainer<Entity<?>> container = dataComponents.createCollectionContainer(metaClass.getJavaClass());
-            CollectionLoader<Entity<?>> loader = dataComponents.createCollectionLoader();
+            CollectionContainer<Entity> container = dataComponents.createCollectionContainer(metaClass.getJavaClass());
+            CollectionLoader<Entity> loader = dataComponents.createCollectionLoader();
             loader.setQuery("select e from " + metaClass.getName() + " e");
             loader.setView(View.MINIMAL);
             loader.setContainer(container);
