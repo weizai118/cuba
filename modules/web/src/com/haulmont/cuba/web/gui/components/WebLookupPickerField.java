@@ -328,12 +328,12 @@ public class WebLookupPickerField<V extends Entity> extends WebPickerField<V>
 
     @Override
     public String getPopupWidth() {
-        return getComponent().getFieldInternal().getPopupWidth();
+        return getComponent().getPopupWidth();
     }
 
     @Override
     public void setPopupWidth(String width) {
-        getComponent().getFieldInternal().setPopupWidth(width);
+        getComponent().setPopupWidth(width);
     }
 
     @Override
