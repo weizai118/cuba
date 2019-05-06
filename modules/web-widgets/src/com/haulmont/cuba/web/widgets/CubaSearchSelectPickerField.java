@@ -49,7 +49,7 @@ public class CubaSearchSelectPickerField<T> extends CubaPickerField<T> {
         (getFieldInternal()).addValueChangeListener(this::onFieldValueChange);
     }
 
-    protected CubaSearchSelect<T> getFieldInternal() {
+    public CubaSearchSelect<T> getFieldInternal() {
         //noinspection unchecked
         return (CubaSearchSelect<T>) field;
     }
