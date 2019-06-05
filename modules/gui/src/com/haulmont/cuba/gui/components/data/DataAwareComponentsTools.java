@@ -109,15 +109,16 @@ public class DataAwareComponentsTools {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void setupDateRange(HasRange component, EntityValueSource valueSource) {
         MetaProperty metaProperty = valueSource.getMetaPropertyPath().getMetaProperty();
         Class javaType = metaProperty.getRange().asDatatype().getJavaClass();
         TemporalType temporalType = getTemporalType(metaProperty, javaType);
 
-        if (metaProperty.getAnnotations().get(Past.class.getName()) != null) {
+        if (metaProperty.getAnnotations().get(Past.class.getName()) != null
+                || metaProperty.getAnnotations().get(PastOrPresent.class.getName()) != null) {
             LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
             ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, ZoneId.systemDefault());
-            //noinspection unchecked
             component.setRangeEnd(dateTimeTransformations.transformFromZDT(zonedDateTime, javaType));
         } else if (metaProperty.getAnnotations().get(Future.class.getName()) != null) {
             LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
@@ -127,17 +128,10 @@ public class DataAwareComponentsTools {
                 dateTime = dateTime.plusDays(1);
             }
             ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, ZoneId.systemDefault());
-            //noinspection unchecked
             component.setRangeStart(dateTimeTransformations.transformFromZDT(zonedDateTime, javaType));
-        } else if (metaProperty.getAnnotations().get(PastOrPresent.class.getName()) != null) {
-            LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, ZoneId.systemDefault());
-            //noinspection unchecked
-            component.setRangeEnd(dateTimeTransformations.transformFromZDT(zonedDateTime, javaType));
         } else if (metaProperty.getAnnotations().get(FutureOrPresent.class.getName()) != null) {
             LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
             ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, ZoneId.systemDefault());
-            //noinspection unchecked
             component.setRangeStart(dateTimeTransformations.transformFromZDT(zonedDateTime, javaType));
         }
     }
