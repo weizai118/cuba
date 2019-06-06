@@ -2379,6 +2379,17 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
     }
 
     @Override
+    public void addGeneratedColumn(String columnId, ColumnGenerator<? super E> generator, int index) {
+        addGeneratedColumn(columnId, generator);
+        columnsOrder.add(index, columnsOrder.remove(columnsOrder.size() - 1));
+
+        // Update column order only if we add a column to an arbitrary position.
+        component.setVisibleColumns(columnsOrder.stream()
+                .map(Table.Column::getId)
+                .toArray());
+    }
+
+    @Override
     public void addGeneratedColumn(String columnId, ColumnGenerator<? super E> generator,
                                    Class<? extends com.haulmont.cuba.gui.components.Component> componentClass) {
         // web ui doesn't make any improvements with componentClass known

@@ -525,6 +525,15 @@ public interface Table<E extends Entity>
     void addGeneratedColumn(String columnId, ColumnGenerator<? super E> generator);
 
     /**
+     * Add a generated column at the specified index to Table.
+     *
+     * @param columnId  column identifier as defined in XML descriptor. May or may not correspond to an entity property.
+     * @param generator column generator instance
+     * @param index     index of a new column
+     */
+    void addGeneratedColumn(String columnId, ColumnGenerator<? super E> generator, int index);
+
+    /**
      * Add a generated column to the table.
      * <br> This method useful for desktop UI. Table can make additional look, feel and performance tweaks
      * if it knows the class of components that will be generated.
