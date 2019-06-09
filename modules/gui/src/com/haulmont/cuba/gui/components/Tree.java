@@ -188,6 +188,48 @@ public interface Tree<E extends Entity> extends ListComponent<E>, HasButtonsPane
      */
     void setSelectionMode(SelectionMode selectionMode);
 
+    /**
+     * Sets the description generator that is used for generating tooltip
+     * descriptions for items.
+     *
+     * @param generator the description generator to use or {@code null} to remove a
+     *                  previously set provider if any
+     */
+    void setItemDescriptionGenerator(Function<? super E, String> generator);
+
+    /**
+     * Sets the description generator that is used for generating HTML tooltip
+     * descriptions for items.
+     *
+     * @param generator   the description generator to use or {@code null} to remove a
+     *                    previously set provider if any
+     * @param contentMode the content mode for row tooltips
+     */
+    void setItemDescriptionGenerator(Function<? super E, String> generator, ContentMode contentMode);
+
+    /**
+     * Gets the item description generator.
+     *
+     * @return the item description generator
+     */
+    Function<E, String> getItemDescriptionGenerator();
+
+    /**
+     * Registers a new expand listener.
+     *
+     * @param listener the listener to be added
+     * @return a registration object for removing an event listener added to a source
+     */
+    Subscription addExpandListener(Consumer<ExpandEvent<E>> listener);
+
+    /**
+     * Registers a new collapse listener.
+     *
+     * @param listener the listener to be added
+     * @return a registration object for removing an event listener added to a source
+     */
+    Subscription addCollapseListener(Consumer<CollapseEvent<E>> listener);
+
     enum SelectionMode {
         /**
          * A SelectionMode that supports for only single rows to be selected at a time.
@@ -203,6 +245,90 @@ public interface Tree<E extends Entity> extends ListComponent<E>, HasButtonsPane
          * A SelectionMode that does not allow for rows to be selected.
          */
         NONE
+    }
+
+    /**
+     * An event that is fired when an item is expanded.
+     *
+     * @param <E> item type
+     */
+    class ExpandEvent<E extends Entity> extends EventObject implements HasUserOriginated {
+
+        protected final E expandedItem;
+        protected final boolean userOriginated;
+
+        /**
+         * Constructor for the expand event.
+         *
+         * @param source         the Tree from which this event originates
+         * @param expandedItem   the expanded item
+         * @param userOriginated whether this event was triggered by user interaction or programmatically
+         */
+        public ExpandEvent(Tree<E> source, E expandedItem, boolean userOriginated) {
+            super(source);
+            this.expandedItem = expandedItem;
+            this.userOriginated = userOriginated;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Tree<E> getSource() {
+            return (Tree<E>) super.getSource();
+        }
+
+        /**
+         * @return the expanded item
+         */
+        public E getExpandedItem() {
+            return expandedItem;
+        }
+
+        @Override
+        public boolean isUserOriginated() {
+            return userOriginated;
+        }
+    }
+
+    /**
+     * An event that is fired when an item is collapsed.
+     *
+     * @param <E> item type
+     */
+    class CollapseEvent<E extends Entity> extends EventObject implements HasUserOriginated {
+
+        protected final E collapsedItem;
+        protected final boolean userOriginated;
+
+        /**
+         * Constructor for the collapse event.
+         *
+         * @param source         the Tree from which this event originates
+         * @param collapsedItem  the collapsed item
+         * @param userOriginated whether this event was triggered by user interaction or programmatically
+         */
+        public CollapseEvent(Tree<E> source, E collapsedItem, boolean userOriginated) {
+            super(source);
+            this.collapsedItem = collapsedItem;
+            this.userOriginated = userOriginated;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Tree<E> getSource() {
+            return (Tree<E>) super.getSource();
+        }
+
+        /**
+         * @return the collapsed item
+         */
+        public E getCollapsedItem() {
+            return collapsedItem;
+        }
+
+        @Override
+        public boolean isUserOriginated() {
+            return userOriginated;
+        }
     }
 
     /**
