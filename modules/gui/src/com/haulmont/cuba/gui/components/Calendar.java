@@ -132,6 +132,16 @@ public interface Calendar extends Component.BelongToFrame, Component.HasCaption,
     int getLastVisibleHourOfDay();
 
     /**
+     * Allow setting first day of week independent of Locale. Set to null if you
+     * want first day of week being defined by the locale
+     *
+     * @param dayOfWeek
+     *            any of java.util.Calendar.SUNDAY..java.util.Calendar.SATURDAY
+     *            or null to revert to default first day of week by locale
+     */
+    void setFirstDayOfWeek(Integer dayOfWeek);
+
+    /**
      * Set date caption format for the weekly view.
      */
     void setWeeklyCaptionFormat(String dateFormatPattern);
