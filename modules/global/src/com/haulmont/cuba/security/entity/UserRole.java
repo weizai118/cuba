@@ -44,6 +44,12 @@ public class UserRole extends StandardEntity {
     @OnDeleteInverse(DeletePolicy.CASCADE)
     private Role role;
 
+    @Column(name = "ROLE_NAME")
+    private String roleName;
+
+    @Transient
+    private transient OrdinaryRole ordinaryRole;
+
     public User getUser() {
         return user;
     }
@@ -58,5 +64,21 @@ public class UserRole extends StandardEntity {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public OrdinaryRole getOrdinaryRole() {
+        return ordinaryRole;
+    }
+
+    public void setOrdinaryRole(OrdinaryRole ordinaryRole) {
+        this.ordinaryRole = ordinaryRole;
     }
 }

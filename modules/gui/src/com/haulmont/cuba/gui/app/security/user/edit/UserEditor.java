@@ -42,6 +42,7 @@ import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.security.app.UserManagementService;
+import com.haulmont.cuba.security.designtime.RolesService;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.BooleanUtils;
@@ -119,6 +120,9 @@ public class UserEditor extends AbstractEditor<User> {
 
     @Inject
     protected Events events;
+
+    @Inject
+    protected RolesService rolesService;
 
     @Named("fieldGroupRight.active")
     private CheckBox activeField;
@@ -224,12 +228,7 @@ public class UserEditor extends AbstractEditor<User> {
         lc.setView(View.MINIMAL);
         List<Role> allowedRoles = dataSupplier.loadList(lc);
 
-        Collection<UserRole> userRoles = new ArrayList<>(rolesDs.getItems());
-        for (UserRole userRole : userRoles) {
-            if (!allowedRoles.contains(userRole.getRole())) {
-                rolesDs.excludeItem(userRole);
-            }
-        }
+        filterRolesDs(allowedRoles);
 
         if (BooleanUtils.isTrue(initCopy)) {
             initCopy();
@@ -237,6 +236,39 @@ public class UserEditor extends AbstractEditor<User> {
 
         // if we add default roles, rolesDs becomes modified on setItem
         ((AbstractDatasource) rolesDs).setModified(false);
+    }
+
+    protected void filterRolesDs(List<Role> allowedRoles) {
+        Collection<UserRole> userRoles = new ArrayList<>(rolesDs.getItems());
+        Map<String, UserRole> notExcludedUserRoles = new HashMap<>();
+
+        for (UserRole userRole : userRoles) {
+            if ((!rolesService.isDatabaseModeAvailable() && userRole.getRole() != null)
+                    || (!rolesService.isPredefinedRolesModeAvailable() && userRole.getRoleName() != null)) {
+                rolesDs.excludeItem(userRole);
+                continue;
+            }
+            if (userRole.getRole() != null && !allowedRoles.contains(userRole.getRole())) {
+                rolesDs.excludeItem(userRole);
+                continue;
+            }
+            if (userRole.getRoleName() != null) {
+                userRole.setRole(rolesService.getRoleByName(userRole.getRoleName()));
+                rolesDs.modifyItem(userRole);
+
+                ((AbstractDatasource) rolesDs).getItemsToUpdate().remove(userRole);
+                ((AbstractDatasource) userDs).setModified(false);
+            }
+            if (notExcludedUserRoles.keySet().contains(userRole.getRole().getName())) {
+                if (userRole.getRoleName() != null) {
+                    rolesDs.excludeItem(userRole);
+                    continue;
+                } else {
+                    rolesDs.excludeItem(notExcludedUserRoles.get(userRole.getRole().getName()));
+                }
+            }
+            notExcludedUserRoles.put(userRole.getRole().getName(), userRole);
+        }
     }
 
     @Override
@@ -404,6 +436,25 @@ public class UserEditor extends AbstractEditor<User> {
 
     @Override
     protected boolean preCommit() {
+
+        boolean isDsModified = rolesDs.isModified();
+        Collection<UserRole> userRoles = new ArrayList<>(rolesDs.getItems());
+        for (UserRole userRole : userRoles) {
+            if (userRole.getRole().isPredefined()) {
+                if (userRole.getRoleName() == null) {
+                    userRole.setRoleName(userRole.getRole().getName());
+                }
+                userRole.setRole(null);
+                rolesDs.modifyItem(userRole);
+            }
+        }
+        for (Object itemToDelete : ((AbstractDatasource) rolesDs).getItemsToDelete()) {
+            if (itemToDelete instanceof UserRole && ((UserRole) itemToDelete).getRoleName() != null) {
+                ((UserRole) itemToDelete).setRole(null);
+            }
+        }
+        ((AbstractDatasource) rolesDs).setModified(isDsModified);
+
         if (rolesDs.isModified()) {
             @SuppressWarnings("unchecked")
             DatasourceImplementation<UserRole> rolesDsImpl = (DatasourceImplementation) rolesDs;
