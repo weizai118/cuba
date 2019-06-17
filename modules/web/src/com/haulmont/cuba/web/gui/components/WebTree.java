@@ -122,6 +122,7 @@ public class WebTree<E extends Entity>
     protected TreeDataProvider<E> dataBinding;
     protected Function<? super E, String> itemCaptionProvider;
     protected Function<? super E, String> itemDescriptionGenerator;
+    protected Tree.DetailsGenerator<? super E> detailsGenerator;
     protected Registration expandListener;
     protected Registration collapseListener;
 
@@ -941,8 +942,8 @@ public class WebTree<E extends Entity>
 
     @Override
     public void setItemDescriptionGenerator(Function<? super E, String> generator, ContentMode contentMode) {
-        this.itemDescriptionGenerator = generator;
-        if (generator != null) {
+        itemDescriptionGenerator = generator;
+        if (Objects.nonNull(generator)) {
             component.setItemDescriptionGenerator(itemDescriptionGenerator::apply,
                     WebWrapperUtils.toVaadinContentMode(contentMode));
         } else {
@@ -954,6 +955,35 @@ public class WebTree<E extends Entity>
     @Override
     public Function<E, String> getItemDescriptionGenerator() {
         return (Function<E, String>) itemDescriptionGenerator;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public Tree.DetailsGenerator<E> getDetailsGenerator() {
+        return (DetailsGenerator<E>) detailsGenerator;
+    }
+
+    @Override
+    public void setDetailsGenerator(Tree.DetailsGenerator<? super E> generator) {
+        detailsGenerator = generator;
+        component.getCompositionRoot().setDetailsGenerator(Objects.nonNull(generator) ? this::getItemDetails : null);
+    }
+
+    protected com.vaadin.ui.Component getItemDetails(E entity) {
+        return Optional.ofNullable(detailsGenerator.getDetails(entity))
+                .map(c -> c.unwrapComposition(com.vaadin.ui.Component.class))
+                .orElse(null);
+    }
+
+    @Override
+    public boolean isDetailsVisible(E entity) {
+        return component.getCompositionRoot().isDetailsVisible(entity);
+    }
+
+    @Override
+    public void setDetailsVisible(E entity, boolean visible) {
+        component.getCompositionRoot().setDetailsVisible(entity, visible);
     }
 
     @SuppressWarnings("unchecked")

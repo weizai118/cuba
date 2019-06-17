@@ -215,6 +215,55 @@ public interface Tree<E extends Entity> extends ListComponent<E>, HasButtonsPane
     Function<E, String> getItemDescriptionGenerator();
 
     /**
+     * A callback interface for generating details for a particular item in Tree.
+     *
+     * @param <E> Tree data type
+     */
+    @FunctionalInterface
+    interface DetailsGenerator<E extends Entity> {
+
+        /**
+         * Returns the component which will be used as details for the given item.
+         *
+         * @param entity an entity instance represented by the current item
+         * @return the details for the given item, or {@code null} to leave the details empty.
+         */
+        @Nullable
+        Component getDetails(E entity);
+    }
+
+    /**
+     * @return the current details generator for item details or {@code null} if not set
+     */
+    @Nullable
+    Tree.DetailsGenerator<E> getDetailsGenerator();
+
+    /**
+     * Sets a new details generator for item details.
+     * <p>
+     * The currently opened item details will be re-rendered.
+     *
+     * @param generator the details generator to set
+     */
+    void setDetailsGenerator(Tree.DetailsGenerator<? super E> generator);
+
+    /**
+     * Checks whether details are visible for the given item.
+     *
+     * @param entity the item for which to check details visibility
+     * @return {@code true} if the details are visible
+     */
+    boolean isDetailsVisible(E entity);
+
+    /**
+     * Shows or hides the details for a specific item.
+     *
+     * @param entity  the item for which to set details visibility
+     * @param visible {@code true} to show the details, or {@code false} to hide them
+     */
+    void setDetailsVisible(E entity, boolean visible);
+
+    /**
      * Registers a new expand listener.
      *
      * @param listener the listener to be added
