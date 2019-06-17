@@ -192,27 +192,27 @@ public interface Tree<E extends Entity> extends ListComponent<E>, HasButtonsPane
      * Sets the description generator that is used for generating tooltip
      * descriptions for items.
      *
-     * @param generator the description generator to use or {@code null} to remove a
+     * @param provider the description generator to use or {@code null} to remove a
      *                  previously set provider if any
      */
-    void setItemDescriptionGenerator(Function<? super E, String> generator);
+    void setDescriptionProvider(Function<? super E, String> provider);
 
     /**
      * Sets the description generator that is used for generating HTML tooltip
      * descriptions for items.
      *
-     * @param generator   the description generator to use or {@code null} to remove a
+     * @param provider   the description generator to use or {@code null} to remove a
      *                    previously set provider if any
      * @param contentMode the content mode for row tooltips
      */
-    void setItemDescriptionGenerator(Function<? super E, String> generator, ContentMode contentMode);
+    void setDescriptionProvider(Function<? super E, String> provider, ContentMode contentMode);
 
     /**
      * Gets the item description generator.
      *
      * @return the item description generator
      */
-    Function<E, String> getItemDescriptionGenerator();
+    Function<E, String> getDescriptionProvider();
 
     /**
      * A callback interface for generating details for a particular item in Tree.

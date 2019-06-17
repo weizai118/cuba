@@ -121,7 +121,7 @@ public class WebTree<E extends Entity>
     protected String hierarchyProperty;
     protected TreeDataProvider<E> dataBinding;
     protected Function<? super E, String> itemCaptionProvider;
-    protected Function<? super E, String> itemDescriptionGenerator;
+    protected Function<? super E, String> descriptionProvider;
     protected Tree.DetailsGenerator<? super E> detailsGenerator;
     protected Registration expandListener;
     protected Registration collapseListener;
@@ -936,15 +936,15 @@ public class WebTree<E extends Entity>
     }
 
     @Override
-    public void setItemDescriptionGenerator(Function<? super E, String> generator) {
-        this.setItemDescriptionGenerator(generator, ContentMode.PREFORMATTED);
+    public void setDescriptionProvider(Function<? super E, String> provider) {
+        this.setDescriptionProvider(provider, ContentMode.PREFORMATTED);
     }
 
     @Override
-    public void setItemDescriptionGenerator(Function<? super E, String> generator, ContentMode contentMode) {
-        itemDescriptionGenerator = generator;
-        if (Objects.nonNull(generator)) {
-            component.setItemDescriptionGenerator(itemDescriptionGenerator::apply,
+    public void setDescriptionProvider(Function<? super E, String> provider, ContentMode contentMode) {
+        descriptionProvider = provider;
+        if (provider != null) {
+            component.setItemDescriptionGenerator(descriptionProvider::apply,
                     WebWrapperUtils.toVaadinContentMode(contentMode));
         } else {
             component.setItemDescriptionGenerator(null);
@@ -953,8 +953,8 @@ public class WebTree<E extends Entity>
 
     @SuppressWarnings("unchecked")
     @Override
-    public Function<E, String> getItemDescriptionGenerator() {
-        return (Function<E, String>) itemDescriptionGenerator;
+    public Function<E, String> getDescriptionProvider() {
+        return (Function<E, String>) descriptionProvider;
     }
 
     @SuppressWarnings("unchecked")
@@ -967,13 +967,12 @@ public class WebTree<E extends Entity>
     @Override
     public void setDetailsGenerator(Tree.DetailsGenerator<? super E> generator) {
         detailsGenerator = generator;
-        component.getCompositionRoot().setDetailsGenerator(Objects.nonNull(generator) ? this::getItemDetails : null);
+        component.getCompositionRoot().setDetailsGenerator(generator != null ? this::getItemDetails : null);
     }
 
     protected com.vaadin.ui.Component getItemDetails(E entity) {
-        return Optional.ofNullable(detailsGenerator.getDetails(entity))
-                .map(c -> c.unwrapComposition(com.vaadin.ui.Component.class))
-                .orElse(null);
+        Component detailsComponent = detailsGenerator.getDetails(entity);
+        return detailsComponent != null ? detailsComponent.unwrapComposition(com.vaadin.ui.Component.class) : null;
     }
 
     @Override
