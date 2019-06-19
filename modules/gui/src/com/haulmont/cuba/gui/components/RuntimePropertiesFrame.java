@@ -270,7 +270,7 @@ public class RuntimePropertiesFrame extends AbstractFrame {
     protected Field.Validator getValidator(MetaProperty property) {
         Field.Validator validator = null;
         if (property.getRange().isDatatype()
-                && BooleanUtils.isFalse(DynamicAttributesUtils.getCategoryAttribute(property).getIsCollection())) {
+                && !Boolean.TRUE.equals(DynamicAttributesUtils.getCategoryAttribute(property).getIsCollection())) {
             Class type = property.getRange().asDatatype().getJavaClass();
 
             if (type.equals(Integer.class)) {
