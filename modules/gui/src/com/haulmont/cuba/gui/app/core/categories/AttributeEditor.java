@@ -61,6 +61,7 @@ import org.apache.commons.text.TextStringBuilder;
 import org.dom4j.Element;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -72,7 +73,8 @@ import static java.lang.String.format;
 public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
     protected static final Multimap<PropertyType, String> FIELDS_VISIBLE_FOR_DATATYPES = ArrayListMultimap.create();
-    protected static final Set<String> ALWAYS_VISIBLE_FIELDS = ImmutableSet.of("name", "code", "required", "dataType", "description");
+    protected static final Set<String> ALWAYS_VISIBLE_FIELDS = ImmutableSet.of("name", "code", "required", "dataType",
+            "description", "validatorGroovyScript", "validatorErrorMessage");
     protected static final String WHERE = " where ";
 
     static {
@@ -82,9 +84,18 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "rowsCount");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "defaultDouble");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "minDouble");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "maxDouble");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "isCollection");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "defaultDecimal");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "minDecimal");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "maxDecimal");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "width");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "defaultInt");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "minInt");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "maxInt");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "defaultDate");
@@ -179,6 +190,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected ListEditor<String> enumerationListEditor;
     protected SourceCodeEditor joinField;
     protected SourceCodeEditor whereField;
+
+    protected TextField<String> validatorErrorMessageField;
+    protected SourceCodeEditor validatorGroovyScriptField;
 
     @Inject
     protected FilterParser filterParser;
@@ -404,6 +418,24 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
                 dynamicAttributesGuiTools.initEntityPickerField(defaultEntityField, attribute);
             }
         });
+
+        attributeFieldGroup.addCustomField("validatorGroovyScript", (datasource, propertyId) -> {
+            validatorGroovyScriptField = uiComponents.create(SourceCodeEditor.class);
+            validatorGroovyScriptField.setDatasource(attributeDs, "validatorGroovyScript");
+            validatorGroovyScriptField.setWidthFull();
+            validatorGroovyScriptField.setHeight(themeConstants.get("cuba.gui.AttributeEditor.validatorGroovyScriptField.height"));
+            validatorGroovyScriptField.setHighlightActiveLine(false);
+            validatorGroovyScriptField.setShowGutter(false);
+            return validatorGroovyScriptField;
+        });
+
+        attributeFieldGroup.addCustomField("validatorErrorMessage", (datasource, propertyId) -> {
+            validatorErrorMessageField = uiComponents.create(TextField.TYPE_STRING);
+            validatorErrorMessageField.setMaxLength(255);
+            validatorErrorMessageField.setDatasource(datasource, "validatorErrorMessage");
+
+            return validatorErrorMessageField;
+        });
     }
 
     public void openConstraintWizard() {
@@ -581,6 +613,30 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
     @Override
     public void postValidate(ValidationErrors errors) {
+        if (attribute.getDataType() == PropertyType.INTEGER
+                || attribute.getDataType() == PropertyType.DOUBLE
+                || attribute.getDataType() == PropertyType.DECIMAL) {
+            if (attribute.getMinValue() != null &&
+                    attribute.getMaxValue() != null &&
+                    compareNumbers(attribute.getDataType(), attribute.getMinValue(), attribute.getMaxValue()) > 0) {
+
+                errors.add(getMessage("minGreaterThanMax"));
+
+            } else if (attribute.getDefaultValue() != null) {
+                if (attribute.getMinValue() != null &&
+                        compareNumbers(attribute.getDataType(), attribute.getMinValue(), (Number) attribute.getDefaultValue()) > 0) {
+
+                    errors.add(getMessage("defaultLessThanMin"));
+                }
+
+                if (attribute.getMaxValue() != null &&
+                        compareNumbers(attribute.getDataType(), attribute.getMaxValue(), (Number) attribute.getDefaultValue()) < 0) {
+
+                    errors.add(getMessage("defaultGreaterThanMax"));
+                }
+            }
+        }
+
         @SuppressWarnings("unchecked")
         CollectionDatasource<CategoryAttribute, UUID> parent
                 = (CollectionDatasource<CategoryAttribute, UUID>) ((DatasourceImplementation) attributeDs).getParent();
@@ -692,5 +748,17 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         query = query.replace("{E}", entityAlias);
 
         return JpqlSuggestionFactory.requestHint(query, queryPosition, sender.getAutoCompleteSupport(), senderCursorPosition);
+    }
+
+    private int compareNumbers(PropertyType type, Number first, Number second) {
+        if (type == PropertyType.INTEGER) {
+            return Integer.compare((Integer) first, (Integer) second);
+        } else if (type == PropertyType.DOUBLE) {
+            return Double.compare((Double) first, (Double) second);
+        } else if (type == PropertyType.DECIMAL) {
+            return ((BigDecimal) first).compareTo((BigDecimal) second);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 }

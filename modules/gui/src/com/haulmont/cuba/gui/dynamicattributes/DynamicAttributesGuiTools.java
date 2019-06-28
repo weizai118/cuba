@@ -33,6 +33,7 @@ import com.haulmont.cuba.gui.WindowManager.OpenType;
 import com.haulmont.cuba.gui.WindowParams;
 import com.haulmont.cuba.gui.commonlookup.CommonLookupController;
 import com.haulmont.cuba.gui.components.PickerField;
+import com.haulmont.cuba.gui.components.validation.*;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
@@ -48,6 +49,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -76,6 +78,9 @@ public class DynamicAttributesGuiTools {
 
     @Inject
     protected Security security;
+
+    @Inject
+    protected BeanLocator beanLocator;
 
     /**
      * Enforce the datasource to change modified status if dynamic attribute is changed
@@ -340,5 +345,73 @@ public class DynamicAttributesGuiTools {
         if (reloadedEntity != null) {
             entity.setDynamicAttributes(reloadedEntity.getDynamicAttributes());
         }
+    }
+
+    public Collection<Consumer<?>> createValidators(CategoryAttribute attribute) {
+        Collection<Consumer<?>> validators;
+
+        switch (attribute.getDataType()) {
+            case INTEGER:
+                validators = createIntegerValidators(attribute);
+                break;
+            case DOUBLE:
+                validators = createDoubleValidators(attribute);
+                break;
+            case DECIMAL:
+                validators = createDecimalValidators(attribute);
+                break;
+            default:
+                validators = null;
+        }
+
+        // add custom groovy script validator
+        if (attribute.getValidatorGroovyScript() != null) {
+            if (validators == null) {
+                validators = new ArrayList<>();
+            }
+            GroovyScriptValidator validator;
+            if (Strings.isNullOrEmpty(attribute.getValidatorErrorMessage())) {
+                validator = beanLocator.getPrototype(GroovyScriptValidator.NAME, attribute.getValidatorGroovyScript());
+            } else {
+                validator = beanLocator.getPrototype(GroovyScriptValidator.NAME,
+                        attribute.getValidatorGroovyScript(), attribute.getValidatorErrorMessage());
+            }
+            validators.add(validator);
+        }
+
+        return validators;
+    }
+
+    protected Collection<Consumer<?>> createIntegerValidators(CategoryAttribute attribute) {
+        List<Consumer<?>> validators = new ArrayList<>();
+        if (attribute.getMinInt() != null) {
+            validators.add(beanLocator.getPrototype(MinValidator.NAME, attribute.getMinInt()));
+        }
+        if (attribute.getMaxInt() != null) {
+            validators.add(beanLocator.getPrototype(MaxValidator.NAME, attribute.getMaxInt()));
+        }
+        return validators;
+    }
+
+    protected Collection<Consumer<?>> createDoubleValidators(CategoryAttribute attribute) {
+        List<Consumer<?>> validators = new ArrayList<>();
+        if (attribute.getMinDouble() != null) {
+            validators.add(beanLocator.getPrototype(DoubleMinValidator.NAME, attribute.getMinDouble()));
+        }
+        if (attribute.getMaxDouble() != null) {
+            validators.add(beanLocator.getPrototype(DoubleMaxValidator.NAME, attribute.getMaxDouble()));
+        }
+        return validators;
+    }
+
+    protected Collection<Consumer<?>> createDecimalValidators(CategoryAttribute attribute) {
+        List<Consumer<?>> validators = new ArrayList<>();
+        if (attribute.getMinDecimal() != null) {
+            validators.add(beanLocator.getPrototype(DecimalMinValidator.NAME, attribute.getMinDecimal()));
+        }
+        if (attribute.getMaxDecimal() != null) {
+            validators.add(beanLocator.getPrototype(DecimalMaxValidator.NAME, attribute.getMaxDecimal()));
+        }
+        return validators;
     }
 }

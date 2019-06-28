@@ -92,4 +92,7 @@ public interface ListEditorDelegate<V> {
 
     void setOptionCaptionProvider(Function<? super V, String> optionCaptionProvider);
     Function<? super V, String> getOptionCaptionProvider();
+
+    void addChildComponentValidator(Consumer<? super V> validator);
+    List<Consumer<? super V>> getChildComponentValidators();
 }

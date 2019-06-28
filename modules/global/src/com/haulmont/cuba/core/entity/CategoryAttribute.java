@@ -34,6 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Entity(name = "sys$CategoryAttribute")
@@ -107,6 +108,9 @@ public class CategoryAttribute extends StandardEntity {
     @Column(name = "DEFAULT_DOUBLE")
     private Double defaultDouble;
 
+    @Column(name = "DEFAULT_DECIMAL", precision = 36, scale = 10)
+    private BigDecimal defaultDecimal;
+
     @Column(name = "DEFAULT_BOOLEAN")
     private Boolean defaultBoolean;
 
@@ -118,6 +122,24 @@ public class CategoryAttribute extends StandardEntity {
 
     @Column(name = "DEFAULT_DATE_IS_CURRENT")
     private Boolean defaultDateIsCurrent;
+
+    @Column(name = "MIN_INT")
+    private Integer minInt;
+
+    @Column(name = "MIN_DOUBLE")
+    private Double minDouble;
+
+    @Column(name = "MIN_DECIMAL", precision = 36, scale = 10)
+    private BigDecimal minDecimal;
+
+    @Column(name = "MAX_INT")
+    private Integer maxInt;
+
+    @Column(name = "MAX_DOUBLE")
+    private Double maxDouble;
+
+    @Column(name = "MAX_DECIMAL", precision = 36, scale = 10)
+    private BigDecimal maxDecimal;
 
     @Column(name = "WIDTH", length = 20)
     private String width;
@@ -145,6 +167,13 @@ public class CategoryAttribute extends StandardEntity {
 
     @Column(name = "ENUMERATION_LOCALES")
     protected String enumerationLocales;
+
+    @Lob
+    @Column(name = "VALIDATOR_GROOVY_SCRIPT")
+    protected String validatorGroovyScript;
+
+    @Column(name = "VALIDATOR_ERROR_MESSAGE")
+    protected String validatorErrorMessage;
 
     @Transient
     @MetaProperty(related = {"localeNames", "name"})
@@ -240,6 +269,14 @@ public class CategoryAttribute extends StandardEntity {
         this.defaultDouble = defaultDouble;
     }
 
+    public BigDecimal getDefaultDecimal() {
+        return defaultDecimal;
+    }
+
+    public void setDefaultDecimal(BigDecimal defaultDecimal) {
+        this.defaultDecimal = defaultDecimal;
+    }
+
     public Boolean getDefaultBoolean() {
         return defaultBoolean;
     }
@@ -269,12 +306,85 @@ public class CategoryAttribute extends StandardEntity {
             switch (PropertyType.fromId(dataType)) {
                 case INTEGER: return defaultInt;
                 case DOUBLE: return defaultDouble;
+                case DECIMAL: return defaultDecimal;
                 case BOOLEAN: return defaultBoolean;
                 case DATE: return defaultDate;
                 case DATE_WITHOUT_TIME: return defaultDateWithoutTime;
                 case STRING: return defaultString;
                 case ENUMERATION: return defaultString;
                 case ENTITY: return getObjectDefaultEntityId();
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    public Integer getMinInt() {
+        return minInt;
+    }
+
+    public void setMinInt(Integer minInt) {
+        this.minInt = minInt;
+    }
+
+    public Double getMinDouble() {
+        return minDouble;
+    }
+
+    public void setMinDouble(Double minDouble) {
+        this.minDouble = minDouble;
+    }
+
+    public BigDecimal getMinDecimal() {
+        return minDecimal;
+    }
+
+    public void setMinDecimal(BigDecimal minDecimal) {
+        this.minDecimal = minDecimal;
+    }
+
+    public Integer getMaxInt() {
+        return maxInt;
+    }
+
+    public void setMaxInt(Integer maxInt) {
+        this.maxInt = maxInt;
+    }
+
+    public Double getMaxDouble() {
+        return maxDouble;
+    }
+
+    public void setMaxDouble(Double maxDouble) {
+        this.maxDouble = maxDouble;
+    }
+
+    public BigDecimal getMaxDecimal() {
+        return maxDecimal;
+    }
+
+    public void setMaxDecimal(BigDecimal maxDecimal) {
+        this.maxDecimal = maxDecimal;
+    }
+
+    public Number getMinValue() {
+        if (dataType != null) {
+            switch (PropertyType.fromId(dataType)) {
+                case INTEGER: return minInt;
+                case DOUBLE: return minDouble;
+                case DECIMAL: return minDecimal;
+                default: return null;
+            }
+        }
+        return null;
+    }
+
+    public Number getMaxValue() {
+        if (dataType != null) {
+            switch (PropertyType.fromId(dataType)) {
+                case INTEGER: return maxInt;
+                case DOUBLE: return maxDouble;
+                case DECIMAL: return maxDecimal;
                 default: return null;
             }
         }
@@ -399,6 +509,22 @@ public class CategoryAttribute extends StandardEntity {
 
     public void setFilterXml(String filterXml) {
         this.filterXml = filterXml;
+    }
+
+    public String getValidatorGroovyScript() {
+        return validatorGroovyScript;
+    }
+
+    public void setValidatorGroovyScript(String validatorGroovyScript) {
+        this.validatorGroovyScript = validatorGroovyScript;
+    }
+
+    public String getValidatorErrorMessage() {
+        return validatorErrorMessage;
+    }
+
+    public void setValidatorErrorMessage(String validatorErrorMessage) {
+        this.validatorErrorMessage = validatorErrorMessage;
     }
 
     public Set<String> targetScreensSet() {

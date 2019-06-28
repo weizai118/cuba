@@ -5,39 +5,12 @@
 
 package com.haulmont.cuba.gui.components.validation.numbers;
 
-import java.math.BigDecimal;
-
 public class DoubleConstraint implements NumberConstraint {
 
     protected Double value;
 
     public DoubleConstraint(Double value) {
         this.value = value;
-    }
-
-    @Override
-    public boolean isMax(long max) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isMin(long min) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isDigits(int integer, int fraction) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isDecimalMax(BigDecimal max, boolean inclusive) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isDecimalMin(BigDecimal min, boolean inclusive) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -58,5 +31,27 @@ public class DoubleConstraint implements NumberConstraint {
     @Override
     public boolean isPositive() {
         return value > 0;
+    }
+
+    @Override
+    public boolean isDoubleMax(Double max, boolean inclusive) {
+        if (inclusive) {
+            return compareValueWith(max) <= 0;
+        } else {
+            return compareValueWith(max) < 0;
+        }
+    }
+
+    @Override
+    public boolean isDoubleMin(Double min, boolean inclusive) {
+        if (inclusive) {
+            return compareValueWith(min) >= 0;
+        } else {
+            return compareValueWith(min) > 0;
+        }
+    }
+
+    private int compareValueWith(Double val) {
+        return this.value.compareTo(val);
     }
 }

@@ -49,6 +49,7 @@ import java.time.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static com.haulmont.cuba.gui.components.DateField.Resolution;
 
@@ -144,6 +145,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
     protected Component createDatatypeLinkField(ComponentGenerationContext context) {
         EntityLinkField linkField = uiComponents.create(EntityLinkField.class);
 
+        setValidators(linkField, context);
         setValueSource(linkField, context);
         setLinkFieldAttributes(linkField, context);
 
@@ -152,12 +154,14 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
 
     protected Field createEnumField(ComponentGenerationContext context) {
         LookupField component = uiComponents.create(LookupField.class);
+        setValidators(component, context);
         setValueSource(component, context);
         return component;
     }
 
     protected Component createMaskedField(ComponentGenerationContext context) {
         MaskedField maskedField = uiComponents.create(MaskedField.class);
+        setValidators(maskedField, context);
         setValueSource(maskedField, context);
 
         Element xmlDescriptor = context.getXmlDescriptor();
@@ -202,6 +206,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
             textField = uiComponents.create(TextField.class);
         }
 
+        setValidators(textField, context);
         setValueSource(textField, context);
 
         String maxLength = xmlDescriptor != null ? xmlDescriptor.attributeValue("maxLength") : null;
@@ -214,6 +219,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
 
     protected Field createUuidField(ComponentGenerationContext context) {
         MaskedField maskedField = uiComponents.create(MaskedField.class);
+        setValidators(maskedField, context);
         setValueSource(maskedField, context);
         maskedField.setMask("hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh");
         maskedField.setSendNullRepresentation(false);
@@ -222,12 +228,14 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
 
     protected Field createBooleanField(ComponentGenerationContext context) {
         CheckBox component = uiComponents.create(CheckBox.class);
+        setValidators(component, context);
         setValueSource(component, context);
         return component;
     }
 
     protected Component createDateField(ComponentGenerationContext context) {
         DateField dateField = uiComponents.create(DateField.class);
+        setValidators(dateField, context);
         setValueSource(dateField, context);
 
         Element xmlDescriptor = context.getXmlDescriptor();
@@ -259,6 +267,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
 
     protected Component createTimeField(ComponentGenerationContext context) {
         TimeField timeField = uiComponents.create(TimeField.class);
+        setValidators(timeField, context);
         setValueSource(timeField, context);
 
         Element xmlDescriptor = context.getXmlDescriptor();
@@ -274,6 +283,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
 
     protected Field createNumberField(ComponentGenerationContext context) {
         TextField component = uiComponents.create(TextField.class);
+        setValidators(component, context);
         setValueSource(component, context);
         return component;
     }
@@ -378,6 +388,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
                     pickerField.setCaptionProperty(captionProperty);
                 }
             }
+            setValidators(pickerField, context);
 
             return pickerField;
         } else {
@@ -424,6 +435,29 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
     @SuppressWarnings("unchecked")
     protected void setValueSource(Field field, ComponentGenerationContext context) {
         field.setValueSource(context.getValueSource());
+    }
+
+    protected void setValidators(Field field, ComponentGenerationContext context) {
+        MetaClass metaClass = context.getMetaClass();
+        MetaPropertyPath mpp = resolveMetaPropertyPath(metaClass, context.getProperty());
+        MetaProperty metaProperty = mpp.getMetaProperty();
+
+        if (DynamicAttributesUtils.isDynamicAttribute(metaProperty)) {
+            CategoryAttribute categoryAttribute = DynamicAttributesUtils.getCategoryAttribute(metaProperty);
+            if (categoryAttribute != null && BooleanUtils.isNotTrue(categoryAttribute.getIsCollection())) {
+
+                DynamicAttributesGuiTools dynamicAttributesGuiTools =
+                        AppBeans.get(DynamicAttributesGuiTools.class);
+
+                Collection<Consumer<?>> validators = dynamicAttributesGuiTools.createValidators(categoryAttribute);
+                if (validators != null && !validators.isEmpty()) {
+                    for (Consumer<?> validator : validators) {
+                        //noinspection unchecked
+                        field.addValidator(validator);
+                    }
+                }
+            }
+        }
     }
 
     protected static class InvokeEntityLinkClickHandler implements EntityLinkField.EntityLinkClickHandler {

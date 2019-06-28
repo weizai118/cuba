@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.gui.components;
 
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.gui.components.Field;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.ListEditor;
@@ -29,10 +30,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -279,6 +277,16 @@ public class WebListEditor<V> extends WebV8AbstractField<WebListEditor.CubaListE
     @Override
     public TimeZone getTimeZone() {
         return delegate.getTimeZone();
+    }
+
+    @Override
+    public void addChildComponentValidator(Consumer<? super V> validator) {
+        delegate.addChildComponentValidator(validator);
+    }
+
+    @Override
+    public Collection<Consumer<? super V>> getChildComponentsValidators() {
+        return delegate.getChildComponentValidators();
     }
 
     @Override
