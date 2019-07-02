@@ -365,17 +365,12 @@ public class DynamicAttributesGuiTools {
         }
 
         // add custom groovy script validator
-        if (attribute.getValidatorGroovyScript() != null) {
+        if (attribute.getConfiguration().getValidatorGroovyScript() != null) {
             if (validators == null) {
                 validators = new ArrayList<>();
             }
-            GroovyScriptValidator validator;
-            if (Strings.isNullOrEmpty(attribute.getValidatorErrorMessage())) {
-                validator = beanLocator.getPrototype(GroovyScriptValidator.NAME, attribute.getValidatorGroovyScript());
-            } else {
-                validator = beanLocator.getPrototype(GroovyScriptValidator.NAME,
-                        attribute.getValidatorGroovyScript(), attribute.getValidatorErrorMessage());
-            }
+            GroovyScriptValidator validator = beanLocator.getPrototype(GroovyScriptValidator.NAME,
+                    attribute.getConfiguration().getValidatorGroovyScript());
             validators.add(validator);
         }
 
@@ -384,33 +379,33 @@ public class DynamicAttributesGuiTools {
 
     protected Collection<Consumer<?>> createIntegerValidators(CategoryAttribute attribute) {
         List<Consumer<?>> validators = new ArrayList<>();
-        if (attribute.getMinInt() != null) {
-            validators.add(beanLocator.getPrototype(MinValidator.NAME, attribute.getMinInt()));
+        if (attribute.getConfiguration().getMinInt() != null) {
+            validators.add(beanLocator.getPrototype(MinValidator.NAME, attribute.getConfiguration().getMinInt()));
         }
-        if (attribute.getMaxInt() != null) {
-            validators.add(beanLocator.getPrototype(MaxValidator.NAME, attribute.getMaxInt()));
+        if (attribute.getConfiguration().getMaxInt() != null) {
+            validators.add(beanLocator.getPrototype(MaxValidator.NAME, attribute.getConfiguration().getMaxInt()));
         }
         return validators;
     }
 
     protected Collection<Consumer<?>> createDoubleValidators(CategoryAttribute attribute) {
         List<Consumer<?>> validators = new ArrayList<>();
-        if (attribute.getMinDouble() != null) {
-            validators.add(beanLocator.getPrototype(DoubleMinValidator.NAME, attribute.getMinDouble()));
+        if (attribute.getConfiguration().getMinDouble() != null) {
+            validators.add(beanLocator.getPrototype(DoubleMinValidator.NAME, attribute.getConfiguration().getMinDouble()));
         }
-        if (attribute.getMaxDouble() != null) {
-            validators.add(beanLocator.getPrototype(DoubleMaxValidator.NAME, attribute.getMaxDouble()));
+        if (attribute.getConfiguration().getMaxDouble() != null) {
+            validators.add(beanLocator.getPrototype(DoubleMaxValidator.NAME, attribute.getConfiguration().getMaxDouble()));
         }
         return validators;
     }
 
     protected Collection<Consumer<?>> createDecimalValidators(CategoryAttribute attribute) {
         List<Consumer<?>> validators = new ArrayList<>();
-        if (attribute.getMinDecimal() != null) {
-            validators.add(beanLocator.getPrototype(DecimalMinValidator.NAME, attribute.getMinDecimal()));
+        if (attribute.getConfiguration().getMinDecimal() != null) {
+            validators.add(beanLocator.getPrototype(DecimalMinValidator.NAME, attribute.getConfiguration().getMinDecimal()));
         }
-        if (attribute.getMaxDecimal() != null) {
-            validators.add(beanLocator.getPrototype(DecimalMaxValidator.NAME, attribute.getMaxDecimal()));
+        if (attribute.getConfiguration().getMaxDecimal() != null) {
+            validators.add(beanLocator.getPrototype(DecimalMaxValidator.NAME, attribute.getConfiguration().getMaxDecimal()));
         }
         return validators;
     }

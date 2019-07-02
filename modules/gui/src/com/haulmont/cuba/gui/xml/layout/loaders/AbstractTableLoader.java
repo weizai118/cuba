@@ -300,9 +300,15 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
 
                     Table.Column column = new Table.Column(metaPropertyPath);
 
-                    column.setCaption(LocaleHelper.isLocalizedValueDefined(attribute.getLocaleNames()) ?
-                            attribute.getLocaleName() :
-                            StringUtils.capitalize(attribute.getName()));
+                    String caption;
+                    if (!Strings.isNullOrEmpty(attribute.getConfiguration().getColumnName())) {
+                        caption = attribute.getConfiguration().getColumnName();
+                    } else if (LocaleHelper.isLocalizedValueDefined(attribute.getLocaleNames())) {
+                        caption = attribute.getLocaleName();
+                    } else {
+                        caption = StringUtils.capitalize(attribute.getName());
+                    }
+                    column.setCaption(caption);
 
                     column.setDescription(attribute.getLocaleDescription());
 
@@ -317,7 +323,16 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
                                 LocaleHelper.getEnumLocalizedValue((String) value, attribute.getEnumerationLocales())
                         );
                     }
+
+                    if (!Strings.isNullOrEmpty(attribute.getConfiguration().getColumnAlignment())) {
+                        column.setAlignment(Table.ColumnAlignment.valueOf(attribute.getConfiguration().getColumnAlignment()));
+                    }
+
                     component.addColumn(column);
+
+                    if (attribute.getConfiguration().getColumnWidth() != null) {
+                        column.setWidth(attribute.getConfiguration().getColumnWidth());
+                    }
                 }
             }
 

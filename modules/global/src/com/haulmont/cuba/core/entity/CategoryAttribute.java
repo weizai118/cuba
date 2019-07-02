@@ -18,6 +18,8 @@
 package com.haulmont.cuba.core.entity;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import com.haulmont.bali.util.ReflectionHelper;
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
@@ -123,24 +125,6 @@ public class CategoryAttribute extends StandardEntity {
     @Column(name = "DEFAULT_DATE_IS_CURRENT")
     private Boolean defaultDateIsCurrent;
 
-    @Column(name = "MIN_INT")
-    private Integer minInt;
-
-    @Column(name = "MIN_DOUBLE")
-    private Double minDouble;
-
-    @Column(name = "MIN_DECIMAL", precision = 36, scale = 10)
-    private BigDecimal minDecimal;
-
-    @Column(name = "MAX_INT")
-    private Integer maxInt;
-
-    @Column(name = "MAX_DOUBLE")
-    private Double maxDouble;
-
-    @Column(name = "MAX_DECIMAL", precision = 36, scale = 10)
-    private BigDecimal maxDecimal;
-
     @Column(name = "WIDTH", length = 20)
     private String width;
 
@@ -169,11 +153,8 @@ public class CategoryAttribute extends StandardEntity {
     protected String enumerationLocales;
 
     @Lob
-    @Column(name = "VALIDATOR_GROOVY_SCRIPT")
-    protected String validatorGroovyScript;
-
-    @Column(name = "VALIDATOR_ERROR_MESSAGE")
-    protected String validatorErrorMessage;
+    @Column(name = "ATTRIBUTE_CONFIGURATION_JSON")
+    protected String attributeConfigurationJson;
 
     @Transient
     @MetaProperty(related = {"localeNames", "name"})
@@ -186,6 +167,9 @@ public class CategoryAttribute extends StandardEntity {
     @Transient
     @MetaProperty(related = "enumerationLocales")
     protected String enumerationLocale;
+
+    @Transient
+    protected CategoryAttributeConfiguration configuration;
 
     @PostConstruct
     public void init() {
@@ -319,78 +303,6 @@ public class CategoryAttribute extends StandardEntity {
         return null;
     }
 
-    public Integer getMinInt() {
-        return minInt;
-    }
-
-    public void setMinInt(Integer minInt) {
-        this.minInt = minInt;
-    }
-
-    public Double getMinDouble() {
-        return minDouble;
-    }
-
-    public void setMinDouble(Double minDouble) {
-        this.minDouble = minDouble;
-    }
-
-    public BigDecimal getMinDecimal() {
-        return minDecimal;
-    }
-
-    public void setMinDecimal(BigDecimal minDecimal) {
-        this.minDecimal = minDecimal;
-    }
-
-    public Integer getMaxInt() {
-        return maxInt;
-    }
-
-    public void setMaxInt(Integer maxInt) {
-        this.maxInt = maxInt;
-    }
-
-    public Double getMaxDouble() {
-        return maxDouble;
-    }
-
-    public void setMaxDouble(Double maxDouble) {
-        this.maxDouble = maxDouble;
-    }
-
-    public BigDecimal getMaxDecimal() {
-        return maxDecimal;
-    }
-
-    public void setMaxDecimal(BigDecimal maxDecimal) {
-        this.maxDecimal = maxDecimal;
-    }
-
-    public Number getMinValue() {
-        if (dataType != null) {
-            switch (PropertyType.fromId(dataType)) {
-                case INTEGER: return minInt;
-                case DOUBLE: return minDouble;
-                case DECIMAL: return minDecimal;
-                default: return null;
-            }
-        }
-        return null;
-    }
-
-    public Number getMaxValue() {
-        if (dataType != null) {
-            switch (PropertyType.fromId(dataType)) {
-                case INTEGER: return maxInt;
-                case DOUBLE: return maxDouble;
-                case DECIMAL: return maxDecimal;
-                default: return null;
-            }
-        }
-        return null;
-    }
-
     public void setObjectDefaultEntityId(Object entity) {
         defaultEntity.setObjectEntityId(entity);
     }
@@ -511,22 +423,6 @@ public class CategoryAttribute extends StandardEntity {
         this.filterXml = filterXml;
     }
 
-    public String getValidatorGroovyScript() {
-        return validatorGroovyScript;
-    }
-
-    public void setValidatorGroovyScript(String validatorGroovyScript) {
-        this.validatorGroovyScript = validatorGroovyScript;
-    }
-
-    public String getValidatorErrorMessage() {
-        return validatorErrorMessage;
-    }
-
-    public void setValidatorErrorMessage(String validatorErrorMessage) {
-        this.validatorErrorMessage = validatorErrorMessage;
-    }
-
     public Set<String> targetScreensSet() {
         if (StringUtils.isNotBlank(targetScreens)) {
             return new HashSet<>(Arrays.asList(targetScreens.split(",")));
@@ -614,5 +510,30 @@ public class CategoryAttribute extends StandardEntity {
             map.put(LocaleHelper.getEnumLocalizedValue(s, enumerationLocales), s);
         }
         return map;
+    }
+
+    public String getAttributeConfigurationJson() {
+        return attributeConfigurationJson;
+    }
+
+    public void setAttributeConfigurationJson(String attributeConfigurationJson) {
+        this.attributeConfigurationJson = attributeConfigurationJson;
+    }
+
+    @MetaProperty
+    public CategoryAttributeConfiguration getConfiguration() {
+        if (configuration == null) {
+            if (!Strings.isNullOrEmpty(attributeConfigurationJson)) {
+                configuration = new Gson().fromJson(attributeConfigurationJson, CategoryAttributeConfiguration.class);
+            } else {
+                configuration = new CategoryAttributeConfiguration();
+            }
+            configuration.setCategoryAttribute(this);
+        }
+        return configuration;
+    }
+
+    public void setConfiguration(CategoryAttributeConfiguration configuration) {
+        this.configuration = configuration;
     }
 }

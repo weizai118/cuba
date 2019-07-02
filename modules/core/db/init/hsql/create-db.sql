@@ -736,12 +736,6 @@ create table SYS_CATEGORY_ATTR(
     DEFAULT_STR_ENTITY_VALUE varchar(255),
     DEFAULT_INT_ENTITY_VALUE integer,
     DEFAULT_LONG_ENTITY_VALUE bigint,
-    MIN_INT integer,
-    MIN_DOUBLE numeric(36,6),
-    MIN_DECIMAL numeric(36,10),
-    MAX_INT integer,
-    MAX_DOUBLE numeric(36,6),
-    MAX_DECIMAL numeric(36,10),
     ENUMERATION varchar(500),
     ORDER_NO integer,
     SCREEN varchar(255),
@@ -757,8 +751,7 @@ create table SYS_CATEGORY_ATTR(
     LOCALE_NAMES varchar(1000),
     LOCALE_DESCRIPTIONS varchar(4000),
     ENUMERATION_LOCALES varchar(5000),
-    VALIDATOR_GROOVY_SCRIPT longvarchar,
-    VALIDATOR_ERROR_MESSAGE varchar(255),
+    ATTRIBUTE_CONFIGURATION_JSON longvarchar,
     --
     primary key (ID)
 )^

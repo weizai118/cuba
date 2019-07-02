@@ -90,12 +90,6 @@ create table SYS_CATEGORY_ATTR (
     DEFAULT_STR_ENTITY_VALUE varchar2(255),
     DEFAULT_INT_ENTITY_VALUE integer,
     DEFAULT_LONG_ENTITY_VALUE number,
-    MIN_INT integer,
-    MIN_DOUBLE numeric(36,6),
-    MIN_DECIMAL numeric(36,10),
-    MAX_INT integer,
-    MAX_DOUBLE numeric(36,6),
-    MAX_DECIMAL numeric(36,10),
     ENUMERATION varchar2(500),
     ORDER_NO integer,
     SCREEN varchar2(255),
@@ -111,8 +105,7 @@ create table SYS_CATEGORY_ATTR (
     LOCALE_NAMES varchar2(1000),
     ENUMERATION_LOCALES clob,
     LOCALE_DESCRIPTIONS varchar2(4000),
-    VALIDATOR_GROOVY_SCRIPT clob,
-    VALIDATOR_ERROR_MESSAGE varchar2(255),
+    ATTRIBUTE_CONFIGURATION_JSON clob,
 
     primary key(ID)
 )^

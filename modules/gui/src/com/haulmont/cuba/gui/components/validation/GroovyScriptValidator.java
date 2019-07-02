@@ -32,8 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * GroovyScript validator runs a custom Groovy script. If the script returns {@code false},
- * then {@link ValidationException} is thrown.
+ * GroovyScript validator runs a custom Groovy script. If the script returns any object,
+ * then {@link ValidationException} is thrown. {@code scriptResult.toString()} is used as error message.
  * <p>
  * For error message it uses Groovy string and it is possible to use '$value' key for formatted output.
  * <p>
@@ -81,19 +81,6 @@ public class GroovyScriptValidator<T> extends AbstractValidator<T> {
         this.validatorGroovyScript = validatorGroovyScript;
     }
 
-    /**
-     * Constructor with custom error message. This message can contain '$value' key for formatted output.
-     * <p>
-     * Example: "Value '$value' is incorrect".
-     *
-     * @param validatorGroovyScript groovy script with {V} macro
-     * @param message error message
-     */
-    public GroovyScriptValidator(String validatorGroovyScript, String message) {
-        this.validatorGroovyScript = validatorGroovyScript;
-        this.message = message;
-    }
-
     @Override
     public void accept(T value) throws ValidationException {
         // consider null value is valid
@@ -106,7 +93,8 @@ public class GroovyScriptValidator<T> extends AbstractValidator<T> {
 
         Object scriptResult = scripting.evaluateGroovy(validatorGroovyScript.replace("{V}", "__value__"), context);
 
-        if (Boolean.FALSE.equals(scriptResult)) {
+        if (scriptResult != null) {
+            setMessage(scriptResult.toString());
             fireValidationException(value);
         }
     }

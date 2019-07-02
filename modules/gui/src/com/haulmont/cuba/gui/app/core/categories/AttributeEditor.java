@@ -24,12 +24,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.gson.Gson;
 import com.haulmont.bali.util.Dom4j;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
+import com.haulmont.cuba.core.entity.CategoryAttributeConfiguration;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.HasUuid;
 import com.haulmont.cuba.core.global.*;
@@ -74,7 +76,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
     protected static final Multimap<PropertyType, String> FIELDS_VISIBLE_FOR_DATATYPES = ArrayListMultimap.create();
     protected static final Set<String> ALWAYS_VISIBLE_FIELDS = ImmutableSet.of("name", "code", "required", "dataType",
-            "description", "validatorGroovyScript", "validatorErrorMessage");
+            "description", "configuration.validatorGroovyScript");
     protected static final String WHERE = " where ";
 
     static {
@@ -84,18 +86,18 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "rowsCount");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.STRING, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "defaultDouble");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "minDouble");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "maxDouble");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "configuration.minDouble");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "configuration.maxDouble");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DOUBLE, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "defaultDecimal");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "minDecimal");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "maxDecimal");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "configuration.minDecimal");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "configuration.maxDecimal");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "defaultInt");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "minInt");
-        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "maxInt");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "configuration.minInt");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "configuration.maxInt");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "isCollection");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DATE, "defaultDate");
@@ -126,16 +128,23 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     @Inject
     protected FieldGroup attributeFieldGroup;
 
+    @Inject
+    protected FieldGroup columnSettingsFieldGroup;
+
     protected LookupField<PropertyType> dataTypeField;
     protected LookupField<String> screenField;
     protected LookupField<String> entityTypeField;
     protected PickerField<Entity> defaultEntityField;
     protected TextArea<String> descriptionField;
+    protected LookupField<String> columnAlignmentField;
 
     protected String fieldWidth;
 
     @Inject
     protected Datasource<CategoryAttribute> attributeDs;
+
+    @Inject
+    protected Datasource<CategoryAttributeConfiguration> configurationDs;
 
     @Inject
     protected UiComponents uiComponents;
@@ -191,8 +200,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected SourceCodeEditor joinField;
     protected SourceCodeEditor whereField;
 
-    protected TextField<String> validatorErrorMessageField;
+    protected HBoxLayout hBoxLayoutField;
     protected SourceCodeEditor validatorGroovyScriptField;
+    protected LinkButton validatorHelpLinkBtn;
 
     @Inject
     protected FilterParser filterParser;
@@ -205,6 +215,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
         initLocalizedFrame();
         initFieldGroup();
+        initColumnSettingsFieldGroup();
 
         Action createAction = initCreateScreenAndComponentAction();
         targetScreensTable.addAction(createAction);
@@ -419,22 +430,51 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             }
         });
 
-        attributeFieldGroup.addCustomField("validatorGroovyScript", (datasource, propertyId) -> {
+        configurationDs.addItemPropertyChangeListener(e -> {
+            ((DatasourceImplementation) attributeDs).modified(attribute);
+        });
+
+        attributeFieldGroup.addCustomField("configuration.validatorGroovyScript", (datasource, propertyId) -> {
+
             validatorGroovyScriptField = uiComponents.create(SourceCodeEditor.class);
-            validatorGroovyScriptField.setDatasource(attributeDs, "validatorGroovyScript");
+            validatorGroovyScriptField.setMode(SourceCodeEditor.Mode.Groovy);
+            validatorGroovyScriptField.setDatasource(attributeDs, "configuration.validatorGroovyScript");
             validatorGroovyScriptField.setWidthFull();
             validatorGroovyScriptField.setHeight(themeConstants.get("cuba.gui.AttributeEditor.validatorGroovyScriptField.height"));
             validatorGroovyScriptField.setHighlightActiveLine(false);
             validatorGroovyScriptField.setShowGutter(false);
-            return validatorGroovyScriptField;
+
+            validatorHelpLinkBtn = uiComponents.create(LinkButton.class);
+            validatorHelpLinkBtn.setIcon("icons/question-white.png");
+            validatorHelpLinkBtn.addClickListener(event -> showMessageDialog(getMessage("validatorScript"), getMessage("validatorScriptHelp"),
+                    MessageType.CONFIRMATION_HTML
+                            .modal(false)
+                            .width(560f)));
+
+            hBoxLayoutField = uiComponents.create(HBoxLayout.class);
+            hBoxLayoutField.setWidthFull();
+            hBoxLayoutField.add(validatorGroovyScriptField, validatorHelpLinkBtn);
+            hBoxLayoutField.expand(validatorGroovyScriptField);
+
+            return hBoxLayoutField;
         });
+    }
 
-        attributeFieldGroup.addCustomField("validatorErrorMessage", (datasource, propertyId) -> {
-            validatorErrorMessageField = uiComponents.create(TextField.TYPE_STRING);
-            validatorErrorMessageField.setMaxLength(255);
-            validatorErrorMessageField.setDatasource(datasource, "validatorErrorMessage");
+    protected void initColumnSettingsFieldGroup() {
+        columnSettingsFieldGroup.addCustomField("configuration.columnAlignment", (datasource, propertyId) -> {
+            columnAlignmentField = uiComponents.create(LookupField.NAME);
+            columnAlignmentField.setDatasource(datasource, "configuration.columnAlignment");
+            columnAlignmentField.setWidth(fieldWidth);
+            columnAlignmentField.setFrame(frame);
 
-            return validatorErrorMessageField;
+            List<String> options = new ArrayList<>();
+            for (Table.ColumnAlignment alignment : Table.ColumnAlignment.values()) {
+                options.add(alignment.name());
+            }
+
+            columnAlignmentField.setOptionsList(options);
+
+            return columnAlignmentField;
         });
     }
 
@@ -608,6 +648,10 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             attribute.setLocaleDescriptions(localizedFrame.getDescriptionsValue());
         }
 
+        if (getDsContext().isModified()) {
+            attribute.setAttributeConfigurationJson(new Gson().toJson(configurationDs.getItem()));
+        }
+
         return true;
     }
 
@@ -616,21 +660,25 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         if (attribute.getDataType() == PropertyType.INTEGER
                 || attribute.getDataType() == PropertyType.DOUBLE
                 || attribute.getDataType() == PropertyType.DECIMAL) {
-            if (attribute.getMinValue() != null &&
-                    attribute.getMaxValue() != null &&
-                    compareNumbers(attribute.getDataType(), attribute.getMinValue(), attribute.getMaxValue()) > 0) {
+            if (attribute.getConfiguration().getMinValue() != null &&
+                    attribute.getConfiguration().getMaxValue() != null &&
+                    compareNumbers(attribute.getDataType(),
+                            attribute.getConfiguration().getMinValue(),
+                            attribute.getConfiguration().getMaxValue()) > 0) {
 
                 errors.add(getMessage("minGreaterThanMax"));
 
             } else if (attribute.getDefaultValue() != null) {
-                if (attribute.getMinValue() != null &&
-                        compareNumbers(attribute.getDataType(), attribute.getMinValue(), (Number) attribute.getDefaultValue()) > 0) {
+                if (attribute.getConfiguration().getMinValue() != null &&
+                        compareNumbers(attribute.getDataType(), attribute.getConfiguration().getMinValue(),
+                                (Number) attribute.getDefaultValue()) > 0) {
 
                     errors.add(getMessage("defaultLessThanMin"));
                 }
 
-                if (attribute.getMaxValue() != null &&
-                        compareNumbers(attribute.getDataType(), attribute.getMaxValue(), (Number) attribute.getDefaultValue()) < 0) {
+                if (attribute.getConfiguration().getMaxValue() != null &&
+                        compareNumbers(attribute.getDataType(),
+                                attribute.getConfiguration().getMaxValue(), (Number) attribute.getDefaultValue()) < 0) {
 
                     errors.add(getMessage("defaultGreaterThanMax"));
                 }
