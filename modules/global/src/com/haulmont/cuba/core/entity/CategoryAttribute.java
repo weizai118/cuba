@@ -520,6 +520,7 @@ public class CategoryAttribute extends StandardEntity {
         this.attributeConfigurationJson = attributeConfigurationJson;
     }
 
+    @Transient
     @MetaProperty
     public CategoryAttributeConfiguration getConfiguration() {
         if (configuration == null) {
@@ -531,9 +532,5 @@ public class CategoryAttribute extends StandardEntity {
             configuration.setCategoryAttribute(this);
         }
         return configuration;
-    }
-
-    public void setConfiguration(CategoryAttributeConfiguration configuration) {
-        this.configuration = configuration;
     }
 }

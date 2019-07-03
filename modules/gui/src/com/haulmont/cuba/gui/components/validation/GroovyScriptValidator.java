@@ -99,18 +99,13 @@ public class GroovyScriptValidator<T> extends AbstractValidator<T> {
         }
     }
 
-    protected String getDefaultMessage() {
-        return messages.getMainMessage("validation.constraints.customGroovyScript");
-    }
-
     protected void fireValidationException(T value) {
         String message = getMessage();
 
         String formattedValue = formatValue(value);
 
         String formattedMessage = getTemplateErrorMessage(
-                message == null ? getDefaultMessage() : message,
-                ParamsMap.of("value", formattedValue));
+                message, ParamsMap.of("value", formattedValue));
 
         throw new ValidationException(formattedMessage);
     }

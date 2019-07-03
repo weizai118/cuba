@@ -181,6 +181,9 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
 
     @Override
     public String getId() {
+        if (id == null) {
+            return categoryAttribute.getId().toString() + "-Configuration";
+        }
         return id;
     }
 }
