@@ -70,6 +70,8 @@
                         <field id="defaultDateWithoutTime" width="100%"/>
                         <field id="defaultDateIsCurrent" width="100%"/>
 
+                        <field id="configuration.numberFormatPattern" width="100%"/>
+
                         <field id="configuration.minInt" width="100%"/>
                         <field id="configuration.minDouble" width="100%"/>
                         <field id="configuration.minDecimal" width="100%"/>

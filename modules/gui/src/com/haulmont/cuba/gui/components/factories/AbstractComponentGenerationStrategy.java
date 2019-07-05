@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.components.factories;
 
+import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
@@ -122,7 +123,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
                     return currencyField;
                 }
 
-                return createNumberField(context);
+                return createNumberField(context, type);
             }
         } else if (mppRange.isClass()) {
             MetaProperty metaProperty = mpp.getMetaProperty();
@@ -281,10 +282,12 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
         return timeField;
     }
 
-    protected Field createNumberField(ComponentGenerationContext context) {
+    protected Field createNumberField(ComponentGenerationContext context, Class<?> type) {
         TextField component = uiComponents.create(TextField.class);
         setValidators(component, context);
+        setCustomDataType(component, context, type);
         setValueSource(component, context);
+
         return component;
     }
 
@@ -338,8 +341,7 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
                 DynamicAttributesMetaProperty metaProperty = (DynamicAttributesMetaProperty) mpp.getMetaProperty();
                 CategoryAttribute attribute = metaProperty.getAttribute();
                 if (Boolean.TRUE.equals(attribute.getLookup())) {
-                    DynamicAttributesGuiTools dynamicAttributesGuiTools = AppBeans.get(DynamicAttributesGuiTools.class);
-                    CollectionDatasource optionsDatasource = dynamicAttributesGuiTools
+                    CollectionDatasource optionsDatasource = getDynamicAttributesGuiTools()
                             .createOptionsDatasourceForLookup(metaProperty.getRange().asClass(),
                                     attribute.getJoinClause(), attribute.getWhereClause());
                     options = new DatasourceOptions<>(optionsDatasource);
@@ -354,12 +356,9 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
                 if (mpp.getMetaProperty().getType() == MetaProperty.Type.ASSOCIATION) {
                     pickerField.addLookupAction();
                     if (DynamicAttributesUtils.isDynamicAttribute(mpp.getMetaProperty())) {
-                        // todo use injection instead
-                        DynamicAttributesGuiTools dynamicAttributesGuiTools =
-                                AppBeans.get(DynamicAttributesGuiTools.class);
                         DynamicAttributesMetaProperty dynamicAttributesMetaProperty =
                                 (DynamicAttributesMetaProperty) mpp.getMetaProperty();
-                        dynamicAttributesGuiTools.initEntityPickerField(pickerField,
+                        getDynamicAttributesGuiTools().initEntityPickerField(pickerField,
                                 dynamicAttributesMetaProperty.getAttribute());
                     }
                     boolean actionsByMetaAnnotations = ComponentsHelper.createActionsByMetaAnnotations(pickerField);
@@ -438,26 +437,44 @@ public abstract class AbstractComponentGenerationStrategy implements ComponentGe
     }
 
     protected void setValidators(Field field, ComponentGenerationContext context) {
+        CategoryAttribute categoryAttribute = getCategoryAttribute(context);
+
+        if (categoryAttribute != null && BooleanUtils.isNotTrue(categoryAttribute.getIsCollection())) {
+
+            Collection<Consumer<?>> validators = getDynamicAttributesGuiTools().createValidators(categoryAttribute);
+            if (validators != null && !validators.isEmpty()) {
+                for (Consumer<?> validator : validators) {
+                    //noinspection unchecked
+                    field.addValidator(validator);
+                }
+            }
+        }
+    }
+
+    protected void setCustomDataType(TextField field, ComponentGenerationContext context, Class<?> type) {
+        CategoryAttribute categoryAttribute = getCategoryAttribute(context);
+        Datatype datatype = getDynamicAttributesGuiTools().getCustomNumberDatatype(categoryAttribute);
+
+        if (datatype != null) {
+            //noinspection unchecked
+            field.setDatatype(datatype);
+        }
+    }
+
+    protected CategoryAttribute getCategoryAttribute(ComponentGenerationContext context) {
         MetaClass metaClass = context.getMetaClass();
         MetaPropertyPath mpp = resolveMetaPropertyPath(metaClass, context.getProperty());
         MetaProperty metaProperty = mpp.getMetaProperty();
 
         if (DynamicAttributesUtils.isDynamicAttribute(metaProperty)) {
-            CategoryAttribute categoryAttribute = DynamicAttributesUtils.getCategoryAttribute(metaProperty);
-            if (categoryAttribute != null && BooleanUtils.isNotTrue(categoryAttribute.getIsCollection())) {
-
-                DynamicAttributesGuiTools dynamicAttributesGuiTools =
-                        AppBeans.get(DynamicAttributesGuiTools.class);
-
-                Collection<Consumer<?>> validators = dynamicAttributesGuiTools.createValidators(categoryAttribute);
-                if (validators != null && !validators.isEmpty()) {
-                    for (Consumer<?> validator : validators) {
-                        //noinspection unchecked
-                        field.addValidator(validator);
-                    }
-                }
-            }
+            return DynamicAttributesUtils.getCategoryAttribute(metaProperty);
         }
+
+        return null;
+    }
+
+    protected DynamicAttributesGuiTools getDynamicAttributesGuiTools() {
+        return AppBeans.get(DynamicAttributesGuiTools.class);
     }
 
     protected static class InvokeEntityLinkClickHandler implements EntityLinkField.EntityLinkClickHandler {

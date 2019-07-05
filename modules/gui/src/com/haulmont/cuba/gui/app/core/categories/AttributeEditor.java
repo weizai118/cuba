@@ -27,6 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.haulmont.bali.util.Dom4j;
 import com.haulmont.bali.util.ParamsMap;
+import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
@@ -95,6 +96,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "configuration.maxDecimal");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "width");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "isCollection");
+        FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.DECIMAL, "configuration.numberFormatPattern");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "defaultInt");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "configuration.minInt");
         FIELDS_VISIBLE_FOR_DATATYPES.put(PropertyType.INTEGER, "configuration.maxInt");
@@ -204,6 +206,10 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     protected SourceCodeEditor validatorGroovyScriptField;
     protected LinkButton validatorHelpLinkBtn;
 
+    protected TextField defaultDecimalField;
+    protected TextField minDecimalField;
+    protected TextField maxDecimalField;
+
     @Inject
     protected FilterParser filterParser;
 
@@ -222,6 +228,15 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         Action removeAction = new RemoveAction(targetScreensTable);
         removeAction.setCaption(getMessage("targetScreensTable.remove"));
         targetScreensTable.addAction(removeAction);
+    }
+
+    @Override
+    public void ready() {
+        defaultDecimalField = (TextField) attributeFieldGroup.getFieldNN("defaultDecimal").getComponentNN();
+        minDecimalField = (TextField) attributeFieldGroup.getFieldNN("configuration.minDecimal").getComponentNN();
+        maxDecimalField = (TextField) attributeFieldGroup.getFieldNN("configuration.maxDecimal").getComponentNN();
+
+        setupBigDecimalFormat();
     }
 
     protected Action initCreateScreenAndComponentAction() {
@@ -432,6 +447,10 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
         configurationDs.addItemPropertyChangeListener(e -> {
             ((DatasourceImplementation) attributeDs).modified(attribute);
+
+            if ("numberFormatPattern".equalsIgnoreCase(e.getProperty())) {
+                setupBigDecimalFormat();
+            }
         });
 
         attributeFieldGroup.addCustomField("configuration.validatorGroovyScript", (datasource, propertyId) -> {
@@ -807,6 +826,22 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
             return ((BigDecimal) first).compareTo((BigDecimal) second);
         } else {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void setupBigDecimalFormat() {
+
+        Datatype datatype = dynamicAttributesGuiTools.getCustomNumberDatatype(attribute);
+
+        if (datatype != null) {
+            defaultDecimalField.setDatatype(datatype);
+            minDecimalField.setDatatype(datatype);
+            maxDecimalField.setDatatype(datatype);
+
+            defaultDecimalField.setValue(defaultDecimalField.getValue());
+            minDecimalField.setValue(minDecimalField.getValue());
+            maxDecimalField.setValue(maxDecimalField.getValue());
         }
     }
 }

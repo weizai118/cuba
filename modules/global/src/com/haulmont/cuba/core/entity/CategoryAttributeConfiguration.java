@@ -62,6 +62,9 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
     @MetaProperty
     protected Integer columnWidth;
 
+    @MetaProperty
+    protected String numberFormatPattern;
+
     public Integer getMinInt() {
         return minInt;
     }
@@ -172,6 +175,14 @@ public class CategoryAttributeConfiguration extends BaseGenericIdEntity<String> 
 
     public void setCategoryAttribute(CategoryAttribute categoryAttribute) {
         this.categoryAttribute = categoryAttribute;
+    }
+
+    public String getNumberFormatPattern() {
+        return numberFormatPattern;
+    }
+
+    public void setNumberFormatPattern(String numberFormatPattern) {
+        this.numberFormatPattern = numberFormatPattern;
     }
 
     @Override
