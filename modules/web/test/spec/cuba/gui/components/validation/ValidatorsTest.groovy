@@ -1031,7 +1031,7 @@ class ValidatorsTest extends UiScreenSpec {
         def validatorsScreen = screens.create(ValidatorsScreen)
         validatorsScreen.show()
 
-        def groovyScript = "if (!{V}.startsWith(\"correct\")) return \"validation error message\""
+        def groovyScript = "if (!value.startsWith(\"correct\")) return \"validation error message\""
         def groovyScriptValidator = (GroovyScriptValidator) cont.getBean(GroovyScriptValidator.NAME, groovyScript)
         def textField = (TextField) validatorsScreen.getWindow().getComponent("stringField")
         textField.setDatatype(datatypeRegistry.get(String))

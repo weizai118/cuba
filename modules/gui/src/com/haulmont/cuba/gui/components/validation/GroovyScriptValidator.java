@@ -75,7 +75,7 @@ public class GroovyScriptValidator<T> extends AbstractValidator<T> {
     /**
      * Constructor with default error message.
      *
-     * @param validatorGroovyScript groovy script with {V} macro
+     * @param validatorGroovyScript groovy script with 'value' macro
      */
     public GroovyScriptValidator(String validatorGroovyScript) {
         this.validatorGroovyScript = validatorGroovyScript;
@@ -89,9 +89,9 @@ public class GroovyScriptValidator<T> extends AbstractValidator<T> {
         }
 
         Map<String, Object> context = new HashMap<>();
-        context.put("__value__", value);
+        context.put("value", value);
 
-        Object scriptResult = scripting.evaluateGroovy(validatorGroovyScript.replace("{V}", "__value__"), context);
+        Object scriptResult = scripting.evaluateGroovy(validatorGroovyScript, context);
 
         if (scriptResult != null) {
             setMessage(scriptResult.toString());

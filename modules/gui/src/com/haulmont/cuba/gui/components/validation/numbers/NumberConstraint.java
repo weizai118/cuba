@@ -16,44 +16,34 @@ public interface NumberConstraint {
      * @param max max value
      * @return true if value less than or equal to max
      */
-    default boolean isMax(long max) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isMax(long max);
 
     /**
      * @param min min value
      * @return true if value greater than or equal to min
      */
-    default boolean isMin(long min) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isMin(long min);
 
     /**
      * @param integer  value of integer part
      * @param fraction value of fraction part
      * @return true if value within accepted range
      */
-    default boolean isDigits(int integer, int fraction) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isDigits(int integer, int fraction);
 
     /**
      * @param max       max value
      * @param inclusive inclusive option, true by default
      * @return true if value less than or equal to max (depends on inclusive option)
      */
-    default boolean isDecimalMax(BigDecimal max, boolean inclusive) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isDecimalMax(BigDecimal max, boolean inclusive);
 
     /**
      * @param min       min value
      * @param inclusive inclusive option, true by default
      * @return true if value less than or equal to min (depends on inclusive option)
      */
-    default boolean isDecimalMin(BigDecimal min, boolean inclusive) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isDecimalMin(BigDecimal min, boolean inclusive);
 
     /**
      * @return true if value is less than or equal to 0
@@ -80,16 +70,12 @@ public interface NumberConstraint {
      * @param inclusive inclusive option, true by default
      * @return true if value less than or equal to max (depends on inclusive option)
      */
-    default boolean isDoubleMax(Double max, boolean inclusive) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isDoubleMax(Double max, boolean inclusive);
 
     /**
      * @param min       min value
      * @param inclusive inclusive option, true by default
      * @return true if value less than or equal to min (depends on inclusive option)
      */
-    default boolean isDoubleMin(Double min, boolean inclusive) {
-        throw new UnsupportedOperationException();
-    };
+    boolean isDoubleMin(Double min, boolean inclusive);
 }
