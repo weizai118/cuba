@@ -17,7 +17,6 @@
 package com.haulmont.cuba.security.app.designtime;
 
 import com.haulmont.cuba.core.EntityManager;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.security.entity.*;
@@ -36,15 +35,12 @@ public class RolesRepository {
     protected List<OrdinaryRole> designTimeRoles;
 
     @Inject
-    protected DataManager dataManager;
-
-    @Inject
     protected Metadata metadata;
 
     @Inject
     protected GlobalConfig config;
 
-    protected Map<String, OrdinaryRole> nameToRoleMapping;
+    protected Map<String, OrdinaryRole> nameToDesignTimeRoleMapping;
 
     protected static final int ROLES_FROM_DATABASE_MODE = 1;
     protected static final int ROLES_FROM_CODE_MODE = 2;
@@ -84,7 +80,7 @@ public class RolesRepository {
 
         if (isDatabaseModeAvailable()) {
             for (UserRole ur : userRolesWithRoleObject) {
-                OrdinaryRole role = RoleBuilder.createRole(ur.getRole()).build();
+                OrdinaryRole role = OrdinaryRoleBuilder.createRole(ur.getRole()).build();
                 ur.setOrdinaryRole(role);
                 result.put(role.getName(), role);
             }
@@ -94,7 +90,7 @@ public class RolesRepository {
     }
 
     public OrdinaryRole getOrdinaryRoleByName(String roleName) {
-        return getNameToRoleMapping().get(roleName);
+        return getNameToDesignTimeRoleMapping().get(roleName);
     }
 
     public Map<String, Role> getDefaultRoles(EntityManager em) {
@@ -102,7 +98,7 @@ public class RolesRepository {
         Map<String, Role> defaultUserRoles = new HashMap<>();
 
         if (isPredefinedRolesModeAvailable()) {
-            for (Map.Entry<String, OrdinaryRole> entry : getNameToRoleMapping().entrySet()) {
+            for (Map.Entry<String, OrdinaryRole> entry : getNameToDesignTimeRoleMapping().entrySet()) {
                 if (entry.getValue().isDefault()) {
                     defaultUserRoles.put(entry.getKey(), null);
                 }
@@ -216,40 +212,14 @@ public class RolesRepository {
         return valueFromConfig;
     }
 
-    protected Map<String, OrdinaryRole> getNameToRoleMapping() {
-        if (nameToRoleMapping == null) {
-            nameToRoleMapping = new HashMap<>();
+    protected Map<String, OrdinaryRole> getNameToDesignTimeRoleMapping() {
+        if (nameToDesignTimeRoleMapping == null) {
+            nameToDesignTimeRoleMapping = new HashMap<>();
 
             for (OrdinaryRole role : designTimeRoles) {
-                nameToRoleMapping.put(role.getName(), role);
+                nameToDesignTimeRoleMapping.put(role.getName(), role);
             }
         }
-        return nameToRoleMapping;
-    }
-
-    public Collection<Role> getRolesForUi() {
-        Map<String, Role> rolesForGui = new HashMap<>();
-
-        if (isPredefinedRolesModeAvailable()) {
-            for (Map.Entry<String, OrdinaryRole> entry : getNameToRoleMapping().entrySet()) {
-                rolesForGui.put(entry.getKey(), getRoleWithoutPermissions(entry.getValue()));
-            }
-        }
-
-        if (isDatabaseModeAvailable()) {
-            List<Role> roles = dataManager.load(Role.class)
-                    .query("select r from sec$Role r order by r.name")
-                    .list();
-
-            for (Role role : roles) {
-                rolesForGui.put(role.getName(), role);
-            }
-        }
-
-        return new ArrayList<>(rolesForGui.values());
-    }
-
-    public Role getRoleByNameForUi(String predefinedRoleName) {
-        return getRoleWithoutPermissions(getOrdinaryRoleByName(predefinedRoleName));
+        return nameToDesignTimeRoleMapping;
     }
 }

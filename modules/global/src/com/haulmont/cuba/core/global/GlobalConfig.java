@@ -243,7 +243,8 @@ public interface GlobalConfig extends Config {
 
     /**
      * Defines the source from which roles are used in the application. There are 3 possible values:
-     * 1 - only roles from a database (sec$Role) will be used; 2 - only roles defined in the source code will be used;
+     * 1 - only roles from a database (sec$Role) will be used;
+     * 2 - only roles defined in the source code will be used;
      * 3 - mixed mode, both sources will be used. If there are roles with equal names in the database and in
      * the source code, role from database will be used.
      * Application uses mixed mode by default.

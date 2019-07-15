@@ -26,14 +26,33 @@ public interface RolesService {
 
     String NAME = "cuba_RolesService";
 
+    /**
+     * @return list of all roles ({@link Role} objects) available in the application.
+     * Depending on the mode, the list contains both predefined roles and roles from the database.
+     */
     Collection<Role> getAllRoles();
 
+    /**
+     * @param predefinedRoleName name of a predefined role
+     * @return {@code Role} object that contains all permissions of a predefined role.
+     */
     Role getRoleByName(String predefinedRoleName);
 
+    /**
+     * @param predefinedRoleName name of a predefined role
+     * @param permissionType type of permissions that should be returned
+     * @return collection of {@code Permission} objects
+     */
     Collection<Permission> getPermissions(String predefinedRoleName, PermissionType permissionType);
 
+    /**
+     * @return {@code true} if database roles mode is available, {@code false} otherwise
+     */
     boolean isDatabaseModeAvailable();
 
+    /**
+     * @return {@code true} if predefined roles mode is available, {@code false} otherwise
+     */
     boolean isPredefinedRolesModeAvailable();
 
 }

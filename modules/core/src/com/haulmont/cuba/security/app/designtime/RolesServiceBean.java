@@ -16,29 +16,52 @@
 
 package com.haulmont.cuba.security.app.designtime;
 
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.security.designtime.RolesService;
+import com.haulmont.cuba.security.entity.OrdinaryRole;
 import com.haulmont.cuba.security.entity.Permission;
 import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.entity.Role;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.Collection;
+import java.util.*;
 
 @Service(RolesService.NAME)
 public class RolesServiceBean implements RolesService {
+
+    @Inject
+    protected DataManager dataManager;
 
     @Inject
     protected RolesRepository rolesRepository;
 
     @Override
     public Collection<Role> getAllRoles() {
-        return rolesRepository.getRolesForUi();
+        Map<String, Role> rolesForGui = new HashMap<>();
+
+        if (isPredefinedRolesModeAvailable()) {
+            for (Map.Entry<String, OrdinaryRole> entry : rolesRepository.getNameToDesignTimeRoleMapping().entrySet()) {
+                rolesForGui.put(entry.getKey(), rolesRepository.getRoleWithoutPermissions(entry.getValue()));
+            }
+        }
+
+        if (isDatabaseModeAvailable()) {
+            List<Role> roles = dataManager.load(Role.class)
+                    .query("select r from sec$Role r order by r.name")
+                    .list();
+
+            for (Role role : roles) {
+                rolesForGui.put(role.getName(), role);
+            }
+        }
+
+        return new ArrayList<>(rolesForGui.values());
     }
 
     @Override
     public Role getRoleByName(String predefinedRoleName) {
-        return rolesRepository.getRoleByNameForUi(predefinedRoleName);
+        return rolesRepository.getRoleWithoutPermissions(rolesRepository.getOrdinaryRoleByName(predefinedRoleName));
     }
 
     @Override

@@ -17,7 +17,7 @@
 package com.haulmont.cuba.core;
 
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.security.app.designtime.RoleBuilder;
+import com.haulmont.cuba.security.app.designtime.OrdinaryRoleBuilder;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.Before;
@@ -29,7 +29,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class RoleBuilderTest {
+public class OrdinaryRoleBuilderTest {
 
     protected Metadata metadata;
 
@@ -43,7 +43,7 @@ public class RoleBuilderTest {
 
     @Test
     public void createNewRole() {
-        OrdinaryRole role = RoleBuilder.createRole().build();
+        OrdinaryRole role = OrdinaryRoleBuilder.createRole().build();
 
         assertNotNull(role);
         assertEquals(RoleType.STANDARD, role.getRoleType());
@@ -56,7 +56,7 @@ public class RoleBuilderTest {
 
     @Test
     public void createRoleWithDuplicatePermissions() {
-        OrdinaryRole role = RoleBuilder.createRole()
+        OrdinaryRole role = OrdinaryRoleBuilder.createRole()
                 .withName("testRole")
                 .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
                 .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
@@ -72,7 +72,7 @@ public class RoleBuilderTest {
     public void createOrdinaryRoleBasedOnRoleEntity() {
         Role roleEntity = createRoleEntityWithPermissions();
 
-        OrdinaryRole role = RoleBuilder.createRole(roleEntity).build();
+        OrdinaryRole role = OrdinaryRoleBuilder.createRole(roleEntity).build();
 
         assertEquals("roleEntity", role.getName());
         assertEquals(RoleType.DENYING, role.getRoleType());
@@ -89,11 +89,11 @@ public class RoleBuilderTest {
 
     @Test
     public void joinRole() {
-        OrdinaryRole role1 = RoleBuilder.createRole()
+        OrdinaryRole role1 = OrdinaryRoleBuilder.createRole()
                 .withPermission(PermissionType.SCREEN, "sec$Role.browse", 1)
                 .build();
 
-        OrdinaryRole role2 = RoleBuilder.createRole(RoleType.DENYING)
+        OrdinaryRole role2 = OrdinaryRoleBuilder.createRole(RoleType.DENYING)
                 .withName("ordinaryRole")
                 .withDescription("description")
                 .withPermission(createPermission(null, PermissionType.SPECIFIC, "specificPermission3", 1))
@@ -118,7 +118,7 @@ public class RoleBuilderTest {
 
     @Test
     public void createRoleWithMultiplePermissions() {
-        OrdinaryRole role = RoleBuilder.createRole()
+        OrdinaryRole role = OrdinaryRoleBuilder.createRole()
                 .withName("role")
                 .withRoleType(RoleType.STANDARD)
                 .withEntityAccessPermission(metadata.getClassNN(User.class), EntityOp.CREATE, AccessOperation.ALLOW)

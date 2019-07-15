@@ -19,7 +19,10 @@ package com.haulmont.cuba.security.app.designtime;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.security.entity.*;
 
-public class RoleBuilder {
+/**
+ * Builder class that helps to create custom predefined roles.
+ */
+public class OrdinaryRoleBuilder {
 
     private EntityAccessPermissions entityAccessPermissions;
     private EntityAttributeAccessPermissions entityAttributeAccessPermissions;
@@ -30,7 +33,7 @@ public class RoleBuilder {
     private String name;
     private String description;
 
-    private RoleBuilder() {
+    private OrdinaryRoleBuilder() {
         entityAccessPermissions = new EntityAccessPermissions();
         entityAttributeAccessPermissions = new EntityAttributeAccessPermissions();
         specificPermissions = new SpecificPermissions();
@@ -40,54 +43,73 @@ public class RoleBuilder {
         description = "";
     }
 
-    public static RoleBuilder createRole() {
-        return new RoleBuilder();
+    /**
+     * @return new builder with default role parameters: {@code roleType = RoleType.STANDARD},
+     * {@code description} and {@code name} are empty.
+     */
+    public static OrdinaryRoleBuilder createRole() {
+        return new OrdinaryRoleBuilder();
     }
 
-    public static RoleBuilder createRole(RoleType roleType) {
-        RoleBuilder builder = new RoleBuilder();
+    /**
+     * @param roleType {@link RoleType}, default value is {@code RoleType.STANDARD}
+     * @return new builder with empty role name and description
+     */
+    public static OrdinaryRoleBuilder createRole(RoleType roleType) {
+        OrdinaryRoleBuilder builder = new OrdinaryRoleBuilder();
         return builder.withRoleType(roleType);
     }
 
-    public static RoleBuilder createRole(Role role) {
-        return new RoleBuilder()
+    /**
+     * @param role source {@link Role} object. Following parameters are taken from this role: name,
+     *             description, roleType, permissions
+     * @return new builder
+     */
+    public static OrdinaryRoleBuilder createRole(Role role) {
+        return new OrdinaryRoleBuilder()
                 .withRoleType(role.getType())
                 .withName(role.getName())
                 .withDescription(role.getDescription())
                 .join(role);
     }
 
-    public static RoleBuilder createRole(OrdinaryRole role) {
-        return new RoleBuilder()
+    /**
+     * @param role source {@link OrdinaryRole} object. Following parameters are taken from this role: name,
+     *             description, roleType, permissions
+     * @return new builder
+     */
+    public static OrdinaryRoleBuilder createRole(OrdinaryRole role) {
+        return new OrdinaryRoleBuilder()
                 .withRoleType(role.getRoleType())
                 .withName(role.getName())
+                .withDescription(role.getDescription())
                 .join(role);
     }
 
-    public RoleBuilder withName(String name) {
+    public OrdinaryRoleBuilder withName(String name) {
         this.name = name;
 
         return this;
     }
 
-    public RoleBuilder withDescription(String description) {
+    public OrdinaryRoleBuilder withDescription(String description) {
         this.description = description;
 
         return this;
     }
 
-    public RoleBuilder withRoleType(RoleType roleType) {
+    public OrdinaryRoleBuilder withRoleType(RoleType roleType) {
         this.roleType = roleType;
         return this;
     }
 
-    public RoleBuilder withPermission(Permission permission) {
+    public OrdinaryRoleBuilder withPermission(Permission permission) {
         joinPermission(permission);
 
         return this;
     }
 
-    public RoleBuilder withPermission(PermissionType permissionType, String target, int access) {
+    public OrdinaryRoleBuilder withPermission(PermissionType permissionType, String target, int access) {
         Permission permission = new Permission();
         permission.setType(permissionType);
         permission.setValue(access);
@@ -98,52 +120,52 @@ public class RoleBuilder {
         return this;
     }
 
-    public RoleBuilder withEntityAccessPermission(MetaClass targetClass, EntityOp operation, AccessOperation access) {
+    public OrdinaryRoleBuilder withEntityAccessPermission(MetaClass targetClass, EntityOp operation, AccessOperation access) {
         return withPermission(PermissionType.ENTITY_OP,
                 targetClass.getName() + Permission.TARGET_PATH_DELIMETER + operation.getId(),
                 access.getId());
     }
 
-    public RoleBuilder withEntityAttrAccessPermission(MetaClass targetClass, String property, EntityAttrAccess access) {
+    public OrdinaryRoleBuilder withEntityAttrAccessPermission(MetaClass targetClass, String property, EntityAttrAccess access) {
         return withPermission(PermissionType.ENTITY_ATTR,
                 targetClass.getName() + Permission.TARGET_PATH_DELIMETER + property,
                 access.getId());
     }
 
-    public RoleBuilder withSpecificPermission(String target, AccessOperation access) {
+    public OrdinaryRoleBuilder withSpecificPermission(String target, AccessOperation access) {
         return withPermission(PermissionType.SPECIFIC, target, access.getId());
     }
 
-    public RoleBuilder withScreenPermission(String windowAlias, AccessOperation access) {
+    public OrdinaryRoleBuilder withScreenPermission(String windowAlias, AccessOperation access) {
         return withPermission(PermissionType.SCREEN, windowAlias, access.getId());
     }
 
-    public RoleBuilder withScreenElementPermission(String windowAlias, String component, AccessOperation access) {
+    public OrdinaryRoleBuilder withScreenElementPermission(String windowAlias, String component, AccessOperation access) {
         return withPermission(PermissionType.UI,
                 windowAlias + Permission.TARGET_PATH_DELIMETER + component,
                 access.getId());
     }
 
-    public RoleBuilder join(OrdinaryRole role) {
+    public OrdinaryRoleBuilder join(OrdinaryRole role) {
         joinApplicationRole(role);
         joinGenericUiRole(role);
 
         return this;
     }
 
-    public RoleBuilder join(ApplicationRole role) {
+    public OrdinaryRoleBuilder join(ApplicationRole role) {
         joinApplicationRole(role);
 
         return this;
     }
 
-    public RoleBuilder join(GenericUiRole role) {
+    public OrdinaryRoleBuilder join(GenericUiRole role) {
         joinGenericUiRole(role);
 
         return this;
     }
 
-    public RoleBuilder join(Role role) {
+    public OrdinaryRoleBuilder join(Role role) {
         if (role.getPermissions() != null) {
             for (Permission permission : role.getPermissions()) {
                 joinPermission(permission);
@@ -153,10 +175,8 @@ public class RoleBuilder {
     }
 
     public OrdinaryRole build() {
-        OrdinaryRole effectiveRole = new BasicUserRole(name, description, roleType, entityAccessPermissions,
+        return new BasicUserRole(name, description, roleType, entityAccessPermissions,
                 entityAttributeAccessPermissions, specificPermissions, screenPermissions, screenElementsPermissions);
-
-        return effectiveRole;
     }
 
 

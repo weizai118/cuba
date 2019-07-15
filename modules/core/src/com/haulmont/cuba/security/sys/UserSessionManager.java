@@ -26,7 +26,7 @@ import com.haulmont.cuba.core.TypedQuery;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.DefaultPermissionValuesConfig;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
-import com.haulmont.cuba.security.app.designtime.RoleBuilder;
+import com.haulmont.cuba.security.app.designtime.OrdinaryRoleBuilder;
 import com.haulmont.cuba.security.app.designtime.RolesRepository;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.global.NoUserSessionException;
@@ -147,11 +147,11 @@ public class UserSessionManager {
             }
         }
 
-        RoleBuilder roleBuilder = RoleBuilder.createRole(session.getEffectiveRole());
+        OrdinaryRoleBuilder ordinaryRoleBuilder = OrdinaryRoleBuilder.createRole(session.getEffectiveRole());
         for (OrdinaryRole role : roles) {
-            roleBuilder.join(role);
+            ordinaryRoleBuilder.join(role);
         }
-        session.applyEffectiveRole(roleBuilder.build());
+        session.applyEffectiveRole(ordinaryRoleBuilder.build());
 
         defaultPermissionValuesConfig.getDefaultPermissionValues().forEach((target, permission) -> {
             if (session.getPermissionValue(permission.getType(), permission.getTarget()) == null) {
