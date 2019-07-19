@@ -17,11 +17,14 @@
 
 package com.haulmont.cuba.gui.data.impl;
 
+import com.google.common.base.Preconditions;
 import com.haulmont.bali.datastruct.Node;
 import com.haulmont.bali.datastruct.Tree;
+import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger;
+import com.haulmont.cuba.gui.model.impl.EntityValuesComparator;
 import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,12 @@ public abstract class AbstractTreeDatasource<T extends Entity<K>, K>
 
     protected Tree<T> tree;
     protected Map<K, Node<T>> nodes;
+    protected SortNodeDelegate<Node<T>, K> treeRootsNoteSortDelegate =
+            (rootNodes, sortInfo) -> rootNodes.sort(createRootNodesComparator());
+
+    interface SortNodeDelegate<T extends Node, K> {
+        void sort(List<T> rootNodes, Sortable.SortInfo<MetaPropertyPath>[] sortInfo);
+    }
 
     @Override
     protected void loadData(Map<String, Object> params) {
@@ -76,6 +85,28 @@ public abstract class AbstractTreeDatasource<T extends Entity<K>, K>
     @Override
     public void setHierarchyPropertyName(String parentPropertyName) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void doSort() {
+        super.doSort();
+
+        Preconditions.checkNotNull(treeRootsNoteSortDelegate, "Root nodes sort delegate is null");
+        List<Node<T>> rootsList = tree.getRootNodes();
+        treeRootsNoteSortDelegate.sort(rootsList, sortInfos);
+        tree.setRootNodes(rootsList);
+    }
+
+    protected Comparator<Node<T>> createRootNodesComparator() {
+        // In case of generated column the sortInfos can actually contain string as a column identifier.
+        if (sortInfos[0].getPropertyPath() != null) {
+            final MetaPropertyPath propertyPath = sortInfos[0].getPropertyPath();
+            final boolean asc = Sortable.Order.ASC.equals(sortInfos[0].getOrder());
+            return Comparator.comparing(e -> e.getData().getValueEx(propertyPath), EntityValuesComparator.asc(asc));
+        } else {
+            // If we can not sort the nodes, just return the empty comparator.
+            return (o1, o2) -> 0;
+        }
     }
 
     @Override
