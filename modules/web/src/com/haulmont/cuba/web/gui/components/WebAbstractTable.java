@@ -703,7 +703,9 @@ public abstract class WebAbstractTable<T extends com.vaadin.ui.Table & CubaEnhan
                     datasource.setItem(null);
                 }
 
-                Entity newItem = selected.iterator().next();
+                Entity newItem = selected.stream()
+                        .reduce((firstItem, secondItem) -> secondItem)
+                        .orElse(null);
                 Entity dsItem = datasource.getItemIfValid();
                 datasource.setItem(newItem);
 

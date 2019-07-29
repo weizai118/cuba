@@ -1160,7 +1160,9 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
                                 datasource.setItem(null);
                             }
 
-                            Entity newItem = selectedItems.iterator().next();
+                            Entity newItem = selectedItems.stream()
+                                    .reduce((firstItem, secondItem) -> secondItem)
+                                    .orElse(null);
                             Entity dsItem = datasource.getItemIfValid();
                             datasource.setItem(newItem);
 
