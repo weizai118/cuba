@@ -358,7 +358,6 @@ public class EntityCombinedScreen extends AbstractLookup {
         for (Datasource dataSource : getDsContext().getAll()) {
             if (AbstractDatasource.class.isAssignableFrom(dataSource.getClass())) {
                 ((AbstractDatasource) dataSource).clearCommitLists();
-                dataSource.refresh();
             }
         }
 
