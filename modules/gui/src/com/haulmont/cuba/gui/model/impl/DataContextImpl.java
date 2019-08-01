@@ -508,6 +508,12 @@ public class DataContextImpl implements DataContext {
     }
 
     @Override
+    public void cleanCommitLists() {
+        modifiedInstances.clear();
+        removedInstances.clear();
+    }
+
+    @Override
     public <T extends Entity> T create(Class<T> entityClass) {
         T entity = getMetadata().create(entityClass);
         return merge(entity);
@@ -556,8 +562,7 @@ public class DataContextImpl implements DataContext {
 
         events.publish(PostCommitEvent.class, new PostCommitEvent(this, committedAndMerged));
 
-        modifiedInstances.clear();
-        removedInstances.clear();
+        cleanCommitLists();
 
         return committedAndMerged;
     }
