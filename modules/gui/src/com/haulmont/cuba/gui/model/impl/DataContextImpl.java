@@ -508,9 +508,11 @@ public class DataContextImpl implements DataContext {
     }
 
     @Override
-    public void cleanCommitLists() {
-        modifiedInstances.clear();
-        removedInstances.clear();
+    public void evictAll() {
+        Set<Entity> tmpModifiedInstances = new HashSet<>(modifiedInstances);
+        Set<Entity> tmpRemovedInstances = new HashSet<>(modifiedInstances);
+        tmpModifiedInstances.forEach(this::evict);
+        tmpRemovedInstances.forEach(this::evict);
     }
 
     @Override
@@ -562,7 +564,8 @@ public class DataContextImpl implements DataContext {
 
         events.publish(PostCommitEvent.class, new PostCommitEvent(this, committedAndMerged));
 
-        cleanCommitLists();
+        modifiedInstances.clear();
+        removedInstances.clear();
 
         return committedAndMerged;
     }

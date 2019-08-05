@@ -65,7 +65,7 @@ public interface DataContext {
     /**
      * Cleans lists with information of created/modified/deleted entities for commit.
      */
-    default void cleanCommitLists() {}
+    default void evictAll() {}
 
     /**
      * Merge the given entity into the context. The whole object graph with all references will be merged.
