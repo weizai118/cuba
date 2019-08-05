@@ -510,7 +510,7 @@ public class DataContextImpl implements DataContext {
     @Override
     public void evictAll() {
         Set<Entity> tmpModifiedInstances = new HashSet<>(modifiedInstances);
-        Set<Entity> tmpRemovedInstances = new HashSet<>(modifiedInstances);
+        Set<Entity> tmpRemovedInstances = new HashSet<>(removedInstances);
         tmpModifiedInstances.forEach(this::evict);
         tmpRemovedInstances.forEach(this::evict);
     }
