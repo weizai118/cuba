@@ -18,16 +18,15 @@
 package com.haulmont.chile.core.model.impl;
 
 import com.haulmont.chile.core.model.Instance;
+import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.utils.InstanceUtils;
 import com.haulmont.chile.core.model.utils.MethodsCache;
+import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.MetadataTools;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -42,6 +41,22 @@ public abstract class AbstractInstance implements Instance {
 
     protected void propertyChanged(String s, Object prev, Object curr) {
         if (__propertyChangeListeners != null) {
+
+            //iterate over all read-only transient meta properties and check if they have the current property in the “related” list
+            List<String> changedRelatedProperties = null;
+            MetadataTools metadataTools = AppBeans.get(MetadataTools.class);
+            for (MetaProperty property : getMetaClass().getProperties()) {
+                if (property.isReadOnly() && metadataTools.isNotPersistent(property)) {
+                    Collection<String> relatedProperties = metadataTools.getRelatedProperties(property);
+                    if (relatedProperties.contains(s)) {
+                        if (changedRelatedProperties == null) {
+                            changedRelatedProperties = new ArrayList<>();
+                        }
+                        changedRelatedProperties.add(property.getName());
+                    }
+                }
+            }
+
             for (Object referenceObject : __propertyChangeListeners.toArray()) {
                 @SuppressWarnings("unchecked")
                 WeakReference<PropertyChangeListener> reference = (WeakReference<PropertyChangeListener>) referenceObject;
@@ -51,6 +66,13 @@ public abstract class AbstractInstance implements Instance {
                     __propertyChangeListeners.remove(reference);
                 } else {
                     listener.propertyChanged(new PropertyChangeEvent(this, s, prev, curr));
+
+                    if (changedRelatedProperties != null) {
+                        for (String changedPropertyName : changedRelatedProperties) {
+                            listener.propertyChanged(
+                                    new PropertyChangeEvent(this, changedPropertyName, null, getValue(changedPropertyName)));
+                        }
+                    }
                 }
             }
         }
