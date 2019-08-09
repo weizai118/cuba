@@ -23,11 +23,12 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.screen.Screen;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.components.ValidationException;
+import com.haulmont.cuba.gui.components.validators.EmailValidator;
+import com.haulmont.cuba.gui.screen.*;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -49,10 +50,14 @@ public class ResendMessage extends Screen {
     protected Notifications notifications;
     @Inject
     protected TextField<String> emailTextField;
+    @Inject
+    protected MessageBundle messageBundle;
+
+    private static final Logger log = LoggerFactory.getLogger(ResendMessage.class);
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
-        if(message!=null) {
+        if (message != null) {
             emailTextField.setValue(message.getAddress());
         }
     }
@@ -63,7 +68,7 @@ public class ResendMessage extends Screen {
 
     @Subscribe("resendEmailBtn")
     protected void onResendEmailBtnClick(Button.ClickEvent event) {
-        if (message != null) {
+        if (message != null && validateEmail(emailTextField.getValue())) {
             EmailInfo emailInfo = new EmailInfo(emailTextField.getValue(), message.getCaption(), emailBody(message));
             emailInfo.setFrom(message.getFrom());
             emailInfo.setBodyContentType(message.getBodyContentType());
@@ -73,20 +78,43 @@ public class ResendMessage extends Screen {
             emailInfo.setHeaders(parseHeadersString(message.getHeaders()));
             try {
                 emailService.sendEmail(emailInfo);
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messageBundle.getMessage("resendMessage.caption"))
+                        .withDescription(messageBundle.getMessage("resendMessage.description"))
+                        .show();
             } catch (EmailException e) {
-                throw new RuntimeException("Something went wrong during email resending", e);
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messageBundle.getMessage("resendMessage.error.caption"))
+                        .withDescription(e.getMessage())
+                        .show();
+                log.error("Something went wrong during email sending!", e);
             }
-            notifications.create(Notifications.NotificationType.HUMANIZED)
-                    .withCaption("Sent!")
-                    .withDescription("Email was successfuly resent")
-                    .show();
             this.closeWithDefaultAction();
+        }
+    }
+
+    protected boolean validateEmail(String emailAddress) {
+        EmailValidator emailValidator = new EmailValidator();
+        try {
+            emailValidator.validate(emailAddress);
+            return true;
+        } catch (ValidationException e) {
+            String errorMessage = messageBundle.getMessage("resendMessage.email.validation.error");
+            errorMessage = String.format(errorMessage, emailAddress);
+
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messageBundle.getMessage("resendMessage.error.caption"))
+                    .withDescription(errorMessage)
+                    .show();
+
+            log.error(errorMessage, e);
+            return false;
         }
     }
 
     protected String emailBody(SendingMessage message) {
         if (message.getContentTextFile() != null) {
-            try (InputStream inputStream = fileLoader.openStream(message.getContentTextFile());){
+            try (InputStream inputStream = fileLoader.openStream(message.getContentTextFile());) {
                 return IOUtils.toString(inputStream, Charset.defaultCharset());
             } catch (FileStorageException | IOException e) {
                 throw new RuntimeException("Can't read message body from the file", e);

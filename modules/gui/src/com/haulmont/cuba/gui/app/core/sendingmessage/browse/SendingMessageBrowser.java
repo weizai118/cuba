@@ -170,8 +170,6 @@ public class SendingMessageBrowser extends AbstractWindow {
         resendMessage.show();
     }
 
-
-
     protected void selectAttachmentDialog(SendingMessage message) {
         openLookup("sys$SendingMessage.attachments", items -> {
             if (items.size() == 1) {
