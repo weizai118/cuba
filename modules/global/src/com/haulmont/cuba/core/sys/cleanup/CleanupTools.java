@@ -165,6 +165,8 @@ public class CleanupTools {
                         AccessControlContext.class.getDeclaredConstructor(ProtectionDomain[].class, DomainCombiner.class);
                 constructor.setAccessible(true);
                 return constructor.newInstance(NO_DOMAINS, domainCombiner);
+            } catch (RuntimeException e1) {
+                throw e1;
             } catch (Exception e1) {
                 log.error("createAccessControlContext not granted and AccessControlContext could not be created via reflection");
                 return AccessController.getContext();
@@ -187,7 +189,7 @@ public class CleanupTools {
                     log.error("Unexpected assignedDomains - please report to developer of this library!");
                 }
 
-                if (isExecuting.get() == Boolean.TRUE)
+                if (Boolean.TRUE.equals(isExecuting.get()))
                     throw new RuntimeException();
 
                 try {
