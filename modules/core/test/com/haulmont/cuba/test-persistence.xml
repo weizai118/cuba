@@ -134,5 +134,7 @@
         <class>com.haulmont.cuba.testmodel.entitychangedevent.EceTestProduct</class>
         <class>com.haulmont.cuba.testmodel.entitychangedevent.EceTestStock</class>
         <class>com.haulmont.cuba.testmodel.entitychangedevent.EceTestLogEntry</class>
+
+        <class>com.haulmont.cuba.testmodel.related_properties.EntityWithRelatedProperties</class>
     </persistence-unit>
 </persistence>

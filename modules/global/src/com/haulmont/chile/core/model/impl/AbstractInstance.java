@@ -18,15 +18,18 @@
 package com.haulmont.chile.core.model.impl;
 
 import com.haulmont.chile.core.model.Instance;
-import com.haulmont.chile.core.model.MetaProperty;
+import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.utils.InstanceUtils;
 import com.haulmont.chile.core.model.utils.MethodsCache;
-import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.chile.core.model.utils.RelatedPropertiesCache;
 import com.haulmont.cuba.core.global.MetadataTools;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -39,23 +42,12 @@ public abstract class AbstractInstance implements Instance {
 
     private static transient Map<Class, MethodsCache> methodCacheMap = new ConcurrentHashMap<>();
 
+    private static transient Map<MetaClass, RelatedPropertiesCache> relatedPropertiesCacheMap = new ConcurrentHashMap<>();
+
     protected void propertyChanged(String s, Object prev, Object curr) {
         if (__propertyChangeListeners != null) {
 
-            //iterate over all read-only transient meta properties and check if they have the current property in the “related” list
-            List<String> changedRelatedProperties = null;
-            MetadataTools metadataTools = AppBeans.get(MetadataTools.class);
-            for (MetaProperty property : getMetaClass().getProperties()) {
-                if (property.isReadOnly() && metadataTools.isNotPersistent(property)) {
-                    Collection<String> relatedProperties = metadataTools.getRelatedProperties(property);
-                    if (relatedProperties.contains(s)) {
-                        if (changedRelatedProperties == null) {
-                            changedRelatedProperties = new ArrayList<>();
-                        }
-                        changedRelatedProperties.add(property.getName());
-                    }
-                }
-            }
+            Collection<String> relatedReadOnlyProperties = getRelatedPropertiesCache().getRelatedReadOnlyProperties(s);
 
             for (Object referenceObject : __propertyChangeListeners.toArray()) {
                 @SuppressWarnings("unchecked")
@@ -67,10 +59,10 @@ public abstract class AbstractInstance implements Instance {
                 } else {
                     listener.propertyChanged(new PropertyChangeEvent(this, s, prev, curr));
 
-                    if (changedRelatedProperties != null) {
-                        for (String changedPropertyName : changedRelatedProperties) {
+                    if (relatedReadOnlyProperties != null) {
+                        for (String property : relatedReadOnlyProperties) {
                             listener.propertyChanged(
-                                    new PropertyChangeEvent(this, changedPropertyName, null, getValue(changedPropertyName)));
+                                    new PropertyChangeEvent(this, property, null, getValue(property)));
                         }
                     }
                 }
@@ -127,6 +119,16 @@ public abstract class AbstractInstance implements Instance {
         if (cache == null) {
             cache = new MethodsCache(cls);
             methodCacheMap.put(cls, cache);
+        }
+        return cache;
+    }
+
+    protected RelatedPropertiesCache getRelatedPropertiesCache() {
+        MetaClass metaClass = getMetaClass();
+        RelatedPropertiesCache cache = relatedPropertiesCacheMap.get(metaClass);
+        if (cache == null) {
+            cache = new RelatedPropertiesCache(metaClass);
+            relatedPropertiesCacheMap.put(metaClass, cache);
         }
         return cache;
     }
