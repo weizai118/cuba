@@ -18,6 +18,17 @@ package com.haulmont.cuba.security.app.designtime.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines screen access permissions.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;ScreenAccess(deny = {"myapp_SomeEntity.edit"})
+ * </pre>
+ *
+ * @see Role
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(ScreenAccessContainer.class)

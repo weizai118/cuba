@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.app.designtime.roles;
+package com.haulmont.cuba.security.designtime;
 
+import com.haulmont.cuba.core.config.type.TypeFactory;
 
-import com.haulmont.cuba.security.app.designtime.annotation.DesignTimeRole;
-import com.haulmont.cuba.security.entity.*;
-
-@DesignTimeRole(name = "Administrators", type = RoleType.SUPER)
-public class AdministratorsRole extends PredefinedRole {
+public class RolesStorageModeFactory extends TypeFactory {
+    @Override
+    public Object build(String string) {
+        for (RolesStorageMode mode : RolesStorageMode.values()) {
+            if (mode.name().equalsIgnoreCase(string)) {
+                return mode;
+            }
+        }
+        return null;
+    }
 }

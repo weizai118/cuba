@@ -21,6 +21,18 @@ import com.haulmont.cuba.security.entity.EntityOp;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines permissions to access operations on an entity (read, create, update, delete).
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;EntityAccess(target = SomeEntity.class,
+ *  *             deny = {EntityOp.DELETE, EntityOp.UPDATE})
+ * </pre>
+ *
+ * @see Role
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(EntityAccessContainer.class)

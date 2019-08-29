@@ -25,6 +25,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * INTERNAL
+ */
 public class RolesCollectionDatasource extends CustomCollectionDatasource<Role, UUID> {
 
     protected RolesService rolesService = AppBeans.get(RolesService.NAME);

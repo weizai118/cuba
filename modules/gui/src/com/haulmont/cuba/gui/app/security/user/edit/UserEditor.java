@@ -290,9 +290,11 @@ public class UserEditor extends AbstractEditor<User> {
     }
 
     protected void addDefaultRoles(User user) {
-        LoadContext<Role> ctx = new LoadContext<>(Role.class);
-        ctx.setQueryString("select r from sec$Role r where r.defaultRole = true");
-        List<Role> defaultRoles = dataSupplier.loadList(ctx);
+        Map<String, Role> defaultRoles = rolesService.getDefaultRoles();
+
+        if (defaultRoles == null || defaultRoles.isEmpty()) {
+            return;
+        }
 
         List<UserRole> newRoles = new ArrayList<>();
         if (user.getUserRoles() != null) {
@@ -300,10 +302,16 @@ public class UserEditor extends AbstractEditor<User> {
         }
 
         MetaClass metaClass = rolesDs.getMetaClass();
-        for (Role role : defaultRoles) {
+
+        for (Map.Entry<String, Role> entry : defaultRoles.entrySet()) {
             UserRole userRole = dataSupplier.newInstance(metaClass);
-            userRole.setRole(role);
             userRole.setUser(user);
+
+            if (entry.getValue() != null) {
+                userRole.setRole(entry.getValue());
+            } else {
+                userRole.setRoleName(entry.getKey());
+            }
             newRoles.add(userRole);
         }
 

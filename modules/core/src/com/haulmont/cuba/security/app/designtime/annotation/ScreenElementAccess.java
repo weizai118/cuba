@@ -18,6 +18,17 @@ package com.haulmont.cuba.security.app.designtime.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines permissions to access screen elements.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;ScreenElementAccess(screen = "myapp_SomeEntity.browse", deny = {"someGroupBox"})
+ * </pre>
+ *
+ * @see Role
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(ScreenElementAccessContainer.class)

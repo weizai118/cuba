@@ -21,7 +21,11 @@ import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.entity.Role;
 
 import java.util.Collection;
+import java.util.Map;
 
+/**
+ * Helps to work with predefined roles in the user interface.
+ */
 public interface RolesService {
 
     String NAME = "cuba_RolesService";
@@ -54,5 +58,11 @@ public interface RolesService {
      * @return {@code true} if predefined roles mode is available, {@code false} otherwise
      */
     boolean isPredefinedRolesModeAvailable();
+
+    /**
+     * @return all available default roles.
+     * Key - role name, Value - {@link Role} object or {@code null} for predefined roles
+     */
+    Map<String, Role> getDefaultRoles();
 
 }

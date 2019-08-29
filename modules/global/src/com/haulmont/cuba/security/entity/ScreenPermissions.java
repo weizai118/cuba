@@ -16,13 +16,11 @@
 
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.security.entity.PermissionType;
-import com.haulmont.cuba.security.entity.Permissions;
-
 public class ScreenPermissions extends Permissions {
 
-    @Override
-    protected PermissionType getPermissionType() {
-        return PermissionType.SCREEN;
+    private static final long serialVersionUID = -6416873506276217570L;
+
+    public boolean isScreenAccessPermitted(String screenId) {
+        return PermissionsUtils.isScreenAccessPermitted(this, screenId);
     }
 }

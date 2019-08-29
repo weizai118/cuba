@@ -14,30 +14,14 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.app.designtime.annotation;
+package com.haulmont.cuba.security.app.designtime.roles;
 
+import com.haulmont.cuba.security.app.designtime.annotation.Role;
 import com.haulmont.cuba.security.entity.RoleType;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.stereotype.Component;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface DesignTimeRole {
-
-    String name();
-
-    String description() default "";
-
-    RoleType type();
-
-    @AliasFor(annotation = Component.class)
-    String value() default "";
-
-    boolean isDefault() default false;
+/**
+ * System role for {@code anonymous} user
+ */
+@Role(name = "Anonymous", type = RoleType.DENYING)
+public class AnonymousRoleDef extends AbstractRoleDef {
 }

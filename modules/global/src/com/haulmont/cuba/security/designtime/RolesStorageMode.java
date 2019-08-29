@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.entity;
+package com.haulmont.cuba.security.designtime;
 
-public interface OrdinaryRole extends ApplicationRole, GenericUiRole {
+public enum RolesStorageMode {
 
-    RoleType getRoleType();
+    /**
+     * Only roles from a database (sec$Role) will be used.
+     */
+    DATABASE,
 
-    String getName();
+    /**
+     * Only roles defined in the source code will be used.
+     */
+    SOURCE_CODE,
 
-    default String getDescription() {
-        return "";
-    }
-
-    default boolean isDefault() {
-        return false;
-    }
+    /**
+     * Mixed mode, both sources will be used. If there are roles with equal names in the database and in
+     * the source code, role from database will be used.
+     */
+    MIXED
 }

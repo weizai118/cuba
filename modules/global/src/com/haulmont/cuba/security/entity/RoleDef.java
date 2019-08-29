@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.app.designtime.roles;
+package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.security.app.designtime.annotation.DesignTimeRole;
-import com.haulmont.cuba.security.entity.RoleType;
+/**
+ * Main interface for working with predefined roles. Regardless of how the role is created
+ * (using the builder or using the Role annotation), it must implement this interface.
+ */
+public interface RoleDef extends ApplicationRole, GenericUiRole {
 
-@DesignTimeRole(name = "Anonymous", type = RoleType.DENYING)
-public class AnonymousRole extends PredefinedRole {
+    RoleType getRoleType();
+
+    String getName();
+
+    default String getDescription() {
+        return "";
+    }
+
+    default boolean isDefault() {
+        return false;
+    }
 }

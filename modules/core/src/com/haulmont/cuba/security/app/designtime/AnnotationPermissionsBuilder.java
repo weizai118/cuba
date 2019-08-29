@@ -20,6 +20,7 @@ import com.google.common.base.Strings;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.security.app.designtime.annotation.*;
+import com.haulmont.cuba.security.app.designtime.annotation.Role;
 import com.haulmont.cuba.security.entity.*;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,11 @@ import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.function.BiFunction;
 
+/**
+ * INTERNAL
+ *
+ * Helps construct permissions for roles defined using annotations.
+ */
 @Component(AnnotationPermissionsBuilder.NAME)
 public class AnnotationPermissionsBuilder {
     public static final String NAME = "cuba_AnnotationPermissionsBuilder";
@@ -81,34 +87,34 @@ public class AnnotationPermissionsBuilder {
                         (ScreenElementsPermissions) permissions));
     }
 
-    public String getNameFromAnnotation(OrdinaryRole role) {
-        DesignTimeRole annotation = getDesignTimeRoleAnnotationNN(role);
+    public String getNameFromAnnotation(RoleDef role) {
+        Role annotation = getDesignTimeRoleAnnotationNN(role);
 
         return annotation.name();
     }
 
-    public String getDescriptionFromAnnotation(OrdinaryRole role) {
-        DesignTimeRole annotation = getDesignTimeRoleAnnotationNN(role);
+    public String getDescriptionFromAnnotation(RoleDef role) {
+        Role annotation = getDesignTimeRoleAnnotationNN(role);
 
         return annotation.description();
     }
 
-    public RoleType getTypeFromAnnotation(OrdinaryRole role) {
-        DesignTimeRole annotation = getDesignTimeRoleAnnotationNN(role);
+    public RoleType getTypeFromAnnotation(RoleDef role) {
+        Role annotation = getDesignTimeRoleAnnotationNN(role);
 
         return annotation.type();
     }
 
-    public boolean getIsDefaultFromAnnotation(OrdinaryRole role) {
-        DesignTimeRole annotation = getDesignTimeRoleAnnotationNN(role);
+    public boolean getIsDefaultFromAnnotation(RoleDef role) {
+        Role annotation = getDesignTimeRoleAnnotationNN(role);
 
         return annotation.isDefault();
     }
 
-    protected DesignTimeRole getDesignTimeRoleAnnotationNN(OrdinaryRole role) {
-        DesignTimeRole annotation = role.getClass().getAnnotation(DesignTimeRole.class);
+    protected Role getDesignTimeRoleAnnotationNN(RoleDef role) {
+        Role annotation = role.getClass().getAnnotation(Role.class);
         if (annotation == null) {
-            throw new IllegalArgumentException("The class must have DesignTimeRole annotation.");
+            throw new IllegalArgumentException("The class must have Role annotation.");
         }
         return annotation;
     }
@@ -122,18 +128,18 @@ public class AnnotationPermissionsBuilder {
         String[] readOnly = annotation.readOnly();
 
         for (String property : deny) {
-            String target = metaClass.getName() + Permission.TARGET_PATH_DELIMETER + property;
-            permissions.addPermission(target, null, EntityAttrAccess.DENY.getId());
+            String target = PermissionsUtils.getEntityAttributeTarget(metaClass, property);
+            PermissionsUtils.addPermission(permissions, target, null, EntityAttrAccess.DENY.getId());
         }
 
         for (String property : allow) {
-            String target = metaClass.getName() + Permission.TARGET_PATH_DELIMETER + property;
-            permissions.addPermission(target, null, EntityAttrAccess.MODIFY.getId());
+            String target = PermissionsUtils.getEntityAttributeTarget(metaClass, property);
+            PermissionsUtils.addPermission(permissions, target, null, EntityAttrAccess.MODIFY.getId());
         }
 
         for (String property : readOnly) {
-            String target = metaClass.getName() + Permission.TARGET_PATH_DELIMETER + property;
-            permissions.addPermission(target, null, EntityAttrAccess.VIEW.getId());
+            String target = PermissionsUtils.getEntityAttributeTarget(metaClass, property);
+            PermissionsUtils.addPermission(permissions, target, null, EntityAttrAccess.VIEW.getId());
         }
 
         return permissions;
@@ -146,13 +152,13 @@ public class AnnotationPermissionsBuilder {
         EntityOp[] allow = annotation.allow();
 
         for (EntityOp entityOp : deny) {
-            String target = metaClass.getName() + Permission.TARGET_PATH_DELIMETER + entityOp.getId();
-            permissions.addPermission(target, null, AccessOperation.DENY.getId());
+            String target = PermissionsUtils.getEntityOperationTarget(metaClass, entityOp);
+            PermissionsUtils.addPermission(permissions, target, null, AccessOperation.DENY.getId());
         }
 
         for (EntityOp entityOp : allow) {
-            String target = metaClass.getName() + Permission.TARGET_PATH_DELIMETER + entityOp.getId();
-            permissions.addPermission(target, null, AccessOperation.ALLOW.getId());
+            String target = PermissionsUtils.getEntityOperationTarget(metaClass, entityOp);
+            PermissionsUtils.addPermission(permissions, target, null, AccessOperation.ALLOW.getId());
         }
 
         return permissions;
@@ -163,11 +169,10 @@ public class AnnotationPermissionsBuilder {
         AccessOperation access = annotation.access();
 
         if (Strings.isNullOrEmpty(target)) {
-            //todo log warning
             return permissions;
         }
 
-        permissions.addPermission(target, null, access.getId());
+        PermissionsUtils.addPermission(permissions, target, null, access.getId());
 
         return permissions;
     }
@@ -177,11 +182,11 @@ public class AnnotationPermissionsBuilder {
         String[] allow = annotation.allow();
 
         for (String screen : deny) {
-            permissions.addPermission(screen, null, AccessOperation.DENY.getId());
+            PermissionsUtils.addPermission(permissions, screen, null, AccessOperation.DENY.getId());
         }
 
         for (String screen : allow) {
-            permissions.addPermission(screen, null, AccessOperation.ALLOW.getId());
+            PermissionsUtils.addPermission(permissions, screen, null, AccessOperation.ALLOW.getId());
         }
 
         return permissions;
@@ -194,18 +199,17 @@ public class AnnotationPermissionsBuilder {
         String[] allow = annotation.allow();
 
         if (Strings.isNullOrEmpty(screen)) {
-            //todo log warning
             return permissions;
         }
 
         for (String component : deny) {
-            String target = screen + Permission.TARGET_PATH_DELIMETER + component;
-            permissions.addPermission(target, null, AccessOperation.DENY.getId());
+            String target = PermissionsUtils.getScreenElementTarget(screen, component);
+            PermissionsUtils.addPermission(permissions, target, null, AccessOperation.DENY.getId());
         }
 
         for (String component : allow) {
-            String target = screen + Permission.TARGET_PATH_DELIMETER + component;
-            permissions.addPermission(target, null, AccessOperation.ALLOW.getId());
+            String target = PermissionsUtils.getScreenElementTarget(screen, component);
+            PermissionsUtils.addPermission(permissions, target, null, AccessOperation.ALLOW.getId());
         }
 
         return permissions;

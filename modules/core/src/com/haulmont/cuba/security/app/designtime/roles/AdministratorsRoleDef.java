@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.entity;
+package com.haulmont.cuba.security.app.designtime.roles;
 
-import java.io.Serializable;
-import java.util.*;
 
-public abstract class Permissions implements Serializable {
+import com.haulmont.cuba.security.app.designtime.annotation.Role;
+import com.haulmont.cuba.security.entity.*;
 
-    private static final long serialVersionUID = -618769986842967904L;
-
-    private Map<String, Integer> permissions = new HashMap<>();
-
-    Map<String, Integer> getPermissions() {
-        return permissions;
-    }
+/**
+ * System role for {@code admin} user.
+ */
+@Role(name = "Administrators", type = RoleType.SUPER)
+public class AdministratorsRoleDef extends AbstractRoleDef {
 }

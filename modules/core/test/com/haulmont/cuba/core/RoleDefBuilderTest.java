@@ -17,7 +17,7 @@
 package com.haulmont.cuba.core;
 
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.security.app.designtime.OrdinaryRoleBuilder;
+import com.haulmont.cuba.security.app.designtime.RoleDefBuilder;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.Before;
@@ -29,7 +29,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class OrdinaryRoleBuilderTest {
+public class RoleDefBuilderTest {
 
     protected Metadata metadata;
 
@@ -43,20 +43,20 @@ public class OrdinaryRoleBuilderTest {
 
     @Test
     public void createNewRole() {
-        OrdinaryRole role = OrdinaryRoleBuilder.createRole().build();
+        RoleDef role = RoleDefBuilder.createRole().build();
 
         assertNotNull(role);
         assertEquals(RoleType.STANDARD, role.getRoleType());
-        assertEquals(0, role.entityAccess().getPermissions().size());
-        assertEquals(0, role.attributeAccess().getPermissions().size());
-        assertEquals(0, role.specificPermissions().getPermissions().size());
-        assertEquals(0, role.screenAccess().getPermissions().size());
-        assertEquals(0, role.screenElementsAccess().getPermissions().size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.entityAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.attributeAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.specificPermissions()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.screenAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.screenElementsAccess()).size());
     }
 
     @Test
     public void createRoleWithDuplicatePermissions() {
-        OrdinaryRole role = OrdinaryRoleBuilder.createRole()
+        RoleDef role = RoleDefBuilder.createRole()
                 .withName("testRole")
                 .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
                 .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
@@ -64,39 +64,39 @@ public class OrdinaryRoleBuilderTest {
                 .build();
 
         assertEquals("testRole", role.getName());
-        assertEquals(1, role.screenAccess().getPermissions().size());
-        assertEquals(1, (Object) role.screenAccess().getPermissionValue("sec$Role.browse"));
+        assertEquals(1, PermissionsUtils.getPermissions(role.screenAccess()).size());
+        assertTrue(role.screenAccess().isScreenAccessPermitted("sec$Role.browse"));
     }
 
     @Test
-    public void createOrdinaryRoleBasedOnRoleEntity() {
+    public void createRoleDefBasedOnRoleEntity() {
         Role roleEntity = createRoleEntityWithPermissions();
 
-        OrdinaryRole role = OrdinaryRoleBuilder.createRole(roleEntity).build();
+        RoleDef role = RoleDefBuilder.createRole(roleEntity).build();
 
         assertEquals("roleEntity", role.getName());
         assertEquals(RoleType.DENYING, role.getRoleType());
         assertFalse(role.isDefault());
         assertEquals("test description", role.getDescription());
-        assertEquals(0, role.entityAccess().getPermissions().size());
-        assertEquals(0, role.attributeAccess().getPermissions().size());
-        assertEquals(0, role.screenAccess().getPermissions().size());
-        assertEquals(0, role.screenElementsAccess().getPermissions().size());
-        assertEquals(2, role.specificPermissions().getPermissions().size());
-        assertEquals(1, (Object) role.specificPermissions().getPermissionValue("specificPermission1"));
-        assertEquals(0, (Object) role.specificPermissions().getPermissionValue("specificPermission2"));
+        assertEquals(0, PermissionsUtils.getPermissions(role.entityAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.attributeAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.screenAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role.screenElementsAccess()).size());
+        assertEquals(2, PermissionsUtils.getPermissions(role.specificPermissions()).size());
+        assertTrue(role.specificPermissions().isSpecificAccessPermitted("specificPermission1"));
+        assertFalse(role.specificPermissions().isSpecificAccessPermitted("specificPermission2"));
     }
 
     @Test
     public void joinRole() {
-        OrdinaryRole role1 = OrdinaryRoleBuilder.createRole()
-                .withPermission(PermissionType.SCREEN, "sec$Role.browse", 1)
+        RoleDef role1 = RoleDefBuilder.createRole()
+                .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
                 .build();
 
-        OrdinaryRole role2 = OrdinaryRoleBuilder.createRole(RoleType.DENYING)
+        RoleDef role2 = RoleDefBuilder.createRole(RoleType.DENYING)
                 .withName("ordinaryRole")
                 .withDescription("description")
-                .withPermission(createPermission(null, PermissionType.SPECIFIC, "specificPermission3", 1))
+                .withSpecificPermission("specificPermission3", AccessOperation.ALLOW)
                 .join(createRoleEntityWithPermissions())
                 .join(role1)
                 .build();
@@ -105,20 +105,22 @@ public class OrdinaryRoleBuilderTest {
         assertEquals(RoleType.DENYING, role2.getRoleType());
         assertFalse(role2.isDefault());
         assertEquals("description", role2.getDescription());
-        assertEquals(0, role2.entityAccess().getPermissions().size());
-        assertEquals(0, role2.attributeAccess().getPermissions().size());
-        assertEquals(1, role2.screenAccess().getPermissions().size());
-        assertEquals(0, role2.screenElementsAccess().getPermissions().size());
-        assertEquals(3, role2.specificPermissions().getPermissions().size());
-        assertEquals(1, (Object) role2.specificPermissions().getPermissionValue("specificPermission1"));
-        assertEquals(0, (Object) role2.specificPermissions().getPermissionValue("specificPermission2"));
-        assertEquals(1, (Object) role2.specificPermissions().getPermissionValue("specificPermission3"));
-        assertEquals(1, (Object) role2.screenAccess().getPermissionValue("sec$Role.browse"));
+
+        assertEquals(0, PermissionsUtils.getPermissions(role2.entityAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role2.attributeAccess()).size());
+        assertEquals(1, PermissionsUtils.getPermissions(role2.screenAccess()).size());
+        assertEquals(0, PermissionsUtils.getPermissions(role2.screenElementsAccess()).size());
+        assertEquals(3, PermissionsUtils.getPermissions(role2.specificPermissions()).size());
+
+        assertTrue(role2.specificPermissions().isSpecificAccessPermitted("specificPermission1"));
+        assertFalse(role2.specificPermissions().isSpecificAccessPermitted("specificPermission2"));
+        assertTrue(role2.specificPermissions().isSpecificAccessPermitted("specificPermission3"));
+        assertTrue(role2.screenAccess().isScreenAccessPermitted("sec$Role.browse"));
     }
 
     @Test
     public void createRoleWithMultiplePermissions() {
-        OrdinaryRole role = OrdinaryRoleBuilder.createRole()
+        RoleDef role = RoleDefBuilder.createRole()
                 .withName("role")
                 .withRoleType(RoleType.STANDARD)
                 .withEntityAccessPermission(metadata.getClassNN(User.class), EntityOp.CREATE, AccessOperation.ALLOW)
@@ -126,21 +128,22 @@ public class OrdinaryRoleBuilderTest {
                 .withSpecificPermission("specificPermission1", AccessOperation.ALLOW)
                 .withScreenPermission("sec$Role.browse", AccessOperation.ALLOW)
                 .withScreenElementPermission("sec$Role.browse", "roleGroupBox", AccessOperation.ALLOW)
-                .withPermission(createPermission(null, PermissionType.SPECIFIC, "specificPermission2", 1))
-                .withPermission(PermissionType.SPECIFIC, "specificPermission3", 1)
+                .withSpecificPermission("specificPermission2", AccessOperation.ALLOW)
+                .withSpecificPermission("specificPermission3", AccessOperation.ALLOW)
                 .build();
 
         assertEquals("role", role.getName());
         assertEquals(RoleType.STANDARD, role.getRoleType());
-        assertEquals(1, role.entityAccess().getPermissions().size());
-        assertEquals(1, role.attributeAccess().getPermissions().size());
-        assertEquals(1, role.screenAccess().getPermissions().size());
-        assertEquals(1, role.screenElementsAccess().getPermissions().size());
-        assertEquals(3, role.specificPermissions().getPermissions().size());
-        assertEquals(1, (Object) role.specificPermissions().getPermissionValue("specificPermission1"));
-        assertEquals(1, (Object) role.specificPermissions().getPermissionValue("specificPermission2"));
-        assertEquals(1, (Object) role.specificPermissions().getPermissionValue("specificPermission3"));
-        assertEquals(1, (Object) role.screenAccess().getPermissionValue("sec$Role.browse"));
+        assertEquals(1, PermissionsUtils.getPermissions(role.entityAccess()).size());
+        assertEquals(1, PermissionsUtils.getPermissions(role.attributeAccess()).size());
+        assertEquals(1, PermissionsUtils.getPermissions(role.screenAccess()).size());
+        assertEquals(1, PermissionsUtils.getPermissions(role.screenElementsAccess()).size());
+        assertEquals(3, PermissionsUtils.getPermissions(role.specificPermissions()).size());
+
+        assertTrue(role.specificPermissions().isSpecificAccessPermitted("specificPermission1"));
+        assertTrue(role.specificPermissions().isSpecificAccessPermitted("specificPermission2"));
+        assertTrue(role.specificPermissions().isSpecificAccessPermitted("specificPermission3"));
+        assertTrue(role.screenAccess().isScreenAccessPermitted("sec$Role.browse"));
     }
 
     protected Role createRoleEntityWithPermissions() {

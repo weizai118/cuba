@@ -153,7 +153,7 @@ public class UserManagementServiceBean implements UserManagementService {
 
         Role clone;
 
-        OrdinaryRole predefinedRole = rolesRepository.getOrdinaryRoleByName(predefinedRoleName);
+        RoleDef predefinedRole = rolesRepository.getRoleDefByName(predefinedRoleName);
         if (predefinedRole == null) {
             throw new IllegalStateException("Unable to find specified role with name: " + predefinedRoleName);
         }

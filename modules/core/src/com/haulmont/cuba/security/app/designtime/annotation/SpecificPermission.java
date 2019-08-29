@@ -20,6 +20,17 @@ import com.haulmont.cuba.security.entity.AccessOperation;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines specific permissions access.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;SpecificPermission(target = "my.specific.permission", access = AccessOperation.ALLOW)
+ * </pre>
+ *
+ * @see Role
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(SpecificPermissionContainer.class)

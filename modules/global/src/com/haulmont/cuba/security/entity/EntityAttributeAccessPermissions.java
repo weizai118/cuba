@@ -16,13 +16,26 @@
 
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.security.entity.PermissionType;
-import com.haulmont.cuba.security.entity.Permissions;
+import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.chile.core.model.MetaProperty;
 
 public class EntityAttributeAccessPermissions extends Permissions {
 
-    @Override
-    protected PermissionType getPermissionType() {
-        return PermissionType.ENTITY_ATTR;
+    private static final long serialVersionUID = -4057315403116500344L;
+
+    public boolean isReadOperationPermitted(MetaClass metaClass, String property) {
+        return PermissionsUtils.isAttributeReadOperationPermitted(this, metaClass, property);
+    }
+
+    public boolean isReadOperationPermitted(MetaClass metaClass, MetaProperty property) {
+        return PermissionsUtils.isAttributeReadOperationPermitted(this, metaClass, property.getName());
+    }
+
+    public boolean isModifyOperationPermitted(MetaClass metaClass, String property) {
+        return PermissionsUtils.isAttributeModifyOperationPermitted(this, metaClass, property);
+    }
+
+    public boolean isModifyOperationPermitted(MetaClass metaClass, MetaProperty property) {
+        return PermissionsUtils.isAttributeModifyOperationPermitted(this, metaClass, property.getName());
     }
 }

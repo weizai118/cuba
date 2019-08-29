@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import java.io.Serializable;
 
-public class BasicUserRole implements OrdinaryRole, Serializable {
+public class BasicUserRoleDef implements RoleDef, Serializable {
 
     private EntityAccessPermissions entityAccessPermissions;
     private EntityAttributeAccessPermissions entityAttributeAccessPermissions;
@@ -29,14 +29,14 @@ public class BasicUserRole implements OrdinaryRole, Serializable {
     private String name;
     private String description;
 
-    public BasicUserRole(String name,
-                         String description,
-                         RoleType roleType,
-                         EntityAccessPermissions entityAccessPermissions,
-                         EntityAttributeAccessPermissions entityAttributeAccessPermissions,
-                         SpecificPermissions specificPermissions,
-                         ScreenPermissions screenPermissions,
-                         ScreenElementsPermissions screenElementsPermissions) {
+    public BasicUserRoleDef(String name,
+                            String description,
+                            RoleType roleType,
+                            EntityAccessPermissions entityAccessPermissions,
+                            EntityAttributeAccessPermissions entityAttributeAccessPermissions,
+                            SpecificPermissions specificPermissions,
+                            ScreenPermissions screenPermissions,
+                            ScreenElementsPermissions screenElementsPermissions) {
         this.name = name;
         this.description = description;
         this.entityAccessPermissions = entityAccessPermissions;
@@ -47,7 +47,7 @@ public class BasicUserRole implements OrdinaryRole, Serializable {
         this.roleType = roleType;
     }
 
-    public BasicUserRole() {
+    public BasicUserRoleDef() {
         initApplicationRoleFields();
         initGenericUiRoleFields();
         roleType = RoleType.STANDARD;

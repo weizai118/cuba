@@ -48,7 +48,7 @@ public class UserRole extends StandardEntity {
     private String roleName;
 
     @Transient
-    private transient OrdinaryRole ordinaryRole;
+    private transient RoleDef roleDef;
 
     public User getUser() {
         return user;
@@ -74,11 +74,11 @@ public class UserRole extends StandardEntity {
         this.roleName = roleName;
     }
 
-    public OrdinaryRole getOrdinaryRole() {
-        return ordinaryRole;
+    public RoleDef getRoleDef() {
+        return roleDef;
     }
 
-    public void setOrdinaryRole(OrdinaryRole ordinaryRole) {
-        this.ordinaryRole = ordinaryRole;
+    public void setRoleDef(RoleDef roleDef) {
+        this.roleDef = roleDef;
     }
 }

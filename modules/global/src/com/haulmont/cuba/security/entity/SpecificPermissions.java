@@ -16,13 +16,11 @@
 
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.security.entity.PermissionType;
-import com.haulmont.cuba.security.entity.Permissions;
-
 public class SpecificPermissions extends Permissions {
 
-    @Override
-    protected PermissionType getPermissionType() {
-        return PermissionType.SPECIFIC;
+    private static final long serialVersionUID = 182848717412671042L;
+
+    public boolean isSpecificAccessPermitted(String specificPermission) {
+        return PermissionsUtils.isSpecificAccessPermitted(this, specificPermission);
     }
 }

@@ -21,7 +21,12 @@ import com.haulmont.cuba.security.entity.*;
 
 import javax.inject.Inject;
 
-public abstract class PredefinedRole implements OrdinaryRole {
+/**
+ * Abstract class that helps to work with {@link com.haulmont.cuba.security.app.designtime.annotation.Role} annotation.
+ *
+ * @see com.haulmont.cuba.security.app.designtime.annotation.Role
+ */
+public abstract class AbstractRoleDef implements RoleDef {
 
     @Inject
     protected AnnotationPermissionsBuilder annotationPermissionsBuilder;

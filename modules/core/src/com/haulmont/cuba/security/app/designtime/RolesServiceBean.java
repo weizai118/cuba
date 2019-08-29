@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.app.designtime;
 
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.security.designtime.RolesService;
-import com.haulmont.cuba.security.entity.OrdinaryRole;
+import com.haulmont.cuba.security.entity.RoleDef;
 import com.haulmont.cuba.security.entity.Permission;
 import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.entity.Role;
@@ -41,7 +41,7 @@ public class RolesServiceBean implements RolesService {
         Map<String, Role> rolesForGui = new HashMap<>();
 
         if (isPredefinedRolesModeAvailable()) {
-            for (Map.Entry<String, OrdinaryRole> entry : rolesRepository.getNameToDesignTimeRoleMapping().entrySet()) {
+            for (Map.Entry<String, RoleDef> entry : rolesRepository.getNameToDesignTimeRoleMapping().entrySet()) {
                 rolesForGui.put(entry.getKey(), rolesRepository.getRoleWithoutPermissions(entry.getValue()));
             }
         }
@@ -61,7 +61,7 @@ public class RolesServiceBean implements RolesService {
 
     @Override
     public Role getRoleByName(String predefinedRoleName) {
-        return rolesRepository.getRoleWithoutPermissions(rolesRepository.getOrdinaryRoleByName(predefinedRoleName));
+        return rolesRepository.getRoleWithoutPermissions(rolesRepository.getRoleDefByName(predefinedRoleName));
     }
 
     @Override
@@ -77,5 +77,10 @@ public class RolesServiceBean implements RolesService {
     @Override
     public boolean isPredefinedRolesModeAvailable() {
         return rolesRepository.isPredefinedRolesModeAvailable();
+    }
+
+    @Override
+    public Map<String, Role> getDefaultRoles() {
+        return rolesRepository.getDefaultRoles();
     }
 }

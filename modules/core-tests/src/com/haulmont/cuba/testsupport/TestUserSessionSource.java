@@ -18,8 +18,6 @@
 package com.haulmont.cuba.testsupport;
 
 import com.haulmont.cuba.core.sys.AbstractUserSessionSource;
-import com.haulmont.cuba.security.entity.OrdinaryRole;
-import com.haulmont.cuba.security.entity.Role;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.NoUserSessionException;
 import com.haulmont.cuba.security.global.UserSession;

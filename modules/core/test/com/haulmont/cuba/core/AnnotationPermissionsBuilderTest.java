@@ -20,6 +20,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.security.app.designtime.AnnotationPermissionsBuilder;
 import com.haulmont.cuba.security.app.designtime.annotation.*;
+import com.haulmont.cuba.security.app.designtime.annotation.Role;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.Before;
@@ -55,51 +56,43 @@ public class AnnotationPermissionsBuilderTest {
     @Test
     public void testPermissionsBuilding() {
         EntityAccessPermissions entityAccessPermissions = builder.buildEntityAccessPermissions(role);
-        String entityTarget1 = metadata.getClassNN(User.class).getName() + Permission.TARGET_PATH_DELIMETER + EntityOp.CREATE.getId();
-        String entityTarget2 = metadata.getClassNN(User.class).getName() + Permission.TARGET_PATH_DELIMETER + EntityOp.READ.getId();
-        String entityTarget3 = metadata.getClassNN(User.class).getName() + Permission.TARGET_PATH_DELIMETER + EntityOp.UPDATE.getId();
-        String entityTarget4 = metadata.getClassNN(Role.class).getName() + Permission.TARGET_PATH_DELIMETER + EntityOp.READ.getId();
 
-        assertEquals(4, entityAccessPermissions.getPermissions().size());
-        assertEquals(1, (Object) entityAccessPermissions.getPermissionValue(entityTarget1));
-        assertEquals(1, (Object) entityAccessPermissions.getPermissionValue(entityTarget2));
-        assertEquals(0, (Object) entityAccessPermissions.getPermissionValue(entityTarget3));
-        assertEquals(1, (Object) entityAccessPermissions.getPermissionValue(entityTarget4));
+        assertEquals(4, PermissionsUtils.getPermissions(entityAccessPermissions).size());
+        assertTrue(entityAccessPermissions.isCreateOperationPermitted(metadata.getClassNN(User.class)));
+        assertTrue(entityAccessPermissions.isReadOperationPermitted(metadata.getClassNN(User.class)));
+        assertFalse(entityAccessPermissions.isUpdateOperationPermitted(metadata.getClassNN(User.class)));
+        assertTrue(entityAccessPermissions.isReadOperationPermitted(metadata.getClassNN(com.haulmont.cuba.security.entity.Role.class)));
 
         EntityAttributeAccessPermissions entityAttributeAccessPermissions = builder.buildEntityAttributeAccessPermissions(role);
-        String attributeTarget1 = metadata.getClassNN(User.class).getName() + Permission.TARGET_PATH_DELIMETER + "login";
-        String attributeTarget2 = metadata.getClassNN(Role.class).getName() + Permission.TARGET_PATH_DELIMETER + "name";
-        String attributeTarget3 = metadata.getClassNN(Role.class).getName() + Permission.TARGET_PATH_DELIMETER + "description";
 
-        assertEquals(3, entityAttributeAccessPermissions.getPermissions().size());
-        assertEquals(2, (Object) entityAttributeAccessPermissions.getPermissionValue(attributeTarget1));
-        assertEquals(1, (Object) entityAttributeAccessPermissions.getPermissionValue(attributeTarget2));
-        assertEquals(0, (Object) entityAttributeAccessPermissions.getPermissionValue(attributeTarget3));
+        assertEquals(3, PermissionsUtils.getPermissions(entityAttributeAccessPermissions).size());
+        assertTrue(entityAttributeAccessPermissions.isModifyOperationPermitted(metadata.getClassNN(User.class), "login"));
+        assertTrue(entityAttributeAccessPermissions.isReadOperationPermitted(metadata.getClassNN(com.haulmont.cuba.security.entity.Role.class), "name"));
+        assertFalse(entityAttributeAccessPermissions.isModifyOperationPermitted(metadata.getClassNN(com.haulmont.cuba.security.entity.Role.class), "description"));
 
         SpecificPermissions specificPermissions = builder.buildSpecificPermissions(role);
 
-        assertEquals(2, specificPermissions.getPermissions().size());
-        assertEquals(1, (Object) specificPermissions.getPermissionValue("specificPermission2"));
-        assertEquals(0, (Object) specificPermissions.getPermissionValue("specificPermission1"));
+        assertEquals(2, PermissionsUtils.getPermissions(specificPermissions).size());
+        assertTrue(specificPermissions.isSpecificAccessPermitted("specificPermission2"));
+        assertFalse(specificPermissions.isSpecificAccessPermitted("specificPermission1"));
 
         ScreenPermissions screenPermissions = builder.buildScreenPermissions(role);
 
-        assertEquals(3, screenPermissions.getPermissions().size());
-        assertEquals(1, (Object) screenPermissions.getPermissionValue("sec$Role.edit"));
-        assertEquals(1, (Object) screenPermissions.getPermissionValue("sec$User.edit"));
-        assertEquals(0, (Object) screenPermissions.getPermissionValue("sec$Role.browse"));
+        assertEquals(3, PermissionsUtils.getPermissions(screenPermissions).size());
+        assertTrue(screenPermissions.isScreenAccessPermitted("sec$Role.edit"));
+        assertTrue(screenPermissions.isScreenAccessPermitted("sec$User.edit"));
+        assertFalse(screenPermissions.isScreenAccessPermitted("sec$Role.browse"));
 
         ScreenElementsPermissions screenElementsPermissions = builder.buildScreenElementsPermissions(role);
-        String elementTarget = "sec$Role.edit" + Permission.TARGET_PATH_DELIMETER + "roleGroupBox";
 
-        assertEquals(1, screenElementsPermissions.getPermissions().size());
-        assertEquals(1, (Object) screenElementsPermissions.getPermissionValue(elementTarget));
+        assertEquals(1, PermissionsUtils.getPermissions(screenElementsPermissions).size());
+        assertTrue(screenElementsPermissions.isScreenElementPermitted("sec$Role.edit", "roleGroupBox"));
 
     }
 
-    @DesignTimeRole(name = "TestPredefinedRole", type = RoleType.STANDARD,
+    @Role(name = "TestPredefinedRole", type = RoleType.STANDARD,
             isDefault = false, description = "Test role")
-    protected class TestPredefinedRole implements OrdinaryRole {
+    protected class TestPredefinedRole implements RoleDef {
 
         @Override
         public RoleType getRoleType() {
@@ -113,7 +106,7 @@ public class AnnotationPermissionsBuilderTest {
 
         @EntityAccess(target = User.class,
                 allow = {EntityOp.CREATE, EntityOp.READ}, deny = {EntityOp.UPDATE})
-        @EntityAccess(target = Role.class,
+        @EntityAccess(target = com.haulmont.cuba.security.entity.Role.class,
                 allow = {EntityOp.READ})
         @Override
         public EntityAccessPermissions entityAccess() {
@@ -121,7 +114,7 @@ public class AnnotationPermissionsBuilderTest {
         }
 
         @EntityAttributeAccess(target = User.class, allow = {"login"})
-        @EntityAttributeAccess(target = Role.class, readOnly = {"name"}, deny = {"description"})
+        @EntityAttributeAccess(target = com.haulmont.cuba.security.entity.Role.class, readOnly = {"name"}, deny = {"description"})
         @Override
         public EntityAttributeAccessPermissions attributeAccess() {
             return null;

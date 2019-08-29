@@ -25,6 +25,9 @@ import com.haulmont.cuba.security.entity.Role;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * INTERNAL
+ */
 public class PermissionsCollectionDatasource extends RestorablePermissionDatasource {
 
     protected RolesService rolesService = AppBeans.get(RolesService.NAME);

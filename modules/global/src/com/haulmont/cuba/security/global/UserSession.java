@@ -53,7 +53,7 @@ public class UserSession implements Serializable {
     protected String clientInfo;
     protected boolean system;
 
-    protected OrdinaryRole effectiveRole;
+    protected RoleDef effectiveRole;
 //    protected Map<String, Integer>[] permissions;
     protected Map<String, List<ConstraintData>> constraints;
 
@@ -72,12 +72,12 @@ public class UserSession implements Serializable {
     /**
      * INTERNAL
      */
-    public UserSession(UUID id, User user, Collection<OrdinaryRole> roles, Locale locale, boolean system) {
+    public UserSession(UUID id, User user, Collection<RoleDef> roles, Locale locale, boolean system) {
         this.id = id;
         this.user = user;
         this.system = system;
 
-        for (OrdinaryRole role : roles) {
+        for (RoleDef role : roles) {
             this.roles.add(role.getName());
             if (role.getRoleType() != null)
                 roleTypes.add(role.getRoleType());
@@ -87,7 +87,7 @@ public class UserSession implements Serializable {
         if (user.getTimeZone() != null)
             this.timeZone = TimeZone.getTimeZone(user.getTimeZone());
 
-        effectiveRole = new BasicUserRole();
+        effectiveRole = new BasicUserRoleDef();
         roleTypes.add(effectiveRole.getRoleType());
 
         constraints = new HashMap<>();
@@ -98,7 +98,7 @@ public class UserSession implements Serializable {
     /**
      * INTERNAL
      */
-    public UserSession(UserSession src, User user, Collection<OrdinaryRole> roles, Locale locale) {
+    public UserSession(UserSession src, User user, Collection<RoleDef> roles, Locale locale) {
         this(src.id, user, roles, locale, src.system);
         this.user = src.user;
         this.substitutedUser = this.user.equals(user) ? null : user;
@@ -298,28 +298,28 @@ public class UserSession implements Serializable {
      * INTERNAL
      */
     public void addPermission(PermissionType type, String target, @Nullable String extTarget, int value) {
-        performPermissionsAction(type, p -> p.addPermission(target, extTarget, value));
+        performPermissionsAction(type, p -> PermissionsUtils.addPermission(p, target, extTarget, value));
     }
 
     /**
      * INTERNAL
      */
     public void removePermission(PermissionType type, String target) {
-        performPermissionsAction(type, p -> p.removePermission(target));
+        performPermissionsAction(type, p -> PermissionsUtils.removePermission(p, target));
     }
 
     /**
      * INTERNAL
      */
     public void removePermissions(PermissionType type) {
-        performPermissionsAction(type, Permissions::removePermissions);
+        performPermissionsAction(type, PermissionsUtils::removePermissions);
     }
 
     /**
      * INTERNAL
      */
     public Integer getPermissionValue(PermissionType type, String target) {
-        return (Integer) performPermissionsFunction(type, p -> p.getPermissionValue(target));
+        return (Integer) performPermissionsFunction(type, p -> PermissionsUtils.getPermissionValue(p, target));
     }
 
     /**
@@ -327,7 +327,7 @@ public class UserSession implements Serializable {
      */
     public Map<String, Integer> getPermissionsByType(PermissionType type) {
         //noinspection unchecked
-        return (Map<String, Integer>) performPermissionsFunction(type, Permissions::getPermissions);
+        return (Map<String, Integer>) performPermissionsFunction(type, PermissionsUtils::getPermissions);
     }
 
     /**
@@ -577,11 +577,11 @@ public class UserSession implements Serializable {
         return system;
     }
 
-    public OrdinaryRole getEffectiveRole() {
+    public RoleDef getEffectiveRole() {
         return effectiveRole;
     }
 
-    public void applyEffectiveRole(OrdinaryRole effectiveRole) {
+    public void applyEffectiveRole(RoleDef effectiveRole) {
         this.effectiveRole = effectiveRole;
     }
 

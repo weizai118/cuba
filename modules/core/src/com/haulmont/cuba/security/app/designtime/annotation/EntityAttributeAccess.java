@@ -20,6 +20,17 @@ import com.haulmont.cuba.core.entity.Entity;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines permissions to access individual entity attributes.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;EntityAttributeAccess(target = SomeEntity.class, allow = {"someAttribute"})
+ * </pre>
+ *
+ * @see Role
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(EntityAttributeAccessContainer.class)
