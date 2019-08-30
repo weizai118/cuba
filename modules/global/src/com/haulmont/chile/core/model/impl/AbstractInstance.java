@@ -22,6 +22,8 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.utils.InstanceUtils;
 import com.haulmont.chile.core.model.utils.MethodsCache;
 import com.haulmont.chile.core.model.utils.RelatedPropertiesCache;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.MetadataTools;
 
 import javax.annotation.Nullable;
@@ -42,7 +44,7 @@ public abstract class AbstractInstance implements Instance {
 
     private static transient Map<Class, MethodsCache> methodCacheMap = new ConcurrentHashMap<>();
 
-    private static transient Map<MetaClass, RelatedPropertiesCache> relatedPropertiesCacheMap = new ConcurrentHashMap<>();
+    private static transient Map<Class, RelatedPropertiesCache> relatedPropertiesCacheMap = new ConcurrentHashMap<>();
 
     protected void propertyChanged(String s, Object prev, Object curr) {
         if (__propertyChangeListeners != null) {
@@ -124,11 +126,12 @@ public abstract class AbstractInstance implements Instance {
     }
 
     protected RelatedPropertiesCache getRelatedPropertiesCache() {
-        MetaClass metaClass = getMetaClass();
-        RelatedPropertiesCache cache = relatedPropertiesCacheMap.get(metaClass);
+        Class cls = getClass();
+        RelatedPropertiesCache cache = relatedPropertiesCacheMap.get(cls);
         if (cache == null) {
+            MetaClass metaClass = AppBeans.get(Metadata.class).getClassNN(cls);
             cache = new RelatedPropertiesCache(metaClass);
-            relatedPropertiesCacheMap.put(metaClass, cache);
+            relatedPropertiesCacheMap.put(cls, cache);
         }
         return cache;
     }
