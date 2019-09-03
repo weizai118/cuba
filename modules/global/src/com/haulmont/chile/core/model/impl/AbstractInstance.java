@@ -28,10 +28,7 @@ import com.haulmont.cuba.core.global.MetadataTools;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -49,8 +46,6 @@ public abstract class AbstractInstance implements Instance {
     protected void propertyChanged(String s, Object prev, Object curr) {
         if (__propertyChangeListeners != null) {
 
-            Collection<String> relatedReadOnlyProperties = getRelatedPropertiesCache().getRelatedReadOnlyProperties(s);
-
             for (Object referenceObject : __propertyChangeListeners.toArray()) {
                 @SuppressWarnings("unchecked")
                 WeakReference<PropertyChangeListener> reference = (WeakReference<PropertyChangeListener>) referenceObject;
@@ -61,11 +56,9 @@ public abstract class AbstractInstance implements Instance {
                 } else {
                     listener.propertyChanged(new PropertyChangeEvent(this, s, prev, curr));
 
-                    if (relatedReadOnlyProperties != null) {
-                        for (String property : relatedReadOnlyProperties) {
-                            listener.propertyChanged(
-                                    new PropertyChangeEvent(this, property, null, getValue(property)));
-                        }
+                    for (String property : getRelatedReadOnlyProperties(s)) {
+                        listener.propertyChanged(
+                                new PropertyChangeEvent(this, property, null, getValue(property)));
                     }
                 }
             }
@@ -123,6 +116,14 @@ public abstract class AbstractInstance implements Instance {
             methodCacheMap.put(cls, cache);
         }
         return cache;
+    }
+
+    protected Collection<String> getRelatedReadOnlyProperties(String propertyName) {
+        Collection<String> result = getRelatedPropertiesCache().getRelatedReadOnlyProperties(propertyName);
+        if (result == null) {
+            return Collections.emptyList();
+        }
+        return result;
     }
 
     protected RelatedPropertiesCache getRelatedPropertiesCache() {
