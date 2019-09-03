@@ -3301,7 +3301,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             this(id, null, type, owner);
         }
 
-        public ColumnImpl(String id,
+        protected ColumnImpl(String id,
                           @Nullable MetaPropertyPath propertyPath, Class type, WebAbstractDataGrid<?, E> owner) {
             this.id = id;
             this.propertyPath = propertyPath;
