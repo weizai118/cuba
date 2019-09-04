@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -36,7 +37,7 @@ import java.util.List;
 @Listeners("cuba_UserEntityListener")
 @NamePattern("#getCaption|login,name")
 @TrackEditScreenHistory
-public class User extends StandardEntity {
+public class User extends StandardEntity implements HasTenant {
 
     private static final long serialVersionUID = 5007187642916030394L;
 
@@ -87,6 +88,9 @@ public class User extends StandardEntity {
 
     @Column(name = "CHANGE_PASSWORD_AT_LOGON")
     protected Boolean changePasswordAtNextLogon = false;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "GROUP_ID")
@@ -259,6 +263,16 @@ public class User extends StandardEntity {
 
     public void setIpMask(String ipMask) {
         this.ipMask = ipMask;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getCaption() {

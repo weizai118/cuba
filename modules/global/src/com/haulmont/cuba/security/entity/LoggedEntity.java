@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.Creatable;
+import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -30,7 +31,7 @@ import java.util.Set;
 @Entity(name = "sec$LoggedEntity")
 @Table(name = "SEC_LOGGED_ENTITY")
 @SystemLevel
-public class LoggedEntity extends BaseUuidEntity implements Creatable {
+public class LoggedEntity extends BaseUuidEntity implements Creatable, HasTenant {
 
     private static final long serialVersionUID = 2189206984294705835L;
 
@@ -39,6 +40,9 @@ public class LoggedEntity extends BaseUuidEntity implements Creatable {
 
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Column(name = "NAME", length = 100)
     private String name;
@@ -70,6 +74,16 @@ public class LoggedEntity extends BaseUuidEntity implements Creatable {
     @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getName() {

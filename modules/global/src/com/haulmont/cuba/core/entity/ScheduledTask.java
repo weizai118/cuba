@@ -46,7 +46,7 @@ import java.util.List;
 @Table(name = "SYS_SCHEDULED_TASK")
 @NamePattern("#name|beanName,methodName,className,scriptName")
 @SystemLevel
-public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatable, SoftDelete {
+public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatable, SoftDelete, HasTenant {
 
     private static final long serialVersionUID = -2330884126746644884L;
 
@@ -74,6 +74,9 @@ public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatabl
 
     @Column(name = "DEFINED_BY")
     protected String definedBy;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Column(name = "BEAN_NAME")
     protected String beanName;
@@ -139,9 +142,9 @@ public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatabl
     protected String description;
 
     //the following field is part of private API, please do not use it
+
     @Transient
     protected volatile long currentStartTimestamp;
-
     @Override
     public Date getCreateTs() {
         return createTs;
@@ -200,6 +203,16 @@ public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatabl
     @Override
     public String getDeletedBy() {
         return deletedBy;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override

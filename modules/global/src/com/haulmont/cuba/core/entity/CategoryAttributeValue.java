@@ -28,12 +28,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @javax.persistence.Entity(name = "sys$CategoryAttributeValue")
 @Table(name = "SYS_ATTR_VALUE")
 @SystemLevel
-public class CategoryAttributeValue extends StandardEntity {
+public class CategoryAttributeValue extends TenantEntity {
 
     private static final long serialVersionUID = -2861790889151226985L;
 

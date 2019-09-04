@@ -31,7 +31,7 @@ import java.util.Date;
 @Table(name = "SYS_FILE")
 @NamePattern("%s (%s)|name,createDate,extension")
 @SystemLevel
-public class FileDescriptor extends StandardEntity {
+public class FileDescriptor extends TenantEntity {
 
     private static final long serialVersionUID = 564683944299730504L;
 

@@ -33,7 +33,7 @@ import java.util.List;
 @Entity(name = "sys$SendingMessage")
 @Table(name = "SYS_SENDING_MESSAGE")
 @SystemLevel
-public class SendingMessage extends StandardEntity {
+public class SendingMessage extends TenantEntity {
 
     private static final long serialVersionUID = -8156998515878702538L;
 

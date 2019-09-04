@@ -17,7 +17,8 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
-import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.HasTenantInstance;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.annotation.Listeners;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.TrackEditScreenHistory;
@@ -36,12 +37,25 @@ import java.util.Set;
 @Listeners("cuba_GroupEntityListener")
 @NamePattern("%s|name")
 @TrackEditScreenHistory
-public class Group extends StandardEntity {
+public class Group extends TenantEntity implements HasTenantInstance {
 
     private static final long serialVersionUID = -4581386806900761785L;
 
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "group")
+    protected Tenant tenant;
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    @Override
+    public Tenant getTenant() {
+        return tenant;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_ID")

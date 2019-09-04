@@ -25,7 +25,7 @@ import java.util.Date;
 @javax.persistence.Entity(name = "sys$LockDescriptor")
 @Table(name = "SYS_LOCK_CONFIG")
 @SystemLevel
-public class LockDescriptor extends BaseUuidEntity implements Creatable {
+public class LockDescriptor extends BaseUuidEntity implements Creatable, HasTenant {
 
     private static final long serialVersionUID = -5798715368435824090L;
 
@@ -34,6 +34,9 @@ public class LockDescriptor extends BaseUuidEntity implements Creatable {
 
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Column(name = "NAME", length = 100, nullable = false)
     private String name;
@@ -59,6 +62,16 @@ public class LockDescriptor extends BaseUuidEntity implements Creatable {
     @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getName() {

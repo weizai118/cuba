@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.Creatable;
+import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -29,7 +30,7 @@ import java.util.Date;
 @Entity(name = "sec$GroupHierarchy")
 @Table(name = "SEC_GROUP_HIERARCHY")
 @SystemLevel
-public class GroupHierarchy extends BaseUuidEntity implements Creatable {
+public class GroupHierarchy extends BaseUuidEntity implements Creatable, HasTenant {
 
     private static final long serialVersionUID = 8106113488822530560L;
 
@@ -38,6 +39,9 @@ public class GroupHierarchy extends BaseUuidEntity implements Creatable {
 
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "GROUP_ID")
@@ -68,6 +72,16 @@ public class GroupHierarchy extends BaseUuidEntity implements Creatable {
     @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public Group getGroup() {

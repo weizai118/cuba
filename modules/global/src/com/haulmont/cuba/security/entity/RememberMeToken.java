@@ -18,6 +18,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -26,7 +27,7 @@ import java.util.Date;
 @Entity(name = "sec$RememberMeToken")
 @Table(name = "SEC_REMEMBER_ME")
 @SystemLevel
-public class RememberMeToken extends BaseUuidEntity {
+public class RememberMeToken extends BaseUuidEntity implements HasTenant {
 
     private static final long serialVersionUID = -3757776319150532739L;
 
@@ -41,6 +42,9 @@ public class RememberMeToken extends BaseUuidEntity {
 
     @Column(name = "CREATE_TS")
     protected Date createTs;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     public User getUser() {
         return user;
@@ -64,5 +68,15 @@ public class RememberMeToken extends BaseUuidEntity {
 
     public void setCreateTs(Date createTs) {
         this.createTs = createTs;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

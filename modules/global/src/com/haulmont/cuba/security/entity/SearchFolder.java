@@ -17,6 +17,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.cuba.core.entity.AbstractSearchFolder;
+import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.annotation.EnableRestore;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -34,7 +35,10 @@ import javax.persistence.*;
 @PrimaryKeyJoinColumn(name = "FOLDER_ID", referencedColumnName = "ID")
 @DiscriminatorValue("S")
 @EnableRestore
-public class SearchFolder extends AbstractSearchFolder {
+public class SearchFolder extends AbstractSearchFolder implements HasTenant {
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
@@ -56,6 +60,16 @@ public class SearchFolder extends AbstractSearchFolder {
 
         UserSessionSource sessionSource = AppBeans.get(UserSessionSource.NAME);
         setUser(sessionSource.getUserSession().getUser());
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public User getUser() {

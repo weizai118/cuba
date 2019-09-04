@@ -28,9 +28,12 @@ import javax.persistence.Entity;
 @PrimaryKeyJoinColumn(name = "FOLDER_ID", referencedColumnName = "ID")
 @DiscriminatorValue("A")
 @EnableRestore
-public class AppFolder extends AbstractSearchFolder {
+public class AppFolder extends AbstractSearchFolder implements HasTenant {
 
     private static final long serialVersionUID = -3587493035203986325L;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Column(name = "VISIBILITY_SCRIPT", length = 200)
     protected String visibilityScript;
@@ -41,6 +44,16 @@ public class AppFolder extends AbstractSearchFolder {
     @MetaProperty
     @Transient
     protected Integer quantity;
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
 
     @Override
     public void copyFrom(AbstractSearchFolder srcFolder) {

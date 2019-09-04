@@ -16,7 +16,7 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -28,7 +28,7 @@ import javax.persistence.*;
 @Entity(name = "sec$Permission")
 @Table(name = "SEC_PERMISSION")
 @SystemLevel
-public class Permission extends StandardEntity {
+public class Permission extends TenantEntity {
 
     private static final long serialVersionUID = 4188184934170706381L;
 

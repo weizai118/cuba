@@ -28,7 +28,7 @@ import java.util.Date;
 @Table(name = "SYS_SERVER")
 @NamePattern("%s|name")
 @SystemLevel
-public class Server extends BaseUuidEntity implements Creatable, Updatable {
+public class Server extends BaseUuidEntity implements Creatable, Updatable, HasTenant {
 
     private static final long serialVersionUID = 1892335683693067357L;
 
@@ -43,6 +43,9 @@ public class Server extends BaseUuidEntity implements Creatable, Updatable {
 
     @Column(name = "UPDATED_BY", length = 50)
     protected String updatedBy;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Column(name = "NAME")
     private String name;
@@ -91,6 +94,16 @@ public class Server extends BaseUuidEntity implements Creatable, Updatable {
     @Override
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getName() {

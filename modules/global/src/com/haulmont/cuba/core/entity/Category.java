@@ -33,7 +33,7 @@ import java.util.List;
 @DiscriminatorValue("0")
 @NamePattern("%s|localeName")
 @SystemLevel
-public class Category extends StandardEntity {
+public class Category extends TenantEntity {
 
     private static final long serialVersionUID = 7160259865207148541L;
 
