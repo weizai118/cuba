@@ -17,7 +17,7 @@
 package com.haulmont.cuba.gui.app.security.ds;
 
 import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.security.designtime.RolesService;
+import com.haulmont.cuba.security.role.RolesService;
 import com.haulmont.cuba.security.entity.Permission;
 import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.entity.Role;

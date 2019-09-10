@@ -27,8 +27,8 @@ import com.haulmont.cuba.core.config.defaults.DefaultInt;
 import com.haulmont.cuba.core.config.defaults.DefaultString;
 import com.haulmont.cuba.core.config.type.*;
 import com.haulmont.cuba.core.sys.AvailableLocalesFactory;
-import com.haulmont.cuba.security.designtime.RolesStorageMode;
-import com.haulmont.cuba.security.designtime.RolesStorageModeFactory;
+import com.haulmont.cuba.security.role.RolesStorageMode;
+import com.haulmont.cuba.security.role.RolesStorageModeFactory;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig;
 
 import java.util.List;

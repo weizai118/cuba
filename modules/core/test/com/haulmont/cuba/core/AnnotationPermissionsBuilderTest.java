@@ -18,10 +18,11 @@ package com.haulmont.cuba.core;
 
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.security.app.designtime.AnnotationPermissionsBuilder;
-import com.haulmont.cuba.security.app.designtime.annotation.*;
-import com.haulmont.cuba.security.app.designtime.annotation.Role;
+import com.haulmont.cuba.security.app.role.AnnotationPermissionsBuilder;
+import com.haulmont.cuba.security.app.role.annotation.*;
+import com.haulmont.cuba.security.app.role.annotation.Role;
 import com.haulmont.cuba.security.entity.*;
+import com.haulmont.cuba.security.role.*;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.Before;
 import org.junit.ClassRule;

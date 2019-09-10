@@ -17,8 +17,10 @@
 package com.haulmont.cuba.core;
 
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.security.app.designtime.RoleDefBuilder;
+import com.haulmont.cuba.security.app.role.RoleDefBuilder;
 import com.haulmont.cuba.security.entity.*;
+import com.haulmont.cuba.security.role.PermissionsUtils;
+import com.haulmont.cuba.security.role.RoleDef;
 import com.haulmont.cuba.testsupport.TestContainer;
 import org.junit.Before;
 import org.junit.ClassRule;

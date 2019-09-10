@@ -33,7 +33,7 @@ import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.export.ExportFormat;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.app.UserManagementService;
-import com.haulmont.cuba.security.designtime.RolesService;
+import com.haulmont.cuba.security.role.RolesService;
 import com.haulmont.cuba.security.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

@@ -19,6 +19,10 @@ package com.haulmont.cuba.security.global;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.sys.UserInvocationContext;
 import com.haulmont.cuba.security.entity.*;
+import com.haulmont.cuba.security.role.BasicUserRoleDef;
+import com.haulmont.cuba.security.role.Permissions;
+import com.haulmont.cuba.security.role.PermissionsUtils;
+import com.haulmont.cuba.security.role.RoleDef;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

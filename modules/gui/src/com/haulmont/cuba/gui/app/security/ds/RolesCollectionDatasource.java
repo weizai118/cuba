@@ -18,7 +18,7 @@ package com.haulmont.cuba.gui.app.security.ds;
 
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.data.impl.CustomCollectionDatasource;
-import com.haulmont.cuba.security.designtime.RolesService;
+import com.haulmont.cuba.security.role.RolesService;
 import com.haulmont.cuba.security.entity.Role;
 
 import java.util.Collection;
