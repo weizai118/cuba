@@ -54,6 +54,9 @@ public class ScreenDataXmlLoader {
     @Inject
     protected ConditionXmlLoader conditionXmlLoader;
 
+    @Inject
+    protected ScreenViewXmlLoader screenViewXmlLoader;
+
     public void load(ScreenData screenData, Element element, @Nullable ScreenData hostScreenData) {
         Preconditions.checkNotNullArgument(screenData, "screenData is null");
         Preconditions.checkNotNullArgument(element, "element is null");
@@ -373,6 +376,12 @@ public class ScreenDataXmlLoader {
     }
 
     protected void loadView(Element element, Class<Entity> entityClass, InstanceContainer<Entity> container) {
+        Element viewElement = element.element("view");
+        if (viewElement != null) {
+            container.setView(screenViewXmlLoader.loadView(viewElement, entityClass));
+            return;
+        }
+
         String viewName = element.attributeValue("view");
         if (viewName != null) {
             container.setView(viewRepository.getView(entityClass, viewName));
