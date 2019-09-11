@@ -16,13 +16,13 @@
 
 package com.haulmont.cuba.security.entity;
 
-public enum AccessOperation {
+public enum AccessOp {
     DENY(0),
     ALLOW(1);
 
     private int id;
 
-    AccessOperation(int id) {
+    AccessOp(int id) {
         this.id = id;
     }
 
@@ -30,7 +30,7 @@ public enum AccessOperation {
         return id;
     }
 
-    public static AccessOperation fromId(int id) {
+    public static AccessOp fromId(int id) {
         switch (id) {
             case 0: return DENY;
             case 1: return ALLOW;

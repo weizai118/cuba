@@ -175,7 +175,7 @@ public class RoleDefBuilder {
      *
      * @return current instance of the builder
      */
-    public RoleDefBuilder withEntityAccessPermission(MetaClass targetClass, EntityOp operation, AccessOperation access) {
+    public RoleDefBuilder withEntityAccessPermission(MetaClass targetClass, EntityOp operation, AccessOp access) {
         return withPermission(PermissionType.ENTITY_OP,
                 targetClass.getName() + Permission.TARGET_PATH_DELIMETER + operation.getId(),
                 access.getId());
@@ -197,7 +197,7 @@ public class RoleDefBuilder {
      *
      * @return current instance of the builder
      */
-    public RoleDefBuilder withSpecificPermission(String target, AccessOperation access) {
+    public RoleDefBuilder withSpecificPermission(String target, AccessOp access) {
         return withPermission(PermissionType.SPECIFIC, target, access.getId());
     }
 
@@ -206,7 +206,7 @@ public class RoleDefBuilder {
      *
      * @return current instance of the builder
      */
-    public RoleDefBuilder withScreenPermission(String windowAlias, AccessOperation access) {
+    public RoleDefBuilder withScreenPermission(String windowAlias, AccessOp access) {
         return withPermission(PermissionType.SCREEN, windowAlias, access.getId());
     }
 
@@ -215,7 +215,7 @@ public class RoleDefBuilder {
      *
      * @return current instance of the builder
      */
-    public RoleDefBuilder withScreenElementPermission(String windowAlias, String component, AccessOperation access) {
+    public RoleDefBuilder withScreenElementPermission(String windowAlias, String component, AccessOp access) {
         return withPermission(PermissionType.UI,
                 windowAlias + Permission.TARGET_PATH_DELIMETER + component,
                 access.getId());

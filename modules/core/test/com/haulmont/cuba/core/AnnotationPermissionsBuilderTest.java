@@ -121,8 +121,8 @@ public class AnnotationPermissionsBuilderTest {
             return null;
         }
 
-        @SpecificPermission(target = "specificPermission2", access = AccessOperation.ALLOW)
-        @SpecificPermission(target = "specificPermission1", access = AccessOperation.DENY)
+        @SpecificPermission(target = "specificPermission2", access = AccessOp.ALLOW)
+        @SpecificPermission(target = "specificPermission1", access = AccessOp.DENY)
         @Override
         public SpecificPermissions specificPermissions() {
             return null;
