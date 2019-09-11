@@ -440,7 +440,7 @@ public class AbstractViewRepository implements ViewRepository {
 
         visited.add(viewInfo);
         viewLoader.loadViewProperties(viewElem, view, viewInfo.isSystemProperties(), (MetaClass refMetaClass, String refViewName) -> {
-            if (refViewName != null) {
+            if (refViewName == null) {
                 return null;
             }
             View refView = retrieveView(refMetaClass, refViewName, visited);
