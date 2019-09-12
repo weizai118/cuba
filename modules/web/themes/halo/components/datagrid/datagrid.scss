@@ -66,6 +66,27 @@ $cuba-datagrid-highlight-hover-row: false !default;
     &:focus {
       outline: none;
     }
+
+    &.borderless {
+      .#{$primary-stylename} {
+        .#{$primary-stylename}-scroller,
+        .#{$primary-stylename}-horizontal-scrollbar-deco,
+        .#{$primary-stylename}-header-deco,
+        .#{$primary-stylename}-footer-deco,
+        .#{$primary-stylename}-sidebar.v-contextmenu,
+        .#{$primary-stylename}-tablewrapper {
+          border: none;
+        }
+
+        .#{$primary-stylename}-row  > .#{$primary-stylename}-cell:last-child {
+          border-right: none;
+        }
+
+        .#{$primary-stylename}-editor .#{$primary-stylename}-editor-cells {
+          margin-left: -1px;
+        }
+      }
+    }
   }
 
   .c-data-grid-composition {
