@@ -83,9 +83,40 @@ $cuba-datagrid-highlight-hover-row: false !default;
         }
 
         .#{$primary-stylename}-editor .#{$primary-stylename}-editor-cells {
-          margin-left: -1px;
+          margin-left: -$v-grid-border-size;
         }
       }
+    }
+
+    &.no-vertical-lines {
+      .#{$primary-stylename} {
+        .#{$primary-stylename}-body .#{$primary-stylename}-row > td:not(:first-child) {
+          border-left: none;
+          padding-left: $v-grid-border-size + $v-grid-cell-padding-horizontal;
+        }
+      }
+    }
+
+    &.no-horizontal-lines {
+      .#{$primary-stylename} {
+        .#{$primary-stylename}-body .#{$primary-stylename}-row > td {
+         border-bottom: none;
+        }
+      }
+    }
+
+    &.no-stripes {
+      .#{$primary-stylename}-body .#{$primary-stylename}-row > td,
+        .#{$primary-stylename}-body .#{$primary-stylename}-row-stripes > td {
+          background: $background-color;
+      }
+
+     .#{$primary-stylename} .#{$primary-stylename}-body .#{$primary-stylename}-row-selected  > .#{$primary-stylename}-cell {
+       $font-color: valo-font-color($v-selection-color, 0.9);
+       color: $font-color;
+
+       @include valo-gradient($v-selection-color);
+     }
     }
   }
 
