@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.security.app.role.annotation;
 
-import com.haulmont.cuba.security.entity.AccessOp;
+import com.haulmont.cuba.security.entity.Access;
 
 import java.lang.annotation.*;
 
@@ -26,7 +26,7 @@ import java.lang.annotation.*;
  * <p>Example:
  *
  * <pre>
- *     &#064;SpecificPermission(target = "my.specific.permission", access = AccessOp.ALLOW)
+ *     &#064;SpecificPermission(target = "my.specific.permission", access = Access.ALLOW)
  * </pre>
  *
  * @see Role
@@ -38,6 +38,6 @@ public @interface SpecificPermission {
 
     String target();
 
-    AccessOp access();
+    Access access();
 
 }

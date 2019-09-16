@@ -154,12 +154,12 @@ public class AnnotationPermissionsBuilder {
 
         for (EntityOp entityOp : deny) {
             String target = PermissionsUtils.getEntityOperationTarget(metaClass, entityOp);
-            PermissionsUtils.addPermission(permissions, target, null, AccessOp.DENY.getId());
+            PermissionsUtils.addPermission(permissions, target, null, Access.DENY.getId());
         }
 
         for (EntityOp entityOp : allow) {
             String target = PermissionsUtils.getEntityOperationTarget(metaClass, entityOp);
-            PermissionsUtils.addPermission(permissions, target, null, AccessOp.ALLOW.getId());
+            PermissionsUtils.addPermission(permissions, target, null, Access.ALLOW.getId());
         }
 
         return permissions;
@@ -167,7 +167,7 @@ public class AnnotationPermissionsBuilder {
 
     protected SpecificPermissions processSpecificPermissionAnnotation(SpecificPermission annotation, SpecificPermissions permissions) {
         String target = annotation.target();
-        AccessOp access = annotation.access();
+        Access access = annotation.access();
 
         if (Strings.isNullOrEmpty(target)) {
             return permissions;
@@ -183,11 +183,11 @@ public class AnnotationPermissionsBuilder {
         String[] allow = annotation.allow();
 
         for (String screen : deny) {
-            PermissionsUtils.addPermission(permissions, screen, null, AccessOp.DENY.getId());
+            PermissionsUtils.addPermission(permissions, screen, null, Access.DENY.getId());
         }
 
         for (String screen : allow) {
-            PermissionsUtils.addPermission(permissions, screen, null, AccessOp.ALLOW.getId());
+            PermissionsUtils.addPermission(permissions, screen, null, Access.ALLOW.getId());
         }
 
         return permissions;
@@ -205,12 +205,12 @@ public class AnnotationPermissionsBuilder {
 
         for (String component : deny) {
             String target = PermissionsUtils.getScreenElementTarget(screen, component);
-            PermissionsUtils.addPermission(permissions, target, null, AccessOp.DENY.getId());
+            PermissionsUtils.addPermission(permissions, target, null, Access.DENY.getId());
         }
 
         for (String component : allow) {
             String target = PermissionsUtils.getScreenElementTarget(screen, component);
-            PermissionsUtils.addPermission(permissions, target, null, AccessOp.ALLOW.getId());
+            PermissionsUtils.addPermission(permissions, target, null, Access.ALLOW.getId());
         }
 
         return permissions;

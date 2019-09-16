@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
  *         return super.attributeAccess();
  *     }
  *
- *     &#064;SpecificPermission(target = "my.specific.permission", access = AccessOp.ALLOW)
+ *     &#064;SpecificPermission(target = "my.specific.permission", access = Access.ALLOW)
  *     &#064;Override
  *     public SpecificPermissions specificPermissions() {
  *         return super.specificPermissions();

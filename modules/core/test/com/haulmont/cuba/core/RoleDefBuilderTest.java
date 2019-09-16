@@ -60,9 +60,9 @@ public class RoleDefBuilderTest {
     public void createRoleWithDuplicatePermissions() {
         RoleDef role = RoleDefBuilder.createRole()
                 .withName("testRole")
-                .withScreenPermission("sec$Role.browse", AccessOp.ALLOW)
-                .withScreenPermission("sec$Role.browse", AccessOp.ALLOW)
-                .withScreenPermission("sec$Role.browse", AccessOp.DENY)
+                .withScreenPermission("sec$Role.browse", Access.ALLOW)
+                .withScreenPermission("sec$Role.browse", Access.ALLOW)
+                .withScreenPermission("sec$Role.browse", Access.DENY)
                 .build();
 
         assertEquals("testRole", role.getName());
@@ -92,13 +92,13 @@ public class RoleDefBuilderTest {
     @Test
     public void joinRole() {
         RoleDef role1 = RoleDefBuilder.createRole()
-                .withScreenPermission("sec$Role.browse", AccessOp.ALLOW)
+                .withScreenPermission("sec$Role.browse", Access.ALLOW)
                 .build();
 
         RoleDef role2 = RoleDefBuilder.createRole(RoleType.DENYING)
                 .withName("ordinaryRole")
                 .withDescription("description")
-                .withSpecificPermission("specificPermission3", AccessOp.ALLOW)
+                .withSpecificPermission("specificPermission3", Access.ALLOW)
                 .join(createRoleEntityWithPermissions())
                 .join(role1)
                 .build();
@@ -125,13 +125,13 @@ public class RoleDefBuilderTest {
         RoleDef role = RoleDefBuilder.createRole()
                 .withName("role")
                 .withRoleType(RoleType.STANDARD)
-                .withEntityAccessPermission(metadata.getClassNN(User.class), EntityOp.CREATE, AccessOp.ALLOW)
+                .withEntityAccessPermission(metadata.getClassNN(User.class), EntityOp.CREATE, Access.ALLOW)
                 .withEntityAttrAccessPermission(metadata.getClassNN(User.class), "login", EntityAttrAccess.MODIFY)
-                .withSpecificPermission("specificPermission1", AccessOp.ALLOW)
-                .withScreenPermission("sec$Role.browse", AccessOp.ALLOW)
-                .withScreenElementPermission("sec$Role.browse", "roleGroupBox", AccessOp.ALLOW)
-                .withSpecificPermission("specificPermission2", AccessOp.ALLOW)
-                .withSpecificPermission("specificPermission3", AccessOp.ALLOW)
+                .withSpecificPermission("specificPermission1", Access.ALLOW)
+                .withScreenPermission("sec$Role.browse", Access.ALLOW)
+                .withScreenElementPermission("sec$Role.browse", "roleGroupBox", Access.ALLOW)
+                .withSpecificPermission("specificPermission2", Access.ALLOW)
+                .withSpecificPermission("specificPermission3", Access.ALLOW)
                 .build();
 
         assertEquals("role", role.getName());
