@@ -50,6 +50,17 @@ public class CubaTreeGridWidget extends TreeGrid {
         }
     }
 
+    /*
+     * Hack to avoid disappearing footer when changing the predefined styles at runtime in Safari
+     */
+    public void updateFooterVisible() {
+        Footer footer = getFooter();
+        boolean visible = footer.isVisible();
+
+        footer.setVisible(!visible);
+        footer.setVisible(visible);
+    }
+
     public void showEmptyState(boolean show) {
         if (show) {
             if (emptyState == null) {
