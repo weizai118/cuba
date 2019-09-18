@@ -64,7 +64,7 @@ public class TrustedClientAuthenticationProvider extends AbstractAuthenticationP
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }
 
-        User user = loadUser(login);
+        User user = loadUser(login, null);
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }

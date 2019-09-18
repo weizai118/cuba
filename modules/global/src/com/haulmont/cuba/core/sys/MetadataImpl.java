@@ -29,10 +29,12 @@ import com.haulmont.chile.core.model.MetaModel;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.Session;
 import com.haulmont.chile.core.model.impl.SessionImpl;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.events.AppContextInitializedEvent;
+import com.haulmont.cuba.security.entity.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -50,7 +52,10 @@ import javax.persistence.InheritanceType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component(Metadata.NAME)
@@ -85,6 +90,9 @@ public class MetadataImpl implements Metadata {
 
     @Inject
     protected GlobalConfig config;
+
+    @Inject
+    protected TenantProvider tenantProvider;
 
     // stores methods in the execution order, all methods are accessible
     protected LoadingCache<Class<?>, List<Method>> postConstructMethodsCache =
@@ -148,6 +156,7 @@ public class MetadataImpl implements Metadata {
             T obj = extClass.newInstance();
             assignIdentifier((Entity) obj);
             assignUuid((Entity) obj);
+            assignTenantId((Entity) obj);
             createEmbedded((Entity) obj);
             invokePostConstructMethods((Entity) obj);
             return obj;
@@ -202,6 +211,15 @@ public class MetadataImpl implements Metadata {
     protected void assignUuid(Entity entity) {
         if (entity instanceof HasUuid) {
             ((HasUuid) entity).setUuid(UuidProvider.createUuid());
+        }
+    }
+
+    protected void assignTenantId(Entity entity) {
+        if(entity instanceof Tenant)
+            return;
+
+        if(entity instanceof HasTenant) {
+            ((HasTenant) entity).setTenantId(tenantProvider.getTenantId());
         }
     }
 

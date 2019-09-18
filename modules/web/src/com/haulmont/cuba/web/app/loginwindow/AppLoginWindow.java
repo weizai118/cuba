@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.app.loginwindow;
 
 import com.haulmont.bali.util.URLEncodeUtils;
 import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.security.app.UserManagementService;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
@@ -111,6 +112,9 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
     @Inject
     protected LookupField<Locale> localesSelect;
+
+    @Inject
+    protected UrlRouting urlRouting;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -261,6 +265,9 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
                 User user = session.getUser();
                 String rememberMeToken = userManagementService.generateRememberMeToken(user.getId());
                 app.addCookie(COOKIE_PASSWORD, rememberMeToken, rememberMeExpiration);
+
+                String rememberMeTenantId = user.getTenantId();
+                app.addCookie(COOKIE_TENANT_ID, rememberMeTenantId, rememberMeExpiration);
             } else {
                 resetRememberCookies();
             }
@@ -271,11 +278,13 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         app.removeCookie(COOKIE_REMEMBER_ME);
         app.removeCookie(COOKIE_LOGIN);
         app.removeCookie(COOKIE_PASSWORD);
+        app.removeCookie(COOKIE_TENANT_ID);
     }
 
     protected void doLogin() {
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
+        String tenantId = urlRouting.getState().getParams().get(globalConfig.getTenantIdName());
 
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             showNotification(messages.getMainMessage("loginWindow.emptyLoginOrPassword"), NotificationType.WARNING);
@@ -286,7 +295,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, tenantId));
 
             // locale could be set on the server
             if (connection.getSession() != null) {
@@ -336,19 +345,23 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         String rememberMeToken = app.getCookieValue(COOKIE_PASSWORD) != null
                 ? app.getCookieValue(COOKIE_PASSWORD) : "";
 
+        String rememberMeTenantId = app.getCookieValue(COOKIE_TENANT_ID) != null
+                ? app.getCookieValue(COOKIE_TENANT_ID) : "";
+
         if (StringUtils.isEmpty(login)
-                || StringUtils.isEmpty(rememberMeToken)) {
+                || StringUtils.isEmpty(rememberMeToken)
+                || StringUtils.isEmpty(rememberMeTenantId)) {
             return;
         }
 
-        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken);
+        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken, rememberMeTenantId);
         if (!tokenValid) {
             resetRememberCookies();
             return;
         }
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken);
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, rememberMeTenantId);
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
             try {
                 connection.login(credentials);

@@ -69,6 +69,9 @@ public class UserSessionManager {
     protected EntityStates entityStates;
 
     @Inject
+    protected GlobalConfig globalConfig;
+
+    @Inject
     protected Metadata metadata;
 
     @Inject
@@ -106,6 +109,7 @@ public class UserSessionManager {
             throw new IllegalStateException("User is not in a Group");
         compileConstraints(session, user.getGroup());
         compileSessionAttributes(session, user.getGroup());
+        setTenantIdAttribute(session, user);
         return session;
     }
 
@@ -129,6 +133,7 @@ public class UserSessionManager {
             throw new IllegalStateException("User is not in a Group");
         compileConstraints(session, user.getGroup());
         compileSessionAttributes(session, user.getGroup());
+        setTenantIdAttribute(session, user);
         return session;
     }
 
@@ -157,6 +162,10 @@ public class UserSessionManager {
                         convertToExtendedEntityTarget(permission), permission.getValue());
             }
         });
+    }
+
+    protected void setTenantIdAttribute(UserSession session, User user){
+        session.setAttribute(globalConfig.getTenantIdName(), user.getTenantId());
     }
 
     protected String convertToExtendedEntityTarget(Permission permission) {

@@ -18,7 +18,6 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.TenantEntity;
-import com.haulmont.cuba.core.entity.annotation.Listeners;
 
 import javax.persistence.*;
 
@@ -29,9 +28,8 @@ import javax.persistence.*;
  *
  * @see <a href="https://youtrack.cuba-platform.com/issue/PL-10474">PL-10474</a>
  */
-@Table(name = "CUBA_TENANT")
-@Entity(name = "cuba$Tenant")
-@Listeners("cuba_TenantListener")
+@Table(name = "SEC_TENANT")
+@Entity(name = "sec$Tenant")
 @NamePattern("%s|name")
 @AttributeOverride(name = "tenantId", column = @Column(name = "TENANT_ID", nullable = false, unique = true))
 public class Tenant extends TenantEntity {

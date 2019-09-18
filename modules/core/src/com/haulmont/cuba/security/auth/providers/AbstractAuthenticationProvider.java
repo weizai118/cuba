@@ -49,16 +49,17 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
     }
 
     @Nullable
-    protected User loadUser(String login) throws LoginException {
+    protected User loadUser(String login, String tenantId) throws LoginException {
         if (login == null) {
             throw new IllegalArgumentException("Login is null");
         }
 
         EntityManager em = persistence.getEntityManager();
-        String queryStr = "select u from sec$User u where u.loginLowerCase = ?1 and (u.active = true or u.active is null)";
+        String queryStr = "select u from sec$User u where (?1 is null or u.tenantId = ?1) and u.loginLowerCase = ?2 and (u.active = true or u.active is null)";
 
         Query q = em.createQuery(queryStr);
-        q.setParameter(1, login.toLowerCase());
+        q.setParameter(1, tenantId);
+        q.setParameter(2, login.toLowerCase());
 
         List list = q.getResultList();
         if (list.isEmpty()) {

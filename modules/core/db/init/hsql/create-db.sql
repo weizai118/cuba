@@ -261,7 +261,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON boolean,
     --
     primary key (ID),
-    constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, DELETE_TS),
+    constraint IDX_SEC_USER_UNIQ_LOGIN unique (TENANT_ID, LOGIN_LC, DELETE_TS),
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
@@ -930,13 +930,14 @@ create table SEC_TENANT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    TENANT_ID varchar(255) not null,
     --
     NAME varchar(255) not null,
     ACCESS_GROUP_ID varchar(36) not null,
     ADMIN_ID varchar(36) not null,
     --
-    primary key (ID)
+    primary key (ID),
+    constraint IDX_SEC_TENANT_UNIQ_TENANT_ID unique (TENANT_ID, DELETE_TS)
 )^
 
 alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ACCESS_GROUP foreign key (ACCESS_GROUP_ID) references SEC_GROUP(ID)^
@@ -952,31 +953,31 @@ create function NEWID() returns varchar(36)
 
 ------------------------------------------------------------------------------------------------------------
 
-insert into SEC_GROUP (ID, CREATE_TS, VERSION, NAME, PARENT_ID)
-values ('0fa2b1a5-1d68-4d69-9fbd-dff348347f93', current_timestamp, 0, 'Company', null)^
+insert into SEC_GROUP (ID, CREATE_TS, VERSION, NAME, PARENT_ID, TENANT_ID)
+values ('0fa2b1a5-1d68-4d69-9fbd-dff348347f93', current_timestamp, 0, 'Company', null, 'tenant_admin')^
 
-insert into SEC_USER (ID, CREATE_TS, VERSION, LOGIN, LOGIN_LC, PASSWORD, PASSWORD_ENCRYPTION, NAME, GROUP_ID, ACTIVE)
+insert into SEC_USER (ID, CREATE_TS, VERSION, LOGIN, LOGIN_LC, PASSWORD, PASSWORD_ENCRYPTION, NAME, GROUP_ID, ACTIVE, TENANT_ID)
 values ('60885987-1b61-4247-94c7-dff348347f93', current_timestamp, 0, 'admin', 'admin',
 '$2a$10$vQx8b8B7jzZ0rQmtuK4YDOKp7nkmUCFjPx6DMT.voPtetNHFOsaOu', 'bcrypt',
-'Administrator', '0fa2b1a5-1d68-4d69-9fbd-dff348347f93', true)^
+'Administrator', '0fa2b1a5-1d68-4d69-9fbd-dff348347f93', true, 'tenant_admin')^
 
-insert into SEC_USER (ID, CREATE_TS, VERSION, LOGIN, LOGIN_LC, PASSWORD, NAME, GROUP_ID, ACTIVE)
+insert into SEC_USER (ID, CREATE_TS, VERSION, LOGIN, LOGIN_LC, PASSWORD, NAME, GROUP_ID, ACTIVE, TENANT_ID)
 values ('a405db59-e674-4f63-8afe-269dda788fe8', now(), 0, 'anonymous', 'anonymous', null,
-'Anonymous', '0fa2b1a5-1d68-4d69-9fbd-dff348347f93', true)^
+'Anonymous', '0fa2b1a5-1d68-4d69-9fbd-dff348347f93', true, 'tenant_admin')^
 
-insert into SEC_ROLE (ID, CREATE_TS, VERSION, NAME, ROLE_TYPE)
-values ('0c018061-b26f-4de2-a5be-dff348347f93', current_timestamp, 0, 'Administrators', 10)^
+insert into SEC_ROLE (ID, CREATE_TS, VERSION, NAME, ROLE_TYPE, TENANT_ID)
+values ('0c018061-b26f-4de2-a5be-dff348347f93', current_timestamp, 0, 'Administrators', 10, 'tenant_admin')^
 
-insert into SEC_ROLE (ID, CREATE_TS, VERSION, NAME, ROLE_TYPE)
-values ('cd541dd4-eeb7-cd5b-847e-d32236552fa9', current_timestamp, 0, 'Anonymous', 30)^
+insert into SEC_ROLE (ID, CREATE_TS, VERSION, NAME, ROLE_TYPE, TENANT_ID)
+values ('cd541dd4-eeb7-cd5b-847e-d32236552fa9', current_timestamp, 0, 'Anonymous', 30, 'tenant_admin')^
 
-insert into SEC_USER_ROLE (ID, CREATE_TS, VERSION, USER_ID, ROLE_ID)
-values ('c838be0a-96d0-4ef4-a7c0-dff348347f93', current_timestamp, 0, '60885987-1b61-4247-94c7-dff348347f93', '0c018061-b26f-4de2-a5be-dff348347f93')^
+insert into SEC_USER_ROLE (ID, CREATE_TS, VERSION, USER_ID, ROLE_ID, TENANT_ID)
+values ('c838be0a-96d0-4ef4-a7c0-dff348347f93', current_timestamp, 0, '60885987-1b61-4247-94c7-dff348347f93', '0c018061-b26f-4de2-a5be-dff348347f93', 'tenant_admin')^
 
-insert into SEC_USER_ROLE (ID, CREATE_TS, VERSION, USER_ID, ROLE_ID)
-values ('f01fb532-c2f0-dc18-b86c-450cf8a8d8c5', current_timestamp, 0, 'a405db59-e674-4f63-8afe-269dda788fe8', 'cd541dd4-eeb7-cd5b-847e-d32236552fa9')^
+insert into SEC_USER_ROLE (ID, CREATE_TS, VERSION, USER_ID, ROLE_ID, TENANT_ID)
+values ('f01fb532-c2f0-dc18-b86c-450cf8a8d8c5', current_timestamp, 0, 'a405db59-e674-4f63-8afe-269dda788fe8', 'cd541dd4-eeb7-cd5b-847e-d32236552fa9', 'tenant_admin')^
 
-INSERT INTO sec_filter (id,create_ts,created_by,version,update_ts,updated_by,delete_ts,deleted_by,component,name,xml,global_default,user_id) VALUES ('b61d18cb-e79a-46f3-b16d-eaf4aebb10dd',{ts '2010-03-01 11:14:06.830'},'admin',2,{ts '2010-03-01 11:52:53.170'},'admin',null,null,'[sec$User.browse].genericFilter','Search by role',
+INSERT INTO sec_filter (id,create_ts,created_by,version,update_ts,updated_by,delete_ts,deleted_by,tenant_id,component,name,xml,global_default,user_id) VALUES ('b61d18cb-e79a-46f3-b16d-eaf4aebb10dd',{ts '2010-03-01 11:14:06.830'},'admin',2,{ts '2010-03-01 11:52:53.170'},'admin',null,null,null,'[sec$User.browse].genericFilter','Search by role',
 '<?xml version="1.0" encoding="UTF-8"?>
 <filter>
   <and>

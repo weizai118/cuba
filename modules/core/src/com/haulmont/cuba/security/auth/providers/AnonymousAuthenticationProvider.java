@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.auth.providers;
 
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.app.ServerConfig;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.auth.AnonymousUserCredentials;
@@ -28,6 +29,7 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.security.sys.UserSessionManager;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +60,11 @@ public class AnonymousAuthenticationProvider extends AbstractAuthenticationProvi
         Locale credentialsLocale = anonymous.getLocale() == null ?
                 messages.getTools().trimLocale(messages.getTools().getDefaultLocale()) : anonymous.getLocale();
 
-        User user = loadUser(login);
+        String tenantId = null;
+        if(ObjectUtils.isNotEmpty(anonymous.getParams())){
+            tenantId = (String) anonymous.getParams().get(TenantProvider.TENANT_ADMIN);
+        }
+        User user = loadUser(login, tenantId);
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }

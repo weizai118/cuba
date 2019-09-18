@@ -29,6 +29,7 @@ public class RememberMeCredentials extends AbstractClientCredentials {
 
     private String login;
     private String rememberMeToken;
+    private String tenantId;
 
     public RememberMeCredentials() {
     }
@@ -39,6 +40,11 @@ public class RememberMeCredentials extends AbstractClientCredentials {
 
     public RememberMeCredentials(String login, String rememberMeToken, Locale locale) {
         this(login, rememberMeToken, locale, Collections.emptyMap());
+    }
+
+    public RememberMeCredentials(String login, String rememberMeToken, Locale locale, String tenantId) {
+        this(login, rememberMeToken, locale, Collections.emptyMap());
+        this.tenantId = tenantId;
     }
 
     public RememberMeCredentials(String login, String rememberMeToken, Locale locale, Map<String, Object> params) {
@@ -61,6 +67,14 @@ public class RememberMeCredentials extends AbstractClientCredentials {
 
     public void setLogin(String login) {
         this.login = login;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override

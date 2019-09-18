@@ -43,7 +43,6 @@ import org.eclipse.persistence.expressions.ExpressionBuilder;
 import org.eclipse.persistence.internal.descriptors.PersistenceObject;
 import org.eclipse.persistence.internal.helper.DatabaseField;
 import org.eclipse.persistence.internal.weaving.PersistenceWeaved;
-import org.eclipse.persistence.internal.weaving.PersistenceWeavedChangeTracking;
 import org.eclipse.persistence.internal.weaving.PersistenceWeavedFetchGroups;
 import org.eclipse.persistence.mappings.*;
 import org.eclipse.persistence.platform.database.PostgreSQLPlatform;
@@ -98,7 +97,7 @@ public class EclipseLinkSessionEventListener extends SessionEventAdapter {
             }
 
             if (SoftDelete.class.isAssignableFrom(desc.getJavaClass())) {
-                desc.getQueryManager().setAdditionalCriteria("this.deleteTs is null");
+                desc.getQueryManager().setAdditionalCriteria("this.deleteTs is null and (:tenantId = 'tenant_admin' or this.tenantId = :tenantId)");
                 desc.setDeletePredicate(entity -> entity instanceof SoftDelete &&
                         PersistenceHelper.isLoaded(entity, "deleteTs") &&
                         ((SoftDelete) entity).isDeleted());

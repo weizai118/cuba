@@ -53,6 +53,7 @@ public class LoginPasswordAuthenticationProvider extends AbstractAuthenticationP
         LoginPasswordCredentials loginAndPassword = (LoginPasswordCredentials) credentials;
 
         String login = loginAndPassword.getLogin();
+        String tenantId = loginAndPassword.getTenantId();
 
         Locale credentialsLocale = loginAndPassword.getLocale() == null ?
                 messages.getTools().getDefaultLocale() : loginAndPassword.getLocale();
@@ -64,7 +65,7 @@ public class LoginPasswordAuthenticationProvider extends AbstractAuthenticationP
 
         checkUserCredentials(credentials);
 
-        User user = loadUser(login);
+        User user = loadUser(login, tenantId);
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }

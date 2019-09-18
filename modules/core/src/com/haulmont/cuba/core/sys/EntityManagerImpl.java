@@ -23,6 +23,7 @@ import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.TypedQuery;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.listener.EntityListenerManager;
@@ -40,6 +41,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
@@ -49,6 +51,8 @@ import java.util.*;
 @Component(EntityManager.NAME)
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class EntityManagerImpl implements EntityManager {
+
+    public static final String TENANT_ID = "tenantId";
 
     protected javax.persistence.EntityManager delegate;
 
@@ -68,6 +72,8 @@ public class EntityManagerImpl implements EntityManager {
     protected AuditInfoProvider auditInfoProvider;
     @Inject
     protected TimeSource timeSource;
+    @Inject
+    protected TenantProvider tenantProvider;
 
     protected boolean softDeletion = true;
 
@@ -75,6 +81,11 @@ public class EntityManagerImpl implements EntityManager {
 
     protected EntityManagerImpl(javax.persistence.EntityManager jpaEntityManager) {
         this.delegate = jpaEntityManager;
+    }
+
+    @PostConstruct
+    protected void init(){
+        this.delegate.setProperty(TENANT_ID, tenantProvider.getTenantId());
     }
 
     @Override

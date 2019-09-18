@@ -84,6 +84,7 @@ public abstract class App {
     public static final String COOKIE_REMEMBER_ME = "rememberMe";
     public static final String COOKIE_LOGIN = "rememberMe.Login";
     public static final String COOKIE_PASSWORD = "rememberMe.Password";
+    public static final String COOKIE_TENANT_ID = "rememberMe.TenantId";
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
@@ -662,6 +663,7 @@ public abstract class App {
         removeCookie(COOKIE_REMEMBER_ME);
         removeCookie(COOKIE_LOGIN);
         removeCookie(COOKIE_PASSWORD);
+        removeCookie(COOKIE_TENANT_ID);
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
             beanLocator.get(UserManagementService.class)

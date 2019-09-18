@@ -51,7 +51,7 @@ public class SystemAuthenticationProvider extends AbstractAuthenticationProvider
         Locale credentialsLocale = systemLogin.getLocale() == null ?
                 messages.getTools().getDefaultLocale() : systemLogin.getLocale();
 
-        User user = loadUser(login);
+        User user = loadUser(login, null);
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }

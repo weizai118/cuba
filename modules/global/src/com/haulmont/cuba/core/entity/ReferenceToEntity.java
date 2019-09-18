@@ -26,11 +26,8 @@ import java.util.UUID;
 @Embeddable
 @MetaClass(name = "sys$ReferenceToEntity")
 @SystemLevel
-public class ReferenceToEntity extends EmbeddableEntity implements HasTenant {
+public class ReferenceToEntity extends EmbeddableEntity {
     private static final long serialVersionUID = -3667689055952380345L;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @Column(name = "ENTITY_ID")
     private UUID entityId;
@@ -43,16 +40,6 @@ public class ReferenceToEntity extends EmbeddableEntity implements HasTenant {
 
     @Column(name = "LONG_ENTITY_ID")
     private Long longEntityId;
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public UUID getEntityId() {
         return entityId;

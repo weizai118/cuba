@@ -22,6 +22,7 @@ import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
@@ -93,6 +94,8 @@ public class LoginScreen extends Screen {
     protected PasswordField passwordField;
     @Inject
     protected LookupField<Locale> localesSelect;
+    @Inject
+    protected UrlRouting urlRouting;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -238,6 +241,9 @@ public class LoginScreen extends Screen {
                 User user = session.getUser();
                 String rememberMeToken = userManagementService.generateRememberMeToken(user.getId());
                 app.addCookie(COOKIE_PASSWORD, rememberMeToken, rememberMeExpiration);
+
+                String rememberMeTenantId = user.getTenantId();
+                app.addCookie(COOKIE_TENANT_ID, rememberMeTenantId, rememberMeExpiration);
             } else {
                 resetRememberCookies();
             }
@@ -248,11 +254,13 @@ public class LoginScreen extends Screen {
         app.removeCookie(COOKIE_REMEMBER_ME);
         app.removeCookie(COOKIE_LOGIN);
         app.removeCookie(COOKIE_PASSWORD);
+        app.removeCookie(COOKIE_TENANT_ID);
     }
 
     protected void doLogin() {
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
+        String tenantId = urlRouting.getState().getParams().get(globalConfig.getTenantIdName());
 
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             notifications.create(Notifications.NotificationType.WARNING)
@@ -265,7 +273,7 @@ public class LoginScreen extends Screen {
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, tenantId));
 
             // locale could be set on the server
             if (connection.getSession() != null) {
@@ -315,19 +323,23 @@ public class LoginScreen extends Screen {
         String rememberMeToken = app.getCookieValue(COOKIE_PASSWORD) != null
                 ? app.getCookieValue(COOKIE_PASSWORD) : "";
 
+        String rememberMeTenantId = app.getCookieValue(COOKIE_TENANT_ID) != null
+                ? app.getCookieValue(COOKIE_TENANT_ID) : "";
+
         if (StringUtils.isEmpty(login)
-                || StringUtils.isEmpty(rememberMeToken)) {
+                || StringUtils.isEmpty(rememberMeToken)
+                || StringUtils.isEmpty(rememberMeTenantId)) {
             return;
         }
 
-        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken);
+        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken, rememberMeTenantId);
         if (!tokenValid) {
             resetRememberCookies();
             return;
         }
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken);
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, rememberMeTenantId);
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
             try {
                 connection.login(credentials);

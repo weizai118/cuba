@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.core.entity;
+package com.haulmont.cuba.core.app.multitenancy;
 
-import com.haulmont.cuba.security.entity.Tenant;
+public interface TenantProvider {
 
-/**
- * Interface for entities that have tenant instance.
- * Implementing this interface doesn't make entities tenant-specific, use {@link HasTenant} for that.
- */
-public interface HasTenantInstance {
+    String NAME = "cuba_TenantProvider";
 
-    void setTenant(Tenant tenant);
+    String TENANT_ADMIN = "tenant_admin";
 
-    Tenant getTenant();
+    String getTenantId();
 }

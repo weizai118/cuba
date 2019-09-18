@@ -71,7 +71,7 @@ public class RememberMeAuthenticationProvider extends AbstractAuthenticationProv
 
         checkUserCredentials(credentials);
 
-        User user = loadUser(login);
+        User user = loadUser(login, rememberMe.getTenantId());
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }
