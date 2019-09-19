@@ -158,7 +158,7 @@ public class CubaGrid<T> extends Grid<T> implements CubaEnhancedGrid<T> {
     }
 
     @Override
-    public void updateFooterVisible() {
-        getRpcProxy(CubsGridClientRpc.class).updateFooterVisible();
+    public void updateFooterVisibility() {
+        getRpcProxy(CubsGridClientRpc.class).updateFooterVisibility();
     }
 }

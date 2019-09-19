@@ -29,7 +29,7 @@ import java.util.List;
 public class CubaGridConnector extends GridConnector {
 
     public CubaGridConnector() {
-        registerRpc(CubsGridClientRpc.class, () -> getWidget().updateFooterVisible());
+        registerRpc(CubsGridClientRpc.class, () -> getWidget().updateFooterVisibility());
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.util.List;
 public class CubaTreeGridConnector extends TreeGridConnector {
 
     public CubaTreeGridConnector() {
-        registerRpc(CubsGridClientRpc.class, () -> getWidget().updateFooterVisible());
+        registerRpc(CubsGridClientRpc.class, () -> getWidget().updateFooterVisibility());
     }
 
     @Override

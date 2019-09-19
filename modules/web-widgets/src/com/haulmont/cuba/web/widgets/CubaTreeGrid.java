@@ -171,7 +171,7 @@ public class CubaTreeGrid<T> extends TreeGrid<T> implements CubaEnhancedGrid<T> 
     }
 
     @Override
-    public void updateFooterVisible() {
-        getRpcProxy(CubsGridClientRpc.class).updateFooterVisible();
+    public void updateFooterVisibility() {
+        getRpcProxy(CubsGridClientRpc.class).updateFooterVisibility();
     }
 }

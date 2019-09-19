@@ -4221,7 +4221,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             super.addStyleName(style);
 
             // Safari hides footer while changing predefined styles at runtime
-            updateFooterVisible(style);
+            updateFooterVisibility(style);
         }
 
         @Override
@@ -4229,10 +4229,10 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             super.removeStyleName(style);
 
             // Safari hides footer while changing predefined styles at runtime
-            updateFooterVisible(style);
+            updateFooterVisibility(style);
         }
 
-        protected void updateFooterVisible(String style) {
+        protected void updateFooterVisibility(String style) {
             Page page = Page.getCurrent();
             if (page == null) {
                 return;
@@ -4244,8 +4244,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
             if (webBrowser.isSafari()
                     && isPredefinedStyle
-                    && grid.getFooterRowCount() > 0) {
-                ((CubaEnhancedGrid) grid).updateFooterVisible();
+                    && grid.getFooterRowCount() > 0
+                    && grid.isFooterVisible()) {
+                ((CubaEnhancedGrid) grid).updateFooterVisibility();
             }
         }
     }

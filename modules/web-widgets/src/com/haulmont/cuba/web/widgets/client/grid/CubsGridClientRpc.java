@@ -24,5 +24,5 @@ public interface CubsGridClientRpc extends ClientRpc {
      * CAUTION! Safari hides footer while changing predefined styles at runtime. Given method updates footer visibility
      * without changing its value.
      */
-    void updateFooterVisible();
+    void updateFooterVisibility();
 }
