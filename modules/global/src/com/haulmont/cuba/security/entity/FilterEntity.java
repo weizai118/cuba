@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.AbstractSearchFolder;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -30,7 +30,7 @@ import javax.persistence.*;
 @Table(name = "SEC_FILTER")
 @NamePattern("%s|name")
 @SystemLevel
-public class FilterEntity extends TenantEntity {
+public class FilterEntity extends StandardTenantEntity {
 
     @Column(name = "COMPONENT")
     protected String componentId;

@@ -17,7 +17,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 
 import javax.persistence.*;
 
@@ -32,7 +32,7 @@ import javax.persistence.*;
 @Entity(name = "sec$Tenant")
 @NamePattern("%s|name")
 @AttributeOverride(name = "tenantId", column = @Column(name = "TENANT_ID", nullable = false, unique = true))
-public class Tenant extends TenantEntity {
+public class Tenant extends StandardTenantEntity {
     private static final long serialVersionUID = 4892183772427391265L;
 
     @Column(name = "NAME", nullable = false, unique = true)

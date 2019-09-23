@@ -25,7 +25,7 @@ import javax.persistence.Entity;
 @Entity(name = "sys$SendingAttachment")
 @Table(name = "SYS_SENDING_ATTACHMENT")
 @SystemLevel
-public class SendingAttachment extends TenantEntity {
+public class SendingAttachment extends StandardTenantEntity {
     private static final long serialVersionUID = -8253918579521701435L;
 
     @ManyToOne(fetch = FetchType.LAZY)

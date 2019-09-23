@@ -16,7 +16,7 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -31,7 +31,7 @@ import java.util.Date;
 @Entity(name = "sec$UserSubstitution")
 @Table(name = "SEC_USER_SUBSTITUTION")
 @SystemLevel
-public class UserSubstitution extends TenantEntity {
+public class UserSubstitution extends StandardTenantEntity {
 
     private static final long serialVersionUID = -1260499554824220311L;
 

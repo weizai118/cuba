@@ -1,10 +1,13 @@
 create table SYS_APP_FOLDER (
+    TENANT_ID varchar2(255 char),
+    --
     FOLDER_ID varchar2(32) not null,
     FILTER_COMPONENT varchar2(200 char),
     FILTER_XML clob,
     VISIBILITY_SCRIPT clob,
     QUANTITY_SCRIPT clob,
     APPLY_DEFAULT char(1),
+    --
     primary key(FOLDER_ID)
 )^
 
@@ -17,6 +20,8 @@ create table SYS_ATTR_VALUE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     CATEGORY_ATTR_ID varchar2(32) not null,
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255 char),
@@ -35,6 +40,7 @@ create table SYS_ATTR_VALUE (
     LONG_ENTITY_VALUE number,
     CODE varchar2(100 char) not null,
     PARENT_ID varchar2(32),
+    --
     primary key(ID)
 )^
 create index IDX_SYS_ATTR_VALUE_ENTITY on SYS_ATTR_VALUE(ENTITY_ID)^
@@ -51,12 +57,15 @@ create table SYS_CATEGORY (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(255 char) not null,
     SPECIAL varchar2(50 char),
     ENTITY_TYPE varchar2(100 char) not null,
     IS_DEFAULT char(1),
     DISCRIMINATOR integer,
     LOCALE_NAMES varchar2(1000 char),
+    --
     primary key(ID)
 )^
 
@@ -71,6 +80,8 @@ create table SYS_CATEGORY_ATTR (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     CATEGORY_ENTITY_TYPE varchar(4000),
     NAME varchar2(255 char),
     CODE varchar2(100 char) not null,
@@ -106,7 +117,7 @@ create table SYS_CATEGORY_ATTR (
     ENUMERATION_LOCALES clob,
     LOCALE_DESCRIPTIONS varchar2(4000),
     ATTRIBUTE_CONFIGURATION_JSON clob,
-
+    --
     primary key(ID)
 )^
 create index IDX_SYS_CATEGORY_ATTR_CATEGORY on SYS_CATEGORY_ATTR(CATEGORY_ID)^
@@ -119,8 +130,11 @@ create table SYS_CONFIG (
     VERSION integer default 1 not null,
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(255 char) not null,
     VALUE_ clob not null,
+    --
     primary key(ID)
 )^
 create unique index IDX_SYS_CONFIG_UNIQ_NAME on SYS_CONFIG(NAME)^
@@ -129,6 +143,8 @@ create table SYS_ENTITY_SNAPSHOT (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     ENTITY_META_CLASS varchar2(50 char) not null,
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255 char),
@@ -138,6 +154,7 @@ create table SYS_ENTITY_SNAPSHOT (
     VIEW_XML clob not null,
     SNAPSHOT_XML clob not null,
     SNAPSHOT_DATE timestamp not null,
+    --
     primary key(ID)
 )^
 create index IDX_SYS_ENTITY_SNAPSHOT_ENT_ID on SYS_ENTITY_SNAPSHOT(ENTITY_ID)^
@@ -151,12 +168,15 @@ create table SYS_ENTITY_STATISTICS (
     CREATED_BY varchar2(50 char),
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(50 char),
     INSTANCE_COUNT number,
     FETCH_UI integer,
     MAX_FETCH_UI integer,
     LAZY_COLLECTION_THRESHOLD integer,
     LOOKUP_SCREEN_THRESHOLD integer,
+    --
     primary key(ID)
 )^
 create unique index IDX_SYS_ENTITY_STA_UNI_NAM on SYS_ENTITY_STATISTICS(NAME)^
@@ -170,10 +190,13 @@ create table SYS_FILE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(500 char) not null,
     EXT varchar2(20 char),
     FILE_SIZE number(19),
     CREATE_DATE timestamp,
+    --
     primary key(ID)
 )^
 
@@ -186,11 +209,14 @@ create table SYS_FOLDER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     FOLDER_TYPE char(1),
     PARENT_ID varchar2(32),
     NAME varchar2(100 char),
     TAB_NAME varchar2(100 char),
     SORT_ORDER integer,
+    --
     primary key(ID)
 )^
 
@@ -198,6 +224,8 @@ create table SYS_FTS_QUEUE (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255 char),
     INT_ENTITY_ID integer,
@@ -207,7 +235,7 @@ create table SYS_FTS_QUEUE (
     SOURCE_HOST varchar2(255 char),
     INDEXING_HOST varchar2(255 char),
     FAKE char(1),
-
+    --
     primary key(ID)
 )^
 create index IDX_SYS_FTS_QUEUE_IDXHOST_CRTS on SYS_FTS_QUEUE (INDEXING_HOST, CREATE_TS)^
@@ -221,10 +249,13 @@ create table SYS_JMX_INSTANCE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NODE_NAME varchar2(255 char),
     ADDRESS varchar2(500 char) not null,
     LOGIN varchar2(50 char) not null,
     PASSWORD varchar2(255 char) not null,
+    --
     primary key(ID)
 )^
 
@@ -232,8 +263,11 @@ create table SYS_LOCK_CONFIG (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(100 char),
     TIMEOUT_SEC integer,
+    --
     primary key(ID)
 )^
 
@@ -242,12 +276,15 @@ create sequence SYS_QUERY_RESULT_SEQ
 
 create table SYS_QUERY_RESULT (
     ID number not null,
+    TENANT_ID varchar2(255 char),
+    --
     SESSION_ID varchar2(32) not null,
     QUERY_KEY integer not null,
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255 char),
     INT_ENTITY_ID integer,
     LONG_ENTITY_ID number,
+    --
     primary key(ID)
 )^
 create index IDX_SYS_QUERY_RES_ENT_SES_KEY on SYS_QUERY_RESULT(ENTITY_ID, SESSION_ID, QUERY_KEY)^
@@ -270,11 +307,14 @@ create table SYS_SCHEDULED_EXECUTION (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     TASK_ID varchar2(32),
     SERVER varchar2(512 char),
     START_TIME timestamp,
     FINISH_TIME timestamp,
     RESULT clob,
+    --
     primary key(ID)
 )^
 create index IDX_SYS_SCH_EXE_TAS_STA_TIM on SYS_SCHEDULED_EXECUTION(TASK_ID, START_TIME)^
@@ -288,6 +328,8 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    --
+    TENANT_ID varchar2(255 char),
     DEFINED_BY varchar2(1),
     CLASS_NAME varchar2(500 char),
     SCRIPT_NAME varchar2(500 char),
@@ -310,6 +352,7 @@ create table SYS_SCHEDULED_TASK (
     DESCRIPTION varchar2(1000 char),
     CRON varchar2(100 char),
     SCHEDULING_TYPE varchar2(1) default 'P',
+    --
     primary key(ID)
 )^
 
@@ -317,6 +360,8 @@ create table SYS_SENDING_ATTACHMENT (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     VERSION integer default 1 not null,
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
@@ -330,7 +375,7 @@ create table SYS_SENDING_ATTACHMENT (
     NAME varchar2(500 char),
     DISPOSITION varchar2(50 char),
     TEXT_ENCODING varchar2(50 char),
-
+    --
     primary key(ID)
 )^
 create index SYS_SENDING_ATTACHMENT_MES_IDX on SYS_SENDING_ATTACHMENT(MESSAGE_ID)^
@@ -344,6 +389,8 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     ADDRESS_TO clob,
     ADDRESS_CC clob,
     ADDRESS_BCC clob,
@@ -359,6 +406,7 @@ create table SYS_SENDING_MESSAGE (
     ATTEMPTS_MADE integer,
     ATTACHMENTS_NAME clob,
     BODY_CONTENT_TYPE varchar2(50 char),
+    --
     primary key(ID)
 )^
 create index IDX_SYS_SENDING_MES_DAT_SEN on SYS_SENDING_MESSAGE(DATE_SENT)^
@@ -371,9 +419,12 @@ create table SYS_SERVER (
     CREATED_BY varchar2(50 char),
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(255 char),
     IS_RUNNING char(1),
     DATA clob,
+    --
     primary key(ID)
 )^
 create unique index IDX_SYS_SERVER_UNIQ_NAME on SYS_SERVER(NAME)^
@@ -387,6 +438,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
     --
     CODE varchar2(255 char),
     CHECK_TYPE varchar2(50 char) default 'db',
@@ -412,6 +464,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
     --
     ENTITY_NAME varchar2(255 char) not null,
     OPERATION_TYPE varchar2(50 char) not null,
@@ -427,6 +480,8 @@ create table SEC_ENTITY_LOG (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     EVENT_TS timestamp,
     USER_ID varchar2(32 char),
     CHANGE_TYPE char(1),
@@ -437,6 +492,7 @@ create table SEC_ENTITY_LOG (
     INT_ENTITY_ID integer,
     LONG_ENTITY_ID number,
     CHANGES clob,
+    --
     primary key(ID)
 )^
 create index IDX_SEC_ENTITY_LOG_ENTITY_ID on SEC_ENTITY_LOG(ENTITY_ID)^
@@ -453,12 +509,15 @@ create table SEC_FILTER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     COMPONENT varchar2(200 char),
     NAME varchar2(255 char),
     CODE varchar2(200 char),
     XML clob,
     USER_ID varchar2(32),
     GLOBAL_DEFAULT char(1),
+    --
     primary key(ID)
 )^
 create index IDX_SEC_FILTER_COMPONENT_USER on SEC_FILTER(COMPONENT, USER_ID)^
@@ -472,8 +531,11 @@ create table SEC_GROUP (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(255 char) not null,
     PARENT_ID varchar2(32),
+    --
     primary key(ID)
 )^
 create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP(NAME, DELETE_TS)^
@@ -482,9 +544,12 @@ create table SEC_GROUP_HIERARCHY (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     GROUP_ID varchar2(32),
     PARENT_ID varchar2(32),
     HIERARCHY_LEVEL integer,
+    --
     primary key(ID)
 )^
 
@@ -492,8 +557,11 @@ create table SEC_LOGGED_ATTR (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     ENTITY_ID varchar2(32),
     NAME varchar2(50 char),
+    --
     primary key(ID)
 )^
 create unique index SEC_LOGGED_ATTR_UNIQ_NAME on SEC_LOGGED_ATTR(ENTITY_ID, NAME)^
@@ -503,9 +571,12 @@ create table SEC_LOGGED_ENTITY (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(100 char),
     AUTO char(1),
     MANUAL char(1),
+    --
     primary key(ID)
 )^
 create unique index SEC_LOGGED_ENTITY_UNIQ_NAME on SEC_LOGGED_ENTITY(NAME)^
@@ -519,10 +590,13 @@ create table SEC_PERMISSION (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     PERMISSION_TYPE integer,
     TARGET varchar2(100 char),
     VALUE_ integer,
     ROLE_ID varchar2(32),
+    --
     primary key(ID)
 )^
 create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION(ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
@@ -533,11 +607,14 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar2(50 char),
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     COMPONENT varchar2(200 char),
     NAME varchar2(255 char),
     XML varchar2(4000),
     USER_ID varchar2(32),
     IS_AUTO_SAVE char(1),
+    --
     primary key(ID)
 )^
 create index IDX_SEC_PRESENTATION_COM_USE on SEC_PRESENTATION(COMPONENT, USER_ID)^
@@ -551,11 +628,14 @@ create table SEC_ROLE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(255 char) not null,
     LOC_NAME varchar2(255 char),
     DESCRIPTION varchar2(1000 char),
     IS_DEFAULT_ROLE char(1),
     ROLE_TYPE integer,
+    --
     primary key(ID)
 )^
 create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE(NAME, DELETE_TS)^
@@ -564,6 +644,8 @@ create table SEC_SCREEN_HISTORY (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     USER_ID varchar2(32),
     CAPTION varchar2(255 char),
     URL clob,
@@ -572,6 +654,7 @@ create table SEC_SCREEN_HISTORY (
     INT_ENTITY_ID integer,
     LONG_ENTITY_ID number,
     SUBSTITUTED_USER_ID varchar2(32),
+    --
     primary key(ID)
 )^
 create index IDX_SEC_SCREEN_HISTORY_USER on SEC_SCREEN_HISTORY(USER_ID)^
@@ -582,6 +665,8 @@ create index IDX_SEC_SCREEN_HISTORY_IENTITY on SEC_SCREEN_HISTORY(INT_ENTITY_ID)
 create index IDX_SEC_SCREEN_HISTORY_LENTITY on SEC_SCREEN_HISTORY(LONG_ENTITY_ID)^
 
 create table SEC_SEARCH_FOLDER (
+    TENANT_ID varchar2(255 char),
+    --
     FOLDER_ID varchar2(32) not null,
     FILTER_COMPONENT varchar2(200 char),
     FILTER_XML clob,
@@ -590,6 +675,7 @@ create table SEC_SEARCH_FOLDER (
     APPLY_DEFAULT char(1),
     IS_SET char(1),
     ENTITY_TYPE varchar2(50 char),
+    --
     primary key(FOLDER_ID)
 )^
 create index IDX_SEC_SEARCH_FOLDER_USER on SEC_SEARCH_FOLDER(USER_ID)^
@@ -603,6 +689,8 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     NAME varchar2(50 char),
     STR_VALUE varchar2(1000 char),
     DATATYPE varchar2(20 char),
@@ -620,6 +708,8 @@ create table SEC_USER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     LOGIN varchar2(50 char) not null,
     LOGIN_LC varchar2(50 char) not null,
     PASSWORD varchar2(255 char),
@@ -637,9 +727,10 @@ create table SEC_USER (
     GROUP_ID varchar2(32) not null,
     IP_MASK varchar2(200 char),
     CHANGE_PASSWORD_AT_LOGON char(1),
+    --
     primary key(ID)
 )^
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(LOGIN_LC, DELETE_TS)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(TENANT_ID, LOGIN_LC, DELETE_TS)^
 
 create table SEC_USER_ROLE (
     ID varchar2(32) not null,
@@ -650,8 +741,11 @@ create table SEC_USER_ROLE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     USER_ID varchar2(32),
     ROLE_ID varchar2(32),
+    --
     primary key(ID)
 )^
 create unique index IDX_SEC_USER_ROLE_UNIQ_ROLE on SEC_USER_ROLE(USER_ID, ROLE_ID, DELETE_TS)^
@@ -660,10 +754,13 @@ create table SEC_USER_SETTING (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     USER_ID varchar2(32),
     CLIENT_TYPE char(1),
     NAME varchar2(255 char),
     VALUE_ clob,
+    --
     primary key(ID)
 )^
 create unique index SEC_USER_SETTING_UNIQ on SEC_USER_SETTING(USER_ID, NAME, CLIENT_TYPE)^
@@ -677,10 +774,13 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
+    --
     USER_ID varchar2(32) not null,
     SUBSTITUTED_USER_ID varchar2(32) not null,
     START_DATE timestamp,
     END_DATE timestamp,
+    --
     primary key(ID)
 )^
 create index IDX_SEC_USER_SUBSTITUTION_USER on SEC_USER_SUBSTITUTION(USER_ID)^
@@ -689,6 +789,7 @@ create table SEC_REMEMBER_ME (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
     VERSION integer default 1 not null,
     --
     USER_ID varchar2(32) not null,
@@ -708,6 +809,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char),
     --
     SESSION_ID varchar2(32) not null,
     USER_ID varchar2(32) not null,
@@ -723,6 +825,32 @@ create table SEC_SESSION_LOG (
     --
     primary key (ID)
 )^
+
+create table SEC_TENANT (
+    ID varchar2(32) not null,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar2(50 char),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar2(50 char),
+    DELETE_TS timestamp,
+    DELETED_BY varchar2(50 char),
+    TENANT_ID varchar2(255 char) not null,
+    --
+    NAME varchar2(255 char) not null,
+    ACCESS_GROUP_ID varchar2(32) not null,
+    ADMIN_ID varchar2(32) not null,
+    --
+    primary key (ID)
+)^
+
+create unique index IDX_SEC_TENANT_UNIQ_TENANT_ID on SEC_TENANT(TENANT_ID, DELETE_TS)^
+
+alter table SEC_TENANT add constraint FK_SDBMT_TENANT_ACCESS_GROUP foreign key (ACCESS_GROUP_ID) references SEC_GROUP(ID)^
+alter table SEC_TENANT add constraint FK_SDBMT_TENANT_ADMIN foreign key (ADMIN_ID) references SEC_USER(ID)^
+create unique index IDX_SEC_TENANT_UK_ADMIN_ID on SEC_TENANT (ADMIN_ID) ^
+create unique index IDX_SEC_TENANT_UK_ACCGR_ID on SEC_TENANT (ACCESS_GROUP_ID) ^
+create unique index IDX_SEC_TENANT_UK_NAME on SEC_TENANT (NAME) ^
 
 alter table SEC_SESSION_LOG add constraint FK_SESSION_LOG_ENTRY_USER foreign key (USER_ID) references SEC_USER(ID)^
 create index IDX_SESSION_LOG_ENTRY_USER on SEC_SESSION_LOG (USER_ID)^

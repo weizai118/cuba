@@ -55,14 +55,14 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
         }
 
         EntityManager em = persistence.getEntityManager();
-        String queryStr = "select u from sec$User u where (?1 is null or u.tenantId = ?1) and u.loginLowerCase = ?2 and (u.active = true or u.active is null)";
+        String queryStr = "select u from sec$User u where ((?1 is null and u.tenantId is null) or u.tenantId = ?1) and u.loginLowerCase = ?2 and (u.active = true or u.active is null)";
 
         Query q = em.createQuery(queryStr);
         q.setParameter(1, tenantId);
         q.setParameter(2, login.toLowerCase());
 
         List list = q.getResultList();
-        if (list.isEmpty()) {
+        if (list.isEmpty() || list.size() > 1) {
             log.debug("Unable to find user: {}", login);
             return null;
         } else {

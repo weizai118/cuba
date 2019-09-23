@@ -16,8 +16,6 @@
 
 package com.haulmont.cuba.security.auth;
 
-import com.haulmont.cuba.core.global.PasswordEncryption;
-
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -41,18 +39,22 @@ public class LoginPasswordCredentials extends AbstractClientCredentials {
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale) {
-        this(login, password, locale, Collections.emptyMap());
-    }
-
-    public LoginPasswordCredentials(String login, String password, Locale locale, String tenantId) {
-        this(login, password, locale, Collections.emptyMap());
-        this.tenantId = tenantId;
+        this(login, password, locale, null, Collections.emptyMap());
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale, Map<String, Object> params) {
+        this(login, password, locale, null, params);
+    }
+
+    public LoginPasswordCredentials(String login, String password, Locale locale, String tenantId) {
+        this(login, password, locale, tenantId, Collections.emptyMap());
+    }
+
+    public LoginPasswordCredentials(String login, String password, Locale locale, String tenantId, Map<String, Object> params) {
         super(locale, params);
         this.login = login;
         this.password = password;
+        this.tenantId = tenantId;
     }
 
     @Override

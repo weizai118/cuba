@@ -20,7 +20,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class TenantEntity extends StandardEntity implements HasTenant {
+public class StandardTenantEntity extends StandardEntity implements HasTenant {
 
     @Column(name = "TENANT_ID")
     protected String tenantId;

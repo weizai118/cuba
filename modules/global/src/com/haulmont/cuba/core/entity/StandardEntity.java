@@ -28,6 +28,7 @@ import java.util.Date;
  * The most widely used base class for entities. <br>
  * Optimistically locked, implements Updatable and SoftDelete.
  */
+@Deprecated
 @MappedSuperclass
 @MetaClass(name = "sys$StandardEntity")
 @UnavailableInSecurityConstraints

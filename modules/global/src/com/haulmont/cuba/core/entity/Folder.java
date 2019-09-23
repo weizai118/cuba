@@ -29,7 +29,7 @@ import javax.persistence.Entity;
 @DiscriminatorValue("F")
 @SystemLevel
 @EnableRestore(false)
-public class Folder extends TenantEntity {
+public class Folder extends StandardTenantEntity {
 
     private static final long serialVersionUID = -2038652558181851215L;
 

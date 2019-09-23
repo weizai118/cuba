@@ -4,6 +4,8 @@ create table SYS_SERVER (
     CREATED_BY varchar(50),
     UPDATE_TS datetime(3),
     UPDATED_BY varchar(50),
+    TENANT_ID varchar(255),
+    --
     NAME varchar(190),
     IS_RUNNING boolean,
     DATA text,
@@ -21,6 +23,7 @@ create table SYS_CONFIG (
     VERSION integer not null default 1,
     UPDATE_TS datetime(3),
     UPDATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(190) not null, -- See PL-8935, 190 length is set due to MySQL problem with encoding
     VALUE_ text not null,
@@ -41,6 +44,7 @@ create table SYS_FILE (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(500) not null,
     EXT varchar(20),
@@ -56,6 +60,7 @@ create table SYS_LOCK_CONFIG (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(100),
     TIMEOUT_SEC integer,
@@ -71,6 +76,7 @@ create table SYS_ENTITY_STATISTICS (
     CREATED_BY varchar(50),
     UPDATE_TS datetime(3),
     UPDATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(50),
     INSTANCE_COUNT bigint,
@@ -94,6 +100,7 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     DEFINED_BY varchar(1) default 'B',
     CLASS_NAME varchar(500),
@@ -129,6 +136,7 @@ create table SYS_SCHEDULED_EXECUTION (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     TASK_ID varchar(32),
     SERVER varchar(512),
@@ -155,6 +163,7 @@ create table SEC_ROLE (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     NAME varchar(190) not null,
     LOC_NAME varchar(255),
@@ -185,6 +194,7 @@ create table SEC_GROUP (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     NAME varchar(190) not null,
     PARENT_ID varchar(32),
@@ -207,6 +217,7 @@ create table SEC_GROUP_HIERARCHY (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     GROUP_ID varchar(32),
     PARENT_ID varchar(32),
@@ -229,6 +240,7 @@ create table SEC_USER (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     LOGIN varchar(50) not null,
     LOGIN_LC varchar(50) not null,
@@ -272,6 +284,7 @@ create table SEC_USER_ROLE (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     USER_ID varchar(32),
     ROLE_ID varchar(32),
@@ -303,6 +316,7 @@ create table SEC_PERMISSION (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     PERMISSION_TYPE integer,
     TARGET varchar(100),
@@ -333,6 +347,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     CODE varchar(255),
     CHECK_TYPE varchar(50) default 'db',
@@ -361,6 +376,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     ENTITY_NAME varchar(150) not null,
     OPERATION_TYPE varchar(40) not null,
@@ -389,6 +405,7 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(50),
     STR_VALUE varchar(1000),
@@ -405,6 +422,7 @@ create table SEC_USER_SETTING (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     USER_ID varchar(32),
     CLIENT_TYPE char(1),
@@ -427,6 +445,7 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     USER_ID varchar(32) not null,
     SUBSTITUTED_USER_ID varchar(32) not null,
@@ -444,6 +463,7 @@ create table SEC_LOGGED_ENTITY (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NAME varchar(100),
     AUTO boolean,
@@ -459,6 +479,7 @@ create table SEC_LOGGED_ATTR (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     ENTITY_ID varchar(32),
     NAME varchar(50),
@@ -474,6 +495,7 @@ create table SEC_ENTITY_LOG (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     EVENT_TS datetime(3),
     USER_ID varchar(32),
@@ -506,6 +528,7 @@ create table SEC_FILTER (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -529,6 +552,7 @@ create table SYS_FOLDER (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     FOLDER_TYPE char(1),
     PARENT_ID varchar(32),
@@ -543,6 +567,8 @@ create table SYS_FOLDER (
 /**********************************************************************************************/
 
 create table SYS_APP_FOLDER (
+    TENANT_ID varchar(255),
+    --
     FOLDER_ID varchar(32),
     FILTER_COMPONENT varchar(200),
     FILTER_XML varchar(7000),
@@ -562,6 +588,7 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar(50),
     UPDATE_TS datetime(3),
     UPDATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -576,6 +603,8 @@ create table SEC_PRESENTATION (
 /**********************************************************************************************/
 
 create table SEC_SEARCH_FOLDER (
+    TENANT_ID varchar(255),
+    --
     FOLDER_ID varchar(32),
     FILTER_COMPONENT varchar(200),
     FILTER_XML varchar(7000),
@@ -601,6 +630,7 @@ create table SYS_FTS_QUEUE (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     ENTITY_ID varchar(32),
     STRING_ENTITY_ID varchar(190),
@@ -623,6 +653,7 @@ create table SEC_SCREEN_HISTORY (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     USER_ID varchar(32),
     CAPTION varchar(255),
@@ -656,6 +687,7 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     ADDRESS_TO text,
     ADDRESS_CC text,
@@ -694,6 +726,7 @@ create table SYS_SENDING_ATTACHMENT (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     MESSAGE_ID varchar(32),
     CONTENT longblob,
@@ -717,6 +750,7 @@ create table SYS_ENTITY_SNAPSHOT (
     ID varchar(32),
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     ENTITY_META_CLASS varchar(50) not null,
     ENTITY_ID varchar(32),
@@ -749,6 +783,7 @@ create table SYS_CATEGORY(
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
+    TENANT_ID varchar(255),
     --
     NAME varchar(190) not null,
     SPECIAL varchar(50),
@@ -779,6 +814,7 @@ create table SYS_CATEGORY_ATTR (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     CATEGORY_ENTITY_TYPE text,
     NAME varchar(255),
@@ -831,6 +867,7 @@ create table SYS_ATTR_VALUE (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     CATEGORY_ATTR_ID varchar(32) not null,
     ENTITY_ID varchar(32),
@@ -873,6 +910,7 @@ create table SYS_JMX_INSTANCE (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     NODE_NAME varchar(255),
     ADDRESS varchar(500) not null,
@@ -886,6 +924,8 @@ create table SYS_JMX_INSTANCE (
 
 create table SYS_QUERY_RESULT (
     ID bigint auto_increment not null,
+    TENANT_ID varchar(255),
+    --
     SESSION_ID varchar(32) not null,
     QUERY_KEY integer not null,
     ENTITY_ID varchar(32),
@@ -910,6 +950,7 @@ create table SEC_REMEMBER_ME (
     CREATE_TS datetime(3),
     CREATED_BY varchar(50),
     VERSION integer not null default 1,
+    TENANT_ID varchar(255),
     --
     USER_ID varchar(32) not null,
     TOKEN varchar(32) not null,
@@ -931,6 +972,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar(50),
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
+    TENANT_ID varchar(255),
     --
     SESSION_ID varchar(32) not null,
     USER_ID varchar(32) not null,
@@ -953,6 +995,34 @@ create index IDX_SESSION_LOG_ENTRY_USER on SEC_SESSION_LOG (USER_ID)^
 create index IDX_SESSION_LOG_ENTRY_SUBUSER on SEC_SESSION_LOG (SUBSTITUTED_USER_ID)^
 create index IDX_SESSION_LOG_ENTRY_SESSION on SEC_SESSION_LOG (SESSION_ID)^
 create index IDX_SESSION_LOG_STARTED_TS on SEC_SESSION_LOG (STARTED_TS DESC)^
+
+/**********************************************************************************************/
+
+create table SEC_TENANT (
+    ID varchar(36) not null,
+    VERSION integer not null default 1,
+    CREATE_TS datetime(3),
+    CREATED_BY varchar(50),
+    UPDATE_TS datetime(3),
+    UPDATED_BY varchar(50),
+    DELETE_TS datetime(3),
+    DELETED_BY varchar(50),
+    TENANT_ID varchar(255) not null,
+    --
+    NAME varchar(255) not null,
+    ACCESS_GROUP_ID varchar(36) not null,
+    ADMIN_ID varchar(36) not null,
+    --
+    primary key (ID)
+)^
+
+create unique index IDX_SEC_TENANT_UNIQ_TENANT_ID on SEC_TENANT (TENANT_ID, DELETE_TS_NN)^
+
+alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ACCESS_GROUP foreign key (ACCESS_GROUP_ID) references SEC_GROUP(ID)^
+alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ADMIN foreign key (ADMIN_ID) references SEC_USER(ID)^
+create unique index IDX_SEC_TENANT_UNIQ_ACCESS_GROUP_ID on SEC_TENANT (ACCESS_GROUP_ID) ^
+create unique index IDX_SEC_TENANT_UNIQ_ADMIN_ID on SEC_TENANT (ADMIN_ID) ^
+create unique index IDX_SEC_TENANT_UNIQ_NAME on SEC_TENANT (NAME) ^
 
 /**********************************************************************************************/
 

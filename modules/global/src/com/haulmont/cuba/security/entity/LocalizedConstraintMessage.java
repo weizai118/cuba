@@ -17,8 +17,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.bali.util.Preconditions;
-import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -35,7 +34,7 @@ import javax.persistence.Table;
 @Entity(name = "sec$LocalizedConstraintMessage")
 @Table(name = "SEC_LOCALIZED_CONSTRAINT_MSG")
 @SystemLevel
-public class LocalizedConstraintMessage extends TenantEntity {
+public class LocalizedConstraintMessage extends StandardTenantEntity {
 
     protected static final String CAPTION_KEY = "caption";
     protected static final String MESSAGE_KEY = "message";

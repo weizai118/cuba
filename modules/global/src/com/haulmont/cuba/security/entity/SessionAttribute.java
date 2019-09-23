@@ -17,8 +17,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.MetaProperty;
-import com.haulmont.cuba.core.entity.StandardEntity;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
@@ -28,7 +27,7 @@ import javax.persistence.*;
 @Entity(name = "sec$SessionAttribute")
 @Table(name = "SEC_SESSION_ATTR")
 @SystemLevel
-public class SessionAttribute extends TenantEntity {
+public class SessionAttribute extends StandardTenantEntity {
 
     private static final long serialVersionUID = 4886168889020578592L;
 

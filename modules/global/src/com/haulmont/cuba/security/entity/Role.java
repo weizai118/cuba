@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.TrackEditScreenHistory;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -36,7 +36,7 @@ import java.util.Set;
 @Table(name = "SEC_ROLE")
 @NamePattern("%s [%s]|locName,name")
 @TrackEditScreenHistory
-public class Role extends TenantEntity {
+public class Role extends StandardTenantEntity {
 
     private static final long serialVersionUID = -4889116218059626402L;
 

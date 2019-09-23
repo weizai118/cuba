@@ -18,15 +18,19 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.TenantEntity;
+import com.haulmont.cuba.core.entity.StandardTenantEntity;
 import com.haulmont.cuba.core.entity.annotation.*;
 import com.haulmont.cuba.core.global.DeletePolicy;
 import com.haulmont.cuba.core.sys.AppContext;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.persistence.annotations.Multitenant;
+import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 
 import javax.persistence.*;
 import java.text.MessageFormat;
 import java.util.List;
+
+import static org.eclipse.persistence.annotations.MultitenantType.SINGLE_TABLE;
 
 /**
  * User
@@ -36,7 +40,7 @@ import java.util.List;
 @Listeners("cuba_UserEntityListener")
 @NamePattern("#getCaption|login,name")
 @TrackEditScreenHistory
-public class User extends TenantEntity {
+public class User extends StandardTenantEntity {
 
     private static final long serialVersionUID = 5007187642916030394L;
 

@@ -29,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "SYS_JMX_INSTANCE")
 @NamePattern("#getCaption|nodeName,address")
 @SystemLevel
-public class JmxInstance extends TenantEntity {
+public class JmxInstance extends StandardTenantEntity {
 
     @Column(name = "NODE_NAME", length = 255)
     protected String nodeName;

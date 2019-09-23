@@ -32,7 +32,7 @@ import java.util.List;
 @javax.persistence.Entity(name = "sys$CategoryAttributeValue")
 @Table(name = "SYS_ATTR_VALUE")
 @SystemLevel
-public class CategoryAttributeValue extends TenantEntity {
+public class CategoryAttributeValue extends StandardTenantEntity {
 
     private static final long serialVersionUID = -2861790889151226985L;
 

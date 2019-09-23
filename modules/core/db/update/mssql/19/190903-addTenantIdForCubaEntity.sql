@@ -1,17 +1,17 @@
 create table SEC_TENANT (
-    ID varchar(36) not null,
-    VERSION integer not null,
-    CREATE_TS timestamp,
+    ID uniqueidentifier not null,
+    VERSION integer not null default 1,
+    CREATE_TS datetime,
     CREATED_BY varchar(50),
-    UPDATE_TS timestamp,
+    UPDATE_TS datetime,
     UPDATED_BY varchar(50),
-    DELETE_TS timestamp,
+    DELETE_TS datetime,
     DELETED_BY varchar(50),
     TENANT_ID varchar(255) not null,
     --
     NAME varchar(255) not null,
-    ACCESS_GROUP_ID varchar(36) not null,
-    ADMIN_ID varchar(36) not null,
+    ACCESS_GROUP_ID uniqueidentifier not null,
+    ADMIN_ID uniqueidentifier not null,
     --
     primary key (ID),
     constraint IDX_SEC_TENANT_UNIQ_TENANT_ID unique (TENANT_ID, DELETE_TS)
@@ -22,8 +22,6 @@ alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ADMIN foreign key (ADMIN_
 create unique index IDX_SEC_TENANT_UNIQ_ACCESS_GROUP_ID on SEC_TENANT (ACCESS_GROUP_ID) ^
 create unique index IDX_SEC_TENANT_UNIQ_ADMIN_ID on SEC_TENANT (ADMIN_ID) ^
 create unique index IDX_SEC_TENANT_UNIQ_NAME on SEC_TENANT (NAME) ^
-
-
 
 alter table SYS_CATEGORY_ATTR add TENANT_ID varchar(255)^
 alter table SYS_SERVER add TENANT_ID varchar(255)^

@@ -218,8 +218,9 @@ public class MetadataImpl implements Metadata {
         if(entity instanceof Tenant)
             return;
 
-        if(entity instanceof HasTenant) {
-            ((HasTenant) entity).setTenantId(tenantProvider.getTenantId());
+        String tenantId = tenantProvider.getTenantId();
+        if(entity instanceof HasTenant && !tenantId.equals(TenantProvider.TENANT_ADMIN)) {
+            ((HasTenant) entity).setTenantId(tenantId);
         }
     }
 

@@ -23,12 +23,14 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.TypedQuery;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.DefaultPermissionValuesConfig;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.global.NoUserSessionException;
 import com.haulmont.cuba.security.global.UserSession;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -165,6 +167,10 @@ public class UserSessionManager {
     }
 
     protected void setTenantIdAttribute(UserSession session, User user){
+        if(StringUtils.isEmpty(user.getTenantId())){
+            session.setAttribute(globalConfig.getTenantIdName(), TenantProvider.TENANT_ADMIN);
+            return;
+        }
         session.setAttribute(globalConfig.getTenantIdName(), user.getTenantId());
     }
 
