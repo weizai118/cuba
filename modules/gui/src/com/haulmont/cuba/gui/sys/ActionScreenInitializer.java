@@ -25,6 +25,9 @@ import com.haulmont.cuba.gui.screen.ScreenOptions;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Used in actions that open screens ({@code EditAction}, etc.) to initialize a screen builder.
+ */
 public class ActionScreenInitializer {
 
     protected OpenMode openMode;
