@@ -978,6 +978,8 @@ create table SEC_TENANT (
     primary key (ID)
 )^
 
+create unique index IDX_SEC_TENANT_UNIQ_TENANT_ID on SEC_TENANT (TENANT_ID) where DELETE_TS is null^
+
 alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ACCESS_GROUP foreign key (ACCESS_GROUP_ID) references SEC_GROUP(ID)^
 alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ADMIN foreign key (ADMIN_ID) references SEC_USER(ID)^
 create unique index IDX_SEC_TENANT_UNIQ_ACCESS_GROUP_ID on SEC_TENANT (ACCESS_GROUP_ID) where DELETE_TS is null ^

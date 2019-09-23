@@ -18,7 +18,6 @@ package com.haulmont.cuba.core.entity;
 
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.cuba.core.entity.annotation.EnableRestore;
-import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
 import javax.persistence.Entity;
@@ -28,12 +27,9 @@ import javax.persistence.Entity;
 @PrimaryKeyJoinColumn(name = "FOLDER_ID", referencedColumnName = "ID")
 @DiscriminatorValue("A")
 @EnableRestore
-public class AppFolder extends AbstractSearchFolder implements HasTenant {
+public class AppFolder extends AbstractSearchFolder {
 
     private static final long serialVersionUID = -3587493035203986325L;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @Column(name = "VISIBILITY_SCRIPT", length = 200)
     protected String visibilityScript;
@@ -44,16 +40,6 @@ public class AppFolder extends AbstractSearchFolder implements HasTenant {
     @MetaProperty
     @Transient
     protected Integer quantity;
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     @Override
     public void copyFrom(AbstractSearchFolder srcFolder) {

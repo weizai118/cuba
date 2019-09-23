@@ -254,7 +254,7 @@ create table SEC_USER (
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, DELETE_TS)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, TENANT_ID, DELETE_TS)^
 
 create clustered index IDX_SEC_USER_LOGIN on SEC_USER (LOGIN_LC)^
 
@@ -1002,11 +1002,13 @@ create table SEC_TENANT (
     primary key (ID)
 )^
 
+create unique index IDX_SEC_TENANT_UNIQ_TENANT_ID on SEC_TENANT (TENANT_ID, DELETE_TS)^
+
 alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ACCESS_GROUP foreign key (ACCESS_GROUP_ID) references SEC_GROUP(ID)^
 alter table SEC_TENANT add constraint FK_SEC_TENANT_ON_ADMIN foreign key (ADMIN_ID) references SEC_USER(ID)^
-create unique index IDX_SEC_TENANT_UNIQ_ACCESS_GROUP_ID on SEC_TENANT (ACCESS_GROUP_ID, DELETE_TS) ^
-create unique index IDX_SEC_TENANT_UNIQ_ADMIN_ID on SEC_TENANT (ADMIN_ID, DELETE_TS) ^
-create unique index IDX_SEC_TENANT_UNIQ_NAME on SEC_TENANT (NAME DELETE_TS) ^
+create unique index IDX_SEC_TENANT_UNIQ_ACCESS_GROUP_ID on SEC_TENANT (ACCESS_GROUP_ID, DELETE_TS)^
+create unique index IDX_SEC_TENANT_UNIQ_ADMIN_ID on SEC_TENANT (ADMIN_ID, DELETE_TS)^
+create unique index IDX_SEC_TENANT_UNIQ_NAME on SEC_TENANT (NAME, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------------
 
