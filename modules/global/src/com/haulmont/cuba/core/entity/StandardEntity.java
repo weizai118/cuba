@@ -27,6 +27,8 @@ import java.util.Date;
 /**
  * The most widely used base class for entities. <br>
  * Optimistically locked, implements Updatable and SoftDelete.
+ *
+ * @deprecated Use {@code com.haulmont.cuba.core.entity.StandardTenantEntity}.
  */
 @Deprecated
 @MappedSuperclass

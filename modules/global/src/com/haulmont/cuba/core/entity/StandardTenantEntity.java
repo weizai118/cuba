@@ -19,6 +19,10 @@ package com.haulmont.cuba.core.entity;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
+/**
+ * The base class for the implementation of the Multitenant. <br>
+ * Optimistically locked, implements Updatable and SoftDelete.
+ */
 @MappedSuperclass
 public class StandardTenantEntity extends StandardEntity implements HasTenant {
 
