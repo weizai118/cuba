@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.role;
+package com.haulmont.cuba.security.app.group;
 
-public enum RolesStorageMode {
+import com.haulmont.cuba.security.group.GroupDef;
+import com.haulmont.cuba.security.group.GroupIdentifier;
 
-    /**
-     * Only roles from a database (sec$Role) will be used.
-     */
-    DATABASE,
+public interface GroupsRepository {
+    String NAME = "cuba_GroupsRepository";
 
-    /**
-     * Only roles defined in the source code will be used.
-     */
-    SOURCE_CODE,
+    GroupDef getGroupDefinition(GroupIdentifier groupDefId);
 
     /**
-     * Mixed mode, both sources will be used. If there are roles with equal names in the database and in
-     * the source code, role from database will be used.
+     * Allows you to register a group created using the {@link GroupDefBuilder}.
+     * This method should be invoked during application startup.
+     *
+     * @param groupDef group to register
      */
-    MIXED
+    void registerGroup(GroupDef groupDef);
 }

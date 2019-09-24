@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.core;
 
+import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.core.global.View;
@@ -25,7 +26,6 @@ import java.util.Collection;
 
 /**
  * Interface providing methods to apply security on persistence layer.
- *
  */
 public interface PersistenceSecurity extends Security {
 
@@ -54,18 +54,21 @@ public interface PersistenceSecurity extends Security {
 
     /**
      * Applies in-memory constraints to the entity by filtered data
+     *
      * @param entity -
      */
     void applyConstraints(Entity entity);
 
     /**
      * Applies in-memory constraints to the entity fields by filtered data
+     *
      * @param entities - collection of entities
      */
     void applyConstraints(Collection<Entity> entities);
 
     /**
      * Filter entities in collection by in-memory constraints
+     *
      * @param entities - collection of entities that will be filtered
      * @return true if some items were filtered out
      */
@@ -73,6 +76,7 @@ public interface PersistenceSecurity extends Security {
 
     /**
      * Filter entity by in-memory constraints
+     *
      * @param entity - entity that will be filtered
      * @return true, if entity should be filtered out from client output
      */
@@ -80,18 +84,21 @@ public interface PersistenceSecurity extends Security {
 
     /**
      * Reads security token and restores security state
+     *
      * @param entity - entity to restore security state
      */
     void restoreSecurityState(Entity entity);
 
     /**
      * Restores filtered data from security token
+     *
      * @param entity - entity to restore filtered data
      */
     void restoreFilteredData(Entity entity);
 
     /**
      * Reads security token and restores security state and filtered data
+     *
      * @param entity - entity to restore
      */
     default void restoreSecurityStateAndFilteredData(Entity entity) {
@@ -102,6 +109,7 @@ public interface PersistenceSecurity extends Security {
     /**
      * Validate that security token exists for specific cases.
      * For example, security constraints exists
+     *
      * @param entity - entity to check security token
      */
     void assertToken(Entity entity);
@@ -109,20 +117,28 @@ public interface PersistenceSecurity extends Security {
     /**
      * Validate that security token for REST exists for specific cases.
      * For example, security constraints exists
+     *
      * @param entity - entity to check security token
-     * @param view - view for entity
+     * @param view   - view for entity
      */
     void assertTokenForREST(Entity entity, View view);
 
     /**
      * Calculate filtered data
+     *
      * @param entity for which will calculate filtered data
      */
     void calculateFilteredData(Entity entity);
 
     /**
      * Calculate filtered data
+     *
      * @param entities - collection of entities for which will calculate filtered data
      */
     void calculateFilteredData(Collection<Entity> entities);
+
+    /**
+     * Check if there are registered memory read constraints for the metaClass or it's original metaClass
+     */
+    boolean hasInMemoryReadConstraints(MetaClass metaClass);
 }

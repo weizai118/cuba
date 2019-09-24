@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.core.sys;
 
+import com.google.common.collect.Streams;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.Datatypes;
 import com.haulmont.chile.core.datatypes.impl.EnumClass;
@@ -30,6 +31,9 @@ import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.global.ConstraintData;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.security.group.EntityConstraint;
+import com.haulmont.cuba.security.group.PersistenceSecurityService;
+import com.haulmont.cuba.security.group.SetOfEntityConstraints;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.slf4j.Logger;
@@ -41,6 +45,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.haulmont.cuba.security.entity.ConstraintOperationType.ALL;
 import static com.haulmont.cuba.security.entity.ConstraintOperationType.CUSTOM;
@@ -64,6 +69,9 @@ public class SecurityImpl implements Security {
 
     @Inject
     protected Scripting scripting;
+
+    @Inject
+    protected PersistenceSecurityService persistenceSecurityService;
 
     @Override
     public boolean isScreenPermitted(String windowAlias) {
@@ -154,88 +162,74 @@ public class SecurityImpl implements Security {
     }
 
     @Override
-    public boolean isPermitted(Entity entity, ConstraintOperationType targetOperationType) {
-        return isPermitted(entity,
-                constraint -> {
-                    ConstraintOperationType operationType = constraint.getOperationType();
-                    return constraint.getCheckType().memory()
-                            && (
-                            (targetOperationType == ALL && operationType != CUSTOM)
-                                    || operationType == targetOperationType
-                                    || operationType == ALL
-                    );
-                });
+    public boolean isPermitted(Entity entity, EntityOp operation) {
+        return persistenceSecurityService.isPermitted(entity, operation);
+    }
+
+    @Override
+    public boolean isPermitted(Entity entity, ConstraintOperationType operationType) {
+        for (EntityOp entityOp : operationType.toEntityOps()) {
+            if (!persistenceSecurityService.isPermitted(entity,entityOp)) {
+                return false;
+            }
+        }
+        return true;
+//        return isPermitted(entity,
+//                constraint -> {
+//                    ConstraintOperationType operationType = constraint.getOperationType();
+//                    return constraint.getCheckType().memory()
+//                            && (
+//                            (targetOperationType == ALL && operationType != CUSTOM)
+//                                    || operationType == targetOperationType
+//                                    || operationType == ALL
+//                    );
+//                });
     }
 
     @Override
     public boolean isPermitted(Entity entity, String customCode) {
-        return isPermitted(entity,
-                constraint -> customCode.equals(constraint.getCode()) && constraint.getCheckType().memory());
+        return persistenceSecurityService.isPermitted(entity, customCode);
+//        return isPermitted(entity,
+//                constraint -> customCode.equals(constraint.getCode()) && constraint.getCheckType().memory());
     }
+
+
 
     @Override
     public boolean hasConstraints(MetaClass metaClass) {
-        List<ConstraintData> constraints = getConstraints(metaClass);
-        return !constraints.isEmpty();
+        return getConstraints(metaClass).findAny().isPresent();
     }
 
     @Override
     public boolean hasInMemoryConstraints(MetaClass metaClass, ConstraintOperationType... operationTypes) {
-        List<ConstraintData> constraints = getConstraints(metaClass, constraint ->
-                constraint.getCheckType().memory() && constraint.getOperationType() != null
-                        && Arrays.asList(operationTypes).contains(constraint.getOperationType())
-        );
-        return !constraints.isEmpty();
+        final Set<EntityOp> entityOperations = Stream.of(operationTypes)
+                .flatMap(o -> o.toEntityOps().stream())
+                .collect(Collectors.toSet());
+
+        return getConstraints(metaClass)
+                .anyMatch(c -> c.isInMemory() && entityOperations.contains(c.getOperation()));
     }
 
-    protected List<ConstraintData> getConstraints(MetaClass metaClass, Predicate<ConstraintData> predicate) {
-        return getConstraints(metaClass).stream()
-                .filter(predicate)
-                .collect(Collectors.toList());
+    @Override
+    public Object evaluateConstraintScript(Entity entity, String groovyScript) {
+        return persistenceSecurityService.evaluateConstraintScript(entity, groovyScript);
     }
 
-    protected List<ConstraintData> getConstraints(MetaClass metaClass) {
+    protected Stream<EntityConstraint> getConstraints(MetaClass metaClass) {
         UserSession userSession = userSessionSource.getUserSession();
         MetaClass mainMetaClass = extendedEntities.getOriginalOrThisMetaClass(metaClass);
 
-        List<ConstraintData> constraints = new ArrayList<>();
-        constraints.addAll(userSession.getConstraints(mainMetaClass.getName()));
+        SetOfEntityConstraints setOfConstraints = userSession.getConstraints();
+
+        Stream<EntityConstraint> constraints = setOfConstraints.findConstraintsByEntity(mainMetaClass.getName());
         for (MetaClass parent : mainMetaClass.getAncestors()) {
-            constraints.addAll(userSession.getConstraints(parent.getName()));
+            constraints = Streams.concat(constraints, setOfConstraints.findConstraintsByEntity(parent.getName()));
         }
         return constraints;
     }
 
-    protected boolean isPermitted(Entity entity, Predicate<ConstraintData> predicate) {
-        List<ConstraintData> constraints = getConstraints(entity.getMetaClass(), predicate);
-        for (ConstraintData constraint : constraints) {
-            if (!isPermitted(entity, constraint)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-    protected boolean isPermitted(Entity entity, ConstraintData constraint) {
-        String metaClassName = entity.getMetaClass().getName();
-        String groovyScript = constraint.getGroovyScript();
-        if (constraint.getCheckType().memory() && StringUtils.isNotBlank(groovyScript)) {
-            try {
-                Object o = evaluateConstraintScript(entity, groovyScript);
-                if (Boolean.FALSE.equals(o)) {
-                    log.trace("Entity does not match security constraint. Entity class [{}]. Entity [{}]. Constraint [{}].",
-                            metaClassName, entity.getId(), constraint.getCheckType());
-                    return false;
-                }
-            } catch (Exception e) {
-                log.error("An error occurred while applying constraint's Groovy script. The entity has been filtered out." +
-                        "Entity class [{}]. Entity [{}].", metaClassName, entity.getId(), e);
-                return false;
-            }
-        }
-        return true;
-    }
-
+    //TODO: refactor it
     @Override
     public Object evaluateConstraintScript(Entity entity, String groovyScript) {
         Map<String, Object> context = new HashMap<>();
@@ -258,7 +252,7 @@ public class SecurityImpl implements Security {
     protected Object parseValue(Class<?> clazz, String string) {
         try {
             if (Entity.class.isAssignableFrom(clazz)) {
-                Object entity = metadata.create((Class<Entity>)clazz);
+                Object entity = metadata.create(clazz);
                 if (entity instanceof BaseIntegerIdEntity) {
                     ((BaseIntegerIdEntity) entity).setId(Integer.valueOf(string));
                 } else if (entity instanceof BaseLongIdEntity) {

@@ -18,6 +18,9 @@
 package com.haulmont.cuba.core.sys;
 
 import com.google.common.collect.Multimap;
+import com.haulmont.chile.core.datatypes.Datatype;
+import com.haulmont.chile.core.datatypes.Datatypes;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.EntityManager;
@@ -25,23 +28,26 @@ import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.PersistenceSecurity;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.app.AttributeSecuritySupport;
-import com.haulmont.cuba.core.entity.BaseEntityInternalAccess;
-import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
-import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.jpql.JpqlSyntaxException;
 import com.haulmont.cuba.security.entity.ConstraintOperationType;
-import com.haulmont.cuba.security.global.ConstraintData;
+import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.security.group.JpqlEntityConstraint;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -67,25 +73,22 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
     @Inject
     protected EntityStates entityStates;
 
-    @Inject
-    protected GlobalConfig globalConfig;
-
     @Override
     public boolean applyConstraints(Query query) {
         QueryParser parser = QueryTransformerFactory.createParser(query.getQueryString());
         String entityName = parser.getEntityName();
 
-        List<ConstraintData> constraints = getConstraints(metadata.getClassNN(entityName), constraint ->
-                constraint.getCheckType().database()
-                        && (constraint.getOperationType() == ConstraintOperationType.READ
-                        || constraint.getOperationType() == ConstraintOperationType.ALL));
+        List<JpqlEntityConstraint> constraints = getConstraints(metadata.getClassNN(entityName))
+                .filter(c -> c instanceof JpqlEntityConstraint && c.getOperation() == EntityOp.READ)
+                .map(JpqlEntityConstraint.class::cast)
+                .collect(Collectors.toList());
 
         if (constraints.isEmpty())
             return false;
 
         QueryTransformer transformer = QueryTransformerFactory.createTransformer(query.getQueryString());
 
-        for (ConstraintData constraint : constraints) {
+        for (JpqlEntityConstraint constraint : constraints) {
             processConstraint(transformer, constraint, entityName);
         }
         query.setQueryString(transformer.getResult());
@@ -133,7 +136,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         boolean filtered = false;
         for (Iterator<Entity> iterator = entities.iterator(); iterator.hasNext(); ) {
             Entity entity = iterator.next();
-            if (!isPermittedInMemory(entity)) {
+            if (isNotPermittedInMemory(entity)) {
                 //we ignore situations when the collection is immutable
                 iterator.remove();
                 filtered = true;
@@ -144,7 +147,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
 
     @Override
     public boolean filterByConstraints(Entity entity) {
-        return !isPermittedInMemory(entity);
+        return isNotPermittedInMemory(entity);
     }
 
     @Override
@@ -240,6 +243,12 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         }
     }
 
+    @Override
+    public boolean hasInMemoryReadConstraints(MetaClass metaClass) {
+        return getConstraints(metaClass)
+                .anyMatch(c -> c.isInMemory() && EntityOp.READ == c.getOperation());
+    }
+
     protected void assertSecurityConstraints(Entity entity, BiPredicate<Entity, MetaProperty> predicate) {
         MetaClass metaClass = metadata.getClassNN(entity.getClass());
         for (MetaProperty metaProperty : metaClass.getProperties()) {
@@ -247,10 +256,9 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
                 if (predicate.test(entity, metaProperty)) {
                     continue;
                 }
-                if (hasInMemoryConstraints(metaProperty.getRange().asClass(), ConstraintOperationType.READ,
-                        ConstraintOperationType.ALL)) {
+                if (hasInMemoryReadConstraints(metaProperty.getRange().asClass())) {
                     throw new RowLevelSecurityException(format("Could not read security token from entity %s, " +
-                            "even though there are active READ/ALL constraints for the property: %s", entity,
+                                    "even though there are active READ/ALL constraints for the property: %s", entity,
                             metaProperty.getName()),
                             entity.getMetaClass().getName());
                 }
@@ -267,9 +275,9 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         }
     }
 
-    protected void processConstraint(QueryTransformer transformer, ConstraintData constraint, String entityName) {
+    protected void processConstraint(QueryTransformer transformer, JpqlEntityConstraint constraint, String entityName) {
         String join = constraint.getJoin();
-        String where = constraint.getWhereClause();
+        String where = constraint.getWhere();
         try {
             if (StringUtils.isBlank(join)) {
                 if (!StringUtils.isBlank(where)) {
@@ -279,14 +287,14 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
                 transformer.addJoinAndWhere(join, where);
             }
         } catch (JpqlSyntaxException e) {
-            log.error("Syntax errors found in constraint's JPQL expressions. Entity [{}]. Constraint ID [{}].",
-                    entityName, constraint.getId(), e);
+            log.error("Syntax errors found in constraint's JPQL expressions. Entity [{}]. Constraint [where = {}, join = {}].",
+                    entityName, constraint.getWhere(), constraint.getJoin(), e);
 
             throw new RowLevelSecurityException(
                     "Syntax errors found in constraint's JPQL expressions. Please see the logs.", entityName);
         } catch (Exception e) {
-            log.error("An error occurred when applying security constraint. Entity [{}]. Constraint ID [{}].",
-                    entityName, constraint.getId(), e);
+            log.error("An error occurred when applying security constraint. Entity [{}]. Constraint [where = {}, join = {}].",
+                    entityName, constraint.getWhere(), constraint.getJoin(), e);
 
             throw new RowLevelSecurityException(
                     "An error occurred when applying security constraint. Please see the logs.", entityName);
@@ -337,7 +345,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
             return false;
         }
         MetaClass metaClass = entity.getMetaClass();
-        if (!isPermittedInMemory(entity) && checkPermitted) {
+        if (isNotPermittedInMemory(entity) && checkPermitted) {
             return true;
         }
         EntityId entityId = new EntityId(referenceToEntitySupport.getReferenceId(entity), metaClass.getName());
@@ -374,11 +382,103 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         return false;
     }
 
-    protected boolean isPermittedInMemory(Entity entity) {
-        return isPermitted(entity, constraint ->
-                constraint.getCheckType().memory()
-                        && (constraint.getOperationType() == ConstraintOperationType.READ
-                        || constraint.getOperationType() == ConstraintOperationType.ALL));
+
+    @Override
+    public boolean isPermitted(Entity entity, EntityOp operation) {
+        return getConstraints(entity.getMetaClass())
+                .filter(c -> c.isInMemory() && c.getOperation() == operation)
+                .allMatch(c -> ((Predicate<Entity>) c.getPredicate()).test(entity));
+    }
+
+    @Override
+    public boolean isPermitted(Entity entity, ConstraintOperationType operationType) {
+        for (EntityOp entityOp : operationType.toEntityOps()) {
+            if (!isPermitted(entity,entityOp)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isPermitted(Entity entity, String customCode) {
+        //noinspection unchecked
+        return getConstraints(entity.getMetaClass())
+                .filter(c -> c.isInMemory() && Objects.equals(c.getCode(), customCode))
+                .allMatch(c -> ((Predicate<Entity>) c.getPredicate()).test(entity));
+    }
+
+    protected boolean isNotPermittedInMemory(Entity entity) {
+        //noinspection unchecked
+        return !getConstraints(entity.getMetaClass())
+                .filter(c -> c.isInMemory() && c.getOperation() == EntityOp.READ)
+                .allMatch(c -> ((Predicate<Entity>) c.getPredicate()).test(entity));
+    }
+
+    @Override
+    public Object evaluateConstraintScript(Entity entity, String groovyScript) {
+        String metaClassName = entity.getMetaClass().getName();
+        if (StringUtils.isNotBlank(groovyScript)) {
+            try {
+                Map<String, Object> context = new HashMap<>();
+                context.put("__entity__", entity);
+                context.put("parse", new MethodClosure(this, "parseValue"));
+                context.put("userSession", userSessionSource.getUserSession());
+                fillGroovyConstraintsContext(context);
+                Object result = scripting.evaluateGroovy(groovyScript.replace("{E}", "__entity__"), context);
+                if (Boolean.FALSE.equals(result)) {
+                    log.trace("Entity does not match security constraint. Entity class [{}]. Entity [{}].",
+                            metaClassName, entity.getId());
+                    return false;
+                }
+            } catch (Exception e) {
+                log.error("An error occurred while applying constraint's Groovy script. The entity has been filtered out." +
+                        "Entity class [{}]. Entity [{}].", metaClassName, entity.getId(), e);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Override if you need specific context variables in Groovy constraints.
+     *
+     * @param context passed to Groovy evaluator
+     */
+    protected void fillGroovyConstraintsContext(Map<String, Object> context) {
+    }
+
+    @SuppressWarnings("unused")
+    protected Object parseValue(Class<?> clazz, String string) {
+        try {
+            if (Entity.class.isAssignableFrom(clazz)) {
+                Object entity = metadata.create(clazz);
+                if (entity instanceof BaseIntegerIdEntity) {
+                    ((BaseIntegerIdEntity) entity).setId(Integer.valueOf(string));
+                } else if (entity instanceof BaseLongIdEntity) {
+                    ((BaseLongIdEntity) entity).setId(Long.valueOf(string));
+                } else if (entity instanceof BaseStringIdEntity) {
+                    ((BaseStringIdEntity) entity).setId(string);
+                } else if (entity instanceof BaseIdentityIdEntity) {
+                    ((BaseIdentityIdEntity) entity).setId(IdProxy.of(Long.valueOf(string)));
+                } else if (entity instanceof BaseIntIdentityIdEntity) {
+                    ((BaseIntIdentityIdEntity) entity).setId(IdProxy.of(Integer.valueOf(string)));
+                } else if (entity instanceof HasUuid) {
+                    ((HasUuid) entity).setUuid(UUID.fromString(string));
+                }
+                return entity;
+            } else if (EnumClass.class.isAssignableFrom(clazz)) {
+                //noinspection unchecked
+                return Enum.valueOf((Class<Enum>) clazz, string);
+            } else {
+                Datatype datatype = Datatypes.get(clazz);
+                return datatype != null ? datatype.parse(string) : string;
+            }
+        } catch (ParseException | IllegalArgumentException e) {
+            log.error("Could not parse a value in constraint. Class [{}], value [{}].", clazz, string, e);
+            throw new RowLevelSecurityException(format("Could not parse a value in constraint. Class [%s], value [%s]. " +
+                    "See the log for details.", clazz, string), null);
+        }
     }
 
     protected static class EntityId {
