@@ -307,6 +307,30 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
     }
 
     @Override
+    public CaptionAlignment getChildrenCaptionAlignment() {
+        return WebWrapperUtils.fromVaadinFieldGroupCaptionAlignment(
+                component.getColumnCaptionAlignment());
+    }
+
+    @Override
+    public void setChildrenCaptionAlignment(CaptionAlignment alignment) {
+        component.setColumnCaptionAlignment(
+                WebWrapperUtils.toVaadinFieldGroupCaptionAlignment(alignment));
+    }
+
+    @Override
+    public CaptionAlignment getChildrenCaptionAlignment(int column) {
+        return WebWrapperUtils.fromVaadinFieldGroupCaptionAlignment(
+                component.getColumnCaptionAlignment(column));
+    }
+
+    @Override
+    public void setChildrenCaptionAlignment(int column, CaptionAlignment alignment) {
+        component.setColumnCaptionAlignment(column,
+                WebWrapperUtils.toVaadinFieldGroupCaptionAlignment(alignment));
+    }
+
+    @Override
     public int getColumns() {
         return component.getColumns();
     }

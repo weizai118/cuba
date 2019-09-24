@@ -16,25 +16,13 @@
 
 package com.haulmont.cuba.web.gui.components;
 
-import com.haulmont.cuba.gui.components.AggregationInfo;
-import com.haulmont.cuba.gui.components.CaptionMode;
-import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Component.Alignment;
-import com.haulmont.cuba.gui.components.ContentMode;
-import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.DataGrid.DataGridStaticCellType;
-import com.haulmont.cuba.gui.components.DateField;
-import com.haulmont.cuba.gui.components.DatePicker;
-import com.haulmont.cuba.gui.components.HasOrientation;
 import com.haulmont.cuba.gui.components.LookupField.FilterMode;
-import com.haulmont.cuba.gui.components.MouseEventDetails;
-import com.haulmont.cuba.gui.components.PopupButton;
-import com.haulmont.cuba.gui.components.PopupView;
-import com.haulmont.cuba.gui.components.ResizableTextArea;
-import com.haulmont.cuba.gui.components.SizeUnit;
-import com.haulmont.cuba.gui.components.TextInputField;
-import com.haulmont.cuba.gui.components.TimeField;
 import com.haulmont.cuba.web.gui.components.JavaScriptComponent.DependencyType;
+import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CubaFieldGroupLayoutState;
+import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CubaFieldGroupLayoutState.CaptionAlignment;
 import com.haulmont.cuba.web.widgets.client.popupview.PopupPosition;
 import com.haulmont.cuba.web.widgets.client.resizabletextarea.ResizeDirection;
 import com.haulmont.cuba.web.widgets.client.timefield.TimeResolution;
@@ -643,6 +631,32 @@ public final class WebWrapperUtils {
         }
     }
 
+    public static CaptionAlignment toVaadinFieldGroupCaptionAlignment(Form.CaptionAlignment alignment) {
+        checkNotNullArgument(alignment);
+
+        switch (alignment) {
+            case LEFT:
+                return CaptionAlignment.LEFT;
+            case RIGHT:
+                return CaptionAlignment.RIGHT;
+            default:
+                throw new IllegalArgumentException("Can't be converted to CaptionAlignment " + alignment);
+        }
+    }
+
+    public static Form.CaptionAlignment fromVaadinFieldGroupCaptionAlignment(CaptionAlignment alignment) {
+        checkNotNullArgument(alignment);
+
+        switch (alignment) {
+            case LEFT:
+                return Form.CaptionAlignment.LEFT;
+            case RIGHT:
+                return Form.CaptionAlignment.RIGHT;
+            default:
+                throw new IllegalArgumentException("Can't be converted to CaptionAlignment " + alignment);
+        }
+    }
+
     @Nullable
     public static DependencyType toDependencyType(Dependency.Type type) {
         if (type == null) {
@@ -714,4 +728,6 @@ public final class WebWrapperUtils {
         }
         return null;
     }
+
+
 }

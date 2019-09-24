@@ -84,6 +84,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
         loadAlign(resultComponent, element);
 
         loadCaptionPosition(resultComponent, element);
+        loadChildrenCaptionAlignment(resultComponent, element);
         loadChildrenCaptionWidth(resultComponent, element);
 
         loadDataContainer(resultComponent, element);
@@ -135,6 +136,7 @@ public class FormLoader extends AbstractComponentLoader<Form> {
                     resultComponent.add(component, colIndex);
                 }
 
+                loadChildrenCaptionAlignment(resultComponent, columnElement, colIndex);
                 loadChildrenCaptionWidth(resultComponent, columnElement, colIndex);
 
                 colIndex++;
@@ -395,6 +397,30 @@ public class FormLoader extends AbstractComponentLoader<Form> {
         String childrenCaptionWidth = loadChildrenCaptionWidth(element);
         if (childrenCaptionWidth != null) {
             resultComponent.setChildrenCaptionWidth(colIndex, Integer.parseInt(childrenCaptionWidth));
+        }
+    }
+
+    @Nullable
+    protected Form.CaptionAlignment loadChildrenCaptionAlignment(Element element) {
+        String childrenCaptionAlignment = element.attributeValue("childrenCaptionAlignment");
+        if (!Strings.isNullOrEmpty(childrenCaptionAlignment)) {
+            return Form.CaptionAlignment.valueOf(childrenCaptionAlignment);
+        }
+
+        return null;
+    }
+
+    protected void loadChildrenCaptionAlignment(Form resultComponent, Element element) {
+        Form.CaptionAlignment childrenCaptionAlignment = loadChildrenCaptionAlignment(element);
+        if (childrenCaptionAlignment != null) {
+            resultComponent.setChildrenCaptionAlignment(childrenCaptionAlignment);
+        }
+    }
+
+    protected void loadChildrenCaptionAlignment(Form resultComponent, Element element, int colIndex) {
+        Form.CaptionAlignment childrenCaptionAlignment = loadChildrenCaptionAlignment(element);
+        if (childrenCaptionAlignment != null) {
+            resultComponent.setChildrenCaptionAlignment(colIndex, childrenCaptionAlignment);
         }
     }
 }
