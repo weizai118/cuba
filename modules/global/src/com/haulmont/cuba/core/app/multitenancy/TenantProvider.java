@@ -16,6 +16,9 @@
 
 package com.haulmont.cuba.core.app.multitenancy;
 
+/**
+ * Class to provide the current tenant id.
+ */
 public interface TenantProvider {
 
     String NAME = "cuba_TenantProvider";

@@ -18,6 +18,9 @@ package com.haulmont.cuba.core.app.multitenancy;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * The default implementation com.haulmont.cuba.core.app.multitenancy.TenantProvider.
+ */
 @Component(TenantProvider.NAME)
 public class DefaultTenantProviderBean implements TenantProvider {
 
