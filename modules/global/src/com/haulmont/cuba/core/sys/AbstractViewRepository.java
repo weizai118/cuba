@@ -20,7 +20,6 @@ import com.haulmont.bali.util.Dom4j;
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
-import com.haulmont.chile.core.model.Range;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import org.apache.commons.io.IOUtils;
@@ -427,7 +426,7 @@ public class AbstractViewRepository implements ViewRepository {
 
         View defaultView = retrieveView(metaClass, viewName, visited);
 
-        if (defaultView != null && !viewInfo.isOverride()) {
+        if (defaultView != null && !viewInfo.isOverwrite()) {
             return defaultView;
         }
 
@@ -472,7 +471,7 @@ public class AbstractViewRepository implements ViewRepository {
 
         storeView(metaClass, view);
 
-        if (viewInfo.isOverride()) {
+        if (viewInfo.isOverwrite()) {
             replaceOverridden(view);
         }
 

@@ -83,7 +83,7 @@ public class ViewLoader {
         }
 
         viewInfo.setAncestors(ancestors);
-        viewInfo.setOverwrites(overwrite);
+        viewInfo.setOverwrite(overwrite);
         viewInfo.setSystemProperties(Boolean.parseBoolean(viewElem.attributeValue("systemProperties")));
         return viewInfo;
     }
@@ -246,10 +246,10 @@ public class ViewLoader {
         protected MetaClass metaClass;
         protected String name;
         protected List<String> ancestors;
-        protected boolean overwrites = false;
+        protected boolean overwrite = false;
         protected boolean systemProperties = false;
 
-        public ViewInfo(@Nonnull MetaClass metaClass, String name) {
+        public ViewInfo(MetaClass metaClass, String name) {
             this.metaClass = metaClass;
             this.name = name;
         }
@@ -278,12 +278,12 @@ public class ViewLoader {
             this.ancestors = ancestors;
         }
 
-        public boolean isOverride() {
-            return overwrites;
+        public boolean isOverwrite() {
+            return overwrite;
         }
 
-        public void setOverwrites(boolean overwrites) {
-            this.overwrites = overwrites;
+        public void setOverwrite(boolean overwrite) {
+            this.overwrite = overwrite;
         }
 
         public boolean isSystemProperties() {
