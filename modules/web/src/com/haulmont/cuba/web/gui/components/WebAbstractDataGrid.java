@@ -192,6 +192,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected final List<HeaderRow> headerRows = new ArrayList<>();
     protected final List<FooterRow> footerRows = new ArrayList<>();
 
+    protected com.vaadin.ui.components.grid.HeaderRow topAggregationRow;
+    protected com.vaadin.ui.components.grid.FooterRow bottomAggregationRow;
+
     protected Collection<String> aggregationPropertyIds;
 
     protected static final Map<Class<? extends Renderer>, Class<? extends Renderer>> rendererClasses;
@@ -3101,10 +3104,12 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 removeDataBindingListeners();
 
                 itemsSizeChangedSubscription = dataGridItems.addItemSetChangeListener(setChangeEvent -> {
-                    Map<Object, Object> results = __aggregate();
+                    Map<String, String> results = __aggregate();
+                    fillAggregationRow(results);
                 });
                 itemChangedSubscription = dataGridItems.addValueChangeListener(itemChangeEvent -> {
-                    Map<Object, Object> results = __aggregate();
+                    Map<String, String> results = __aggregate();
+                    fillAggregationRow(results);
                 });
             }
         }
@@ -3147,7 +3152,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     @SuppressWarnings("unchecked")
-    protected Map<Object, Object> __aggregate() {
+    protected Map<String, String> __aggregate() {
         if (!(getItems() instanceof AggregatableDataGridItems)) {
             throw new IllegalStateException("DataGrid items must implement AggregatableDataGridItems in " +
                     "order to use aggregation");
@@ -3159,7 +3164,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 getItems().getItems().map(Entity::getId).collect(Collectors.toList())
         );
 
-        Map<Object, Object> resultsByColumns = new LinkedHashMap<>();
+        Map<String, String> resultsByColumns = new LinkedHashMap<>();
         for (String propertyId : getAggregationPropertyIds()) {
             DataGrid.Column column = columns.get(propertyId);
             if (column.getAggregation() != null) {
@@ -3202,6 +3207,83 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 propertyPath, propertyPath.getRange(), aggregationInfo.getType());
 
         throw new IllegalArgumentException(msg);
+    }
+
+    protected void fillAggregationRow(Map<String, String> values) {
+        if (aggregationStyle == AggregationStyle.TOP) {
+            if (topAggregationRow == null) {
+                initAggregationRow();
+            }
+            for (Map.Entry<String, String> value : values.entrySet()) {
+                com.vaadin.ui.components.grid.HeaderCell headerCell = topAggregationRow.getCell(value.getKey());
+                headerCell.setText(value.getValue());
+            }
+        } else {
+            if (bottomAggregationRow == null) {
+                initAggregationRow();
+            }
+            for (Map.Entry<String, String> value : values.entrySet()) {
+                com.vaadin.ui.components.grid.FooterCell footerCell = bottomAggregationRow.getCell(value.getKey());
+                footerCell.setText(value.getValue());
+            }
+        }
+    }
+
+    protected void initAggregationRow() {
+        if (isAggregatable()) {
+            if (aggregationStyle == AggregationStyle.TOP) {
+                topAggregationRow = component.appendHeaderRow();
+                for (Column<E> column : columns.values()) {
+                    if (column.getAggregation() != null) {
+                        com.vaadin.ui.components.grid.HeaderCell headerCell = topAggregationRow.getCell(column.getId());
+                        String description = column.getValueDescription() != null ?
+                                column.getValueDescription() :
+                                getColumnAggregationDescriptionByType(column);
+
+                        headerCell.setDescription(description);
+                    }
+                }
+                addHeaderRowInternal(topAggregationRow);
+            } else {
+                bottomAggregationRow = component.prependFooterRow();
+                for (Column<E> column : columns.values()) {
+                    if (column.getAggregation() != null) {
+                        com.vaadin.ui.components.grid.FooterCell footerCell = bottomAggregationRow.getCell(column.getId());
+                        String description = column.getValueDescription() != null ?
+                                column.getValueDescription() :
+                                getColumnAggregationDescriptionByType(column);
+
+                        footerCell.setDescription(description);
+                    }
+                }
+                addFooterRowInternal(bottomAggregationRow);
+            }
+        }
+    }
+
+    protected String getColumnAggregationDescriptionByType(Column<E> column) {
+        String aggregationTypeLabel;
+        switch (column.getAggregation().getType()) {
+            case AVG:
+                aggregationTypeLabel = "aggregation.avg";
+                break;
+            case COUNT:
+                aggregationTypeLabel = "aggregation.count";
+                break;
+            case SUM:
+                aggregationTypeLabel = "aggregation.sum";
+                break;
+            case MIN:
+                aggregationTypeLabel = "aggregation.min";
+                break;
+            case MAX:
+                aggregationTypeLabel = "aggregation.max";
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("AggregationType %s is not supported",
+                                column.getAggregation().getType().toString()));
+        }
+        return messages.getMainMessage(aggregationTypeLabel);
     }
 
     protected void enableCrossFieldValidationHandling(boolean enable) {
