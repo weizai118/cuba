@@ -2568,6 +2568,16 @@
         <xs:sequence>
             <xs:element name="formatter" minOccurs="0" type="formatterType"/>
             <xs:element name="renderer" minOccurs="0" type="rendererType"/>
+            <xs:element name="aggregation" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="formatter" minOccurs="0" type="formatterType"/>
+                    </xs:sequence>
+                    <xs:attribute name="type" type="aggregation"/>
+                    <xs:attribute name="strategyClass" type="xs:string"/>
+                    <xs:attribute name="valueDescription" type="resourceString"/>
+                </xs:complexType>
+            </xs:element>
         </xs:sequence>
 
         <xs:attributeGroup ref="hasId"/>
@@ -2629,6 +2639,8 @@
                 <xs:attribute name="editorCancelCaption" type="resourceString"/>
                 <xs:attribute name="emptyStateMessage" type="resourceString"/>
                 <xs:attribute name="emptyStateLinkMessage" type="resourceString"/>
+                <xs:attribute name="aggregatable" type="xs:boolean"/>
+                <xs:attribute name="aggregationStyle" type="aggregationStyle"/>
 
                 <xs:attributeGroup ref="hasSettings"/>
                 <xs:attributeGroup ref="hasTabIndex"/>

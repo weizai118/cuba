@@ -2578,6 +2578,21 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         return getAction(name);
     }
 
+    boolean isAggregatable();
+
+    void setAggregatable(boolean aggregatable);
+
+    enum AggregationStyle {
+        TOP,
+        BOTTOM
+    }
+
+    AggregationStyle getAggregationStyle();
+
+    void setAggregationStyle(AggregationStyle style);
+
+    Map<Object, Object> getAggregationResults();
+
     /**
      * Sets a message to the middle of DataGrid body that should be appeared when DataGrid is empty.
      *
@@ -3071,6 +3086,14 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         default void setColumnGenerator(GenericColumnGenerator<E, Object> columnGenerator) {
             getOwner().addGeneratedColumn(getId(), columnGenerator);
         }
+
+        AggregationInfo getAggregation();
+
+        void setAggregation(AggregationInfo info);
+
+        String getValueDescription();
+
+        void setValueDescription(String valueDescription);
     }
 
     /**

@@ -151,11 +151,13 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected boolean columnsCollapsingAllowed = true;
     protected boolean textSelectionEnabled = false;
     protected boolean editorCrossFieldValidate = true;
+    protected boolean aggregatable = false;
 
     protected Action itemClickAction;
     protected Action enterPressAction;
 
     protected SelectionMode selectionMode;
+    protected AggregationStyle aggregationStyle = AggregationStyle.TOP;
 
     protected GridComposition componentComposition;
     protected HorizontalLayout topPanel;
@@ -3016,6 +3018,31 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     @Override
+    public boolean isAggregatable() {
+        return aggregatable;
+    }
+
+    @Override
+    public void setAggregatable(boolean aggregatable) {
+        this.aggregatable = aggregatable;
+    }
+
+    @Override
+    public AggregationStyle getAggregationStyle() {
+        return aggregationStyle;
+    }
+
+    @Override
+    public void setAggregationStyle(AggregationStyle style) {
+        this.aggregationStyle = style;
+    }
+
+    @Override
+    public Map<Object, Object> getAggregationResults() {
+        return null;
+    }
+
+    @Override
     public void setEmptyStateMessage(String message) {
         component.setEmptyStateMessage(message);
 
@@ -3276,6 +3303,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         protected boolean editable;
         protected boolean generated;
         protected Function<?, String> formatter;
+        protected AggregationInfo aggregation;
+        protected String valueDescription;
 
         protected AbstractRenderer<E, ?> renderer;
         protected Function presentationProvider;
@@ -3849,6 +3878,26 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         @Override
         public String toString() {
             return id == null ? super.toString() : id;
+        }
+
+        @Override
+        public AggregationInfo getAggregation() {
+            return aggregation;
+        }
+
+        @Override
+        public void setAggregation(AggregationInfo info) {
+            this.aggregation = info;
+        }
+
+        @Override
+        public String getValueDescription() {
+            return valueDescription;
+        }
+
+        @Override
+        public void setValueDescription(String valueDescription) {
+            this.valueDescription = valueDescription;
         }
     }
 
