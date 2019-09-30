@@ -29,6 +29,7 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.AggregatableDataGridItems;
 import com.haulmont.cuba.gui.components.data.BindingState;
 import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.components.data.ValueSourceProvider;
@@ -45,6 +46,8 @@ import com.haulmont.cuba.gui.components.sys.ShowInfoAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsBuilder;
+import com.haulmont.cuba.gui.data.aggregation.Aggregation;
+import com.haulmont.cuba.gui.data.aggregation.Aggregations;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.model.impl.KeyValueContainerImpl;
@@ -176,6 +179,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected Registration columnResizeListenerRegistration;
     protected Registration contextClickListenerRegistration;
 
+    protected Subscription itemsSizeChangedSubscription;
+    protected Subscription itemChangedSubscription;
+
     protected Document defaultSettings;
 
     protected Registration editorCancelListener;
@@ -185,6 +191,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected final List<HeaderRow> headerRows = new ArrayList<>();
     protected final List<FooterRow> footerRows = new ArrayList<>();
+
+    protected Collection<String> aggregationPropertyIds;
 
     protected static final Map<Class<? extends Renderer>, Class<? extends Renderer>> rendererClasses;
 
@@ -806,6 +814,10 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         columnsOrder.remove(column);
         columnGenerators.remove(column.getId());
 
+        if (column.getAggregation() != null) {
+            removeAggregationPropertyId(column.getId());
+        }
+
         ((ColumnImpl<E>) column).setGridColumn(null);
         column.setOwner(null);
     }
@@ -847,6 +859,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         if (this.dataBinding != null) {
             this.dataBinding.unbind();
             this.dataBinding = null;
+            removeDataBindingListeners();
 
             clearFieldDatasources(null);
 
@@ -864,6 +877,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             // Bind new datasource
             this.dataBinding = createDataGridDataProvider(dataGridItems);
             this.component.setDataProvider(this.dataBinding);
+            addDataBindingListeners();
 
             List<Column<E>> visibleColumnsOrder = getInitialVisibleColumns();
 
@@ -3076,6 +3090,120 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         return emptyStateClickEventHandler;
     }
 
+    protected void addDataBindingListeners() {
+        if (dataBinding == null) {
+            return;
+        }
+
+        if (isAggregatable()) {
+            DataGridItems<E> dataGridItems = dataBinding.getDataGridItems();
+            if (dataGridItems != null) {
+                removeDataBindingListeners();
+
+                itemsSizeChangedSubscription = dataGridItems.addItemSetChangeListener(setChangeEvent -> {
+                    Map<Object, Object> results = __aggregate();
+                });
+                itemChangedSubscription = dataGridItems.addValueChangeListener(itemChangeEvent -> {
+                    Map<Object, Object> results = __aggregate();
+                });
+            }
+        }
+    }
+
+    protected void removeDataBindingListeners() {
+        if (itemsSizeChangedSubscription != null) {
+            itemsSizeChangedSubscription.remove();
+            itemsSizeChangedSubscription = null;
+        }
+        if (itemChangedSubscription != null) {
+            itemChangedSubscription.remove();
+            itemChangedSubscription = null;
+        }
+    }
+
+    protected Collection<String> getAggregationPropertyIds() {
+        if (aggregationPropertyIds == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableCollection(aggregationPropertyIds);
+    }
+
+    protected void addAggregationPropertyId(String propertyId) {
+        if (aggregationPropertyIds == null) {
+            aggregationPropertyIds = new ArrayList<>();
+        } else if (aggregationPropertyIds.contains(propertyId)) {
+            throw new IllegalStateException(String.format("Aggregation property %s already exists", propertyId));
+        }
+        aggregationPropertyIds.add(propertyId);
+    }
+
+    protected void removeAggregationPropertyId(String propertyId) {
+        if (aggregationPropertyIds != null) {
+            aggregationPropertyIds.remove(propertyId);
+            if (aggregationPropertyIds.isEmpty()) {
+                aggregationPropertyIds = null;
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Map<Object, Object> __aggregate() {
+        if (!(getItems() instanceof AggregatableDataGridItems)) {
+            throw new IllegalStateException("DataGrid items must implement AggregatableDataGridItems in " +
+                    "order to use aggregation");
+        }
+
+        List<AggregationInfo> aggregationInfos = getAggregationInfos();
+        Map<AggregationInfo, String> aggregationInfoMap = ((AggregatableDataGridItems) getItems()).aggregate(
+                aggregationInfos.toArray(new AggregationInfo[0]),
+                getItems().getItems().map(Entity::getId).collect(Collectors.toList())
+        );
+
+        Map<Object, Object> resultsByColumns = new LinkedHashMap<>();
+        for (String propertyId : getAggregationPropertyIds()) {
+            DataGrid.Column column = columns.get(propertyId);
+            if (column.getAggregation() != null) {
+                resultsByColumns.put(column.getId(), aggregationInfoMap.get(column.getAggregation()));
+            }
+        }
+
+        return resultsByColumns;
+    }
+
+    protected List<AggregationInfo> getAggregationInfos() {
+        List<AggregationInfo> aggregationInfos = new ArrayList<>();
+        for (String propertyId : getAggregationPropertyIds()) {
+            DataGrid.Column column = columns.get(propertyId);
+            AggregationInfo aggregation = column.getAggregation();
+            if (aggregation != null) {
+                checkAggregation(aggregation);
+                aggregationInfos.add(aggregation);
+            }
+        }
+        return aggregationInfos;
+    }
+
+    protected void checkAggregation(AggregationInfo aggregationInfo) {
+        AggregationInfo.Type aggregationType = aggregationInfo.getType();
+
+        if (aggregationType == AggregationInfo.Type.CUSTOM) {
+            return;
+        }
+
+        MetaPropertyPath propertyPath = aggregationInfo.getPropertyPath();
+        Class<?> javaType = propertyPath.getMetaProperty().getJavaType();
+        Aggregation<?> aggregation = Aggregations.get(javaType);
+
+        if (aggregation != null && aggregation.getSupportedAggregationTypes().contains(aggregationType)) {
+            return;
+        }
+
+        String msg = String.format("Unable to aggregate column \"%s\" with data type %s with default aggregation strategy: %s",
+                propertyPath, propertyPath.getRange(), aggregationInfo.getType());
+
+        throw new IllegalArgumentException(msg);
+    }
+
     protected void enableCrossFieldValidationHandling(boolean enable) {
         if (isEditorEnabled()) {
             ((CubaEditorImpl<E>) component.getEditor()).setCrossFieldValidationHandler(
@@ -3888,6 +4016,10 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         @Override
         public void setAggregation(AggregationInfo info) {
             this.aggregation = info;
+
+            if (owner != null && id != null) {
+                owner.addAggregationPropertyId(id);
+            }
         }
 
         @Override
