@@ -2578,19 +2578,41 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         return getAction(name);
     }
 
+    /**
+     * @return true if DataGrid is aggregatable
+     */
     boolean isAggregatable();
 
+    /**
+     * Set to true if aggregation should be enabled. Default value is false.
+     *
+     * @param aggregatable aggregatable option
+     */
     void setAggregatable(boolean aggregatable);
 
+    /**
+     * Defines the position of aggregation row.
+     */
     enum AggregationStyle {
         TOP,
         BOTTOM
     }
 
+    /**
+     * @return return aggregation row position
+     */
     AggregationStyle getAggregationStyle();
 
+    /**
+     * Sets aggregation row position. Default value is {@link AggregationStyle#TOP}.
+     *
+     * @param style style: {@link AggregationStyle#TOP} or {@link AggregationStyle#BOTTOM}
+     */
     void setAggregationStyle(AggregationStyle style);
 
+    /**
+     * @return aggregated values for columns
+     */
     Map<String, Object> getAggregationResults();
 
     /**
