@@ -3055,8 +3055,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     @Override
-    public Map<Object, Object> getAggregationResults() {
-        return null;
+    public Map<String, Object> getAggregationResults() {
+        return __aggregateValues();
     }
 
     @Override
@@ -3164,14 +3164,33 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 getItems().getItems().map(Entity::getId).collect(Collectors.toList())
         );
 
-        Map<String, String> resultsByColumns = new LinkedHashMap<>();
+        return convertAggregationKeyMapToColumnIdKeyMap(aggregationInfoMap);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Map<String, Object> __aggregateValues() {
+        if (!(getItems() instanceof AggregatableDataGridItems)) {
+            throw new IllegalStateException("DataGrid items must implement AggregatableDataGridItems in " +
+                    "order to use aggregation");
+        }
+
+        List<AggregationInfo> aggregationInfos = getAggregationInfos();
+        Map<AggregationInfo, Object> aggregationInfoMap = ((AggregatableDataGridItems) getItems()).aggregateValues(
+                aggregationInfos.toArray(new AggregationInfo[0]),
+                getItems().getItems().map(Entity::getId).collect(Collectors.toList())
+        );
+
+        return convertAggregationKeyMapToColumnIdKeyMap(aggregationInfoMap);
+    }
+
+    protected <V> Map<String, V> convertAggregationKeyMapToColumnIdKeyMap(Map<AggregationInfo, V> aggregationInfoMap) {
+        Map<String, V> resultsByColumns = new LinkedHashMap<>();
         for (String propertyId : getAggregationPropertyIds()) {
             DataGrid.Column column = columns.get(propertyId);
             if (column.getAggregation() != null) {
                 resultsByColumns.put(column.getId(), aggregationInfoMap.get(column.getAggregation()));
             }
         }
-
         return resultsByColumns;
     }
 

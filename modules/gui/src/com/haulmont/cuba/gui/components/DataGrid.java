@@ -2591,7 +2591,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
 
     void setAggregationStyle(AggregationStyle style);
 
-    Map<Object, Object> getAggregationResults();
+    Map<String, Object> getAggregationResults();
 
     /**
      * Sets a message to the middle of DataGrid body that should be appeared when DataGrid is empty.
