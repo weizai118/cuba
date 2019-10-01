@@ -2906,7 +2906,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected int calculateHeaderIndex(int index) {
         if (isAggregatable() && headerAggregationRow != null) {
-            // if trying to add on aggregation row position
+            // if the same position as aggregation row
             if (index == headerRows.size()) {
                 index = index - 1;
                 return Math.max(index, 0);
@@ -2954,9 +2954,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public FooterRow getFooterRow(int index) {
-        if (isAggregatable() && footerAggregationRow != null) {
-            index++;
-        }
+        index = calculateFooterIndex(index);
         return getFooterRowByGridRow(component.getFooterRow(index));
     }
 
@@ -2993,7 +2991,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected int calculateFooterIndex(int index) {
         if (isAggregatable() && footerAggregationRow != null) {
-            // trying to add on aggregation row position
+            // if the same position as aggregation row
             if (index == 0) {
                 return index + 1;
             }
@@ -3301,7 +3299,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                     }
                 }
                 addHeaderRowInternal(headerAggregationRow);
-            } else {
+            } else if (aggregationStyle == AggregationStyle.BOTTOM) {
                 footerAggregationRow = component.prependFooterRow();
                 footerAggregationRow.setStyleName("c-aggregation-row");
 

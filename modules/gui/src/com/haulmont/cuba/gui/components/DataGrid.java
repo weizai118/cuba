@@ -3109,12 +3109,32 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
             getOwner().addGeneratedColumn(getId(), columnGenerator);
         }
 
+        /**
+         * @return aggregation info
+         * @see DataGrid#setAggregatable(boolean)
+         */
         AggregationInfo getAggregation();
 
+        /**
+         * Sets an aggregation info in order to perform aggregation for this column.
+         *
+         * @param info aggregation info
+         * @see DataGrid#setAggregatable(boolean)
+         */
         void setAggregation(AggregationInfo info);
 
+        /**
+         * @return value description for aggregation row cells
+         * @see DataGrid#setAggregatable(boolean)
+         */
         String getValueDescription();
 
+        /**
+         * Sets value description for aggregated row cells.
+         *
+         * @param valueDescription value description
+         * @see DataGrid#setAggregatable(boolean)
+         */
         void setValueDescription(String valueDescription);
     }
 
