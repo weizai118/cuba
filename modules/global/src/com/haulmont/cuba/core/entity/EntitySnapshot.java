@@ -144,7 +144,7 @@ public class EntitySnapshot extends BaseUuidEntity implements Creatable, HasTena
     public String getLabel() {
         String name = "";
         if (author != null && StringUtils.isNotEmpty(this.author.getCaption())) {
-           name += this.author.getCaption() + " ";
+            name += this.author.getCaption() + " ";
         }
 
         Datatype datatype = Datatypes.getNN(Date.class);

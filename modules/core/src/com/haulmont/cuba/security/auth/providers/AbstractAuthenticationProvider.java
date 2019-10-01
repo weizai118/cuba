@@ -62,7 +62,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
         q.setParameter(2, login.toLowerCase());
 
         List list = q.getResultList();
-        if (list.isEmpty() || list.size() > 1) {
+        if (list.isEmpty() || list.size() != 1) {
             log.debug("Unable to find user: {}", login);
             return null;
         } else {

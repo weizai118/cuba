@@ -18,7 +18,6 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.Creatable;
-import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.ClientType;
 
@@ -28,12 +27,11 @@ import java.util.Date;
 /**
  * Record for user setting.
  * Used by <code>UserSettingServiceBean</code>.
- *
  */
 @Entity(name = "sec$UserSetting")
 @Table(name = "SEC_USER_SETTING")
 @SystemLevel
-public class UserSetting extends BaseUuidEntity implements Creatable, HasTenant {
+public class UserSetting extends BaseUuidEntity implements Creatable {
 
     private static final long serialVersionUID = -4324101071593066529L;
 
@@ -42,9 +40,6 @@ public class UserSetting extends BaseUuidEntity implements Creatable, HasTenant 
 
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
@@ -78,16 +73,6 @@ public class UserSetting extends BaseUuidEntity implements Creatable, HasTenant 
     @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public User getUser() {

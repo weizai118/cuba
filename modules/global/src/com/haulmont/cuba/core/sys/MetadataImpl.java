@@ -34,7 +34,6 @@ import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.events.AppContextInitializedEvent;
-import com.haulmont.cuba.security.entity.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -215,11 +214,8 @@ public class MetadataImpl implements Metadata {
     }
 
     protected void assignTenantId(Entity entity) {
-        if(entity instanceof Tenant)
-            return;
-
         String tenantId = tenantProvider.getTenantId();
-        if(entity instanceof HasTenant && !tenantId.equals(TenantProvider.TENANT_ADMIN)) {
+        if (entity instanceof HasTenant && !tenantId.equals(TenantProvider.TENANT_ADMIN)) {
             ((HasTenant) entity).setTenantId(tenantId);
         }
     }

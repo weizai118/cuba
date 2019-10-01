@@ -23,11 +23,11 @@ import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.TypedQuery;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.listener.EntityListenerManager;
 import com.haulmont.cuba.core.sys.listener.EntityListenerType;
+import com.haulmont.cuba.core.sys.persistence.AdditionalCriteriaProvider;
 import com.haulmont.cuba.core.sys.persistence.EntityPersistingEventManager;
 import com.haulmont.cuba.core.sys.persistence.PersistenceImplSupport;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,8 +52,6 @@ import java.util.*;
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class EntityManagerImpl implements EntityManager {
 
-    public static final String TENANT_ID = "tenantId";
-
     protected javax.persistence.EntityManager delegate;
 
     @Inject
@@ -72,8 +70,6 @@ public class EntityManagerImpl implements EntityManager {
     protected AuditInfoProvider auditInfoProvider;
     @Inject
     protected TimeSource timeSource;
-    @Inject
-    protected TenantProvider tenantProvider;
 
     protected boolean softDeletion = true;
 
@@ -84,8 +80,14 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @PostConstruct
-    protected void init(){
-        this.delegate.setProperty(TENANT_ID, tenantProvider.getTenantId());
+    protected void init() {
+        Map<String, AdditionalCriteriaProvider> additionalCriteriaProviderMap = AppBeans.getAll(AdditionalCriteriaProvider.class);
+
+        additionalCriteriaProviderMap.values().stream()
+                .filter(item -> item.getCriteriaParameters() != null)
+                .forEach(item ->
+                        item.getCriteriaParameters().forEach((propertyName, value) -> this.delegate.setProperty(propertyName, value))
+                );
     }
 
     @Override
@@ -242,7 +244,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @SuppressWarnings("unchecked")
     protected <T> TypedQuery<T> createQueryInstance(boolean isNative, Class<T> resultClass) {
-        return (TypedQuery<T>) beanLocator.getPrototype(Query.NAME,this, isNative, resultClass);
+        return (TypedQuery<T>) beanLocator.getPrototype(Query.NAME, this, isNative, resultClass);
     }
 
     @Override

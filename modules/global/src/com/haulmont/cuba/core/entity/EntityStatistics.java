@@ -27,7 +27,7 @@ import java.util.Date;
 @Entity(name = "sys$EntityStatistics")
 @Table(name = "SYS_ENTITY_STATISTICS")
 @SystemLevel
-public class EntityStatistics extends BaseUuidEntity implements Creatable, Updatable, HasTenant {
+public class EntityStatistics extends BaseUuidEntity implements Creatable, Updatable {
 
     private static final long serialVersionUID = -1734840995849860033L;
 
@@ -42,9 +42,6 @@ public class EntityStatistics extends BaseUuidEntity implements Creatable, Updat
 
     @Column(name = "UPDATED_BY", length = 50)
     private String updatedBy;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @Column(name = "NAME", length = 50)
     private String name;
@@ -102,16 +99,6 @@ public class EntityStatistics extends BaseUuidEntity implements Creatable, Updat
     @Override
     public void setUpdateTs(Date updateTs) {
         this.updateTs = updateTs;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public Long getInstanceCount() {

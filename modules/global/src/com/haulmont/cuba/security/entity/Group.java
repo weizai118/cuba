@@ -18,7 +18,8 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.StandardTenantEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Listeners;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.TrackEditScreenHistory;
@@ -36,7 +37,7 @@ import java.util.Set;
 @Listeners("cuba_GroupEntityListener")
 @NamePattern("%s|name")
 @TrackEditScreenHistory
-public class Group extends StandardTenantEntity {
+public class Group extends StandardEntity implements HasTenant {
 
     private static final long serialVersionUID = -4581386806900761785L;
 
@@ -60,6 +61,9 @@ public class Group extends StandardTenantEntity {
     @Composition()
     @OnDelete(DeletePolicy.CASCADE)
     private Set<SessionAttribute> sessionAttributes;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     public String getName() {
         return name;
@@ -99,5 +103,15 @@ public class Group extends StandardTenantEntity {
 
     public void setSessionAttributes(Set<SessionAttribute> sessionAttributes) {
         this.sessionAttributes = sessionAttributes;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

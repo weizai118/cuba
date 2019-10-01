@@ -29,7 +29,7 @@ import java.util.Date;
 @Entity(name = "sys$Config")
 @Table(name = "SYS_CONFIG")
 @SystemLevel
-public class Config extends BaseUuidEntity implements Versioned, Creatable, Updatable, HasTenant {
+public class Config extends BaseUuidEntity implements Versioned, Creatable, Updatable {
     private static final long serialVersionUID = -2103060811330948816L;
 
     @Version
@@ -47,9 +47,6 @@ public class Config extends BaseUuidEntity implements Versioned, Creatable, Upda
 
     @Column(name = "UPDATED_BY", length = 50)
     private String updatedBy;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -106,16 +103,6 @@ public class Config extends BaseUuidEntity implements Versioned, Creatable, Upda
     @Override
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String getName() {

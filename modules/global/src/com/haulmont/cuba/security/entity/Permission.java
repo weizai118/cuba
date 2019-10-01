@@ -16,7 +16,8 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.StandardTenantEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -28,13 +29,15 @@ import javax.persistence.*;
 @Entity(name = "sec$Permission")
 @Table(name = "SEC_PERMISSION")
 @SystemLevel
-public class Permission extends StandardTenantEntity {
+public class Permission extends StandardEntity implements HasTenant {
 
     private static final long serialVersionUID = 4188184934170706381L;
 
     public static final String TARGET_PATH_DELIMETER = ":";
 
-    /** @see com.haulmont.cuba.security.entity.PermissionType PermissionType.getId() */
+    /**
+     * @see com.haulmont.cuba.security.entity.PermissionType PermissionType.getId()
+     */
     @Column(name = "PERMISSION_TYPE")
     private Integer type;
 
@@ -50,6 +53,9 @@ public class Permission extends StandardTenantEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_ID")
     private Role role;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     public Role getRole() {
         return role;
@@ -75,13 +81,27 @@ public class Permission extends StandardTenantEntity {
         this.type = type == null ? null : type.getId();
     }
 
-    /** See {@link #value} */
+    /**
+     * See {@link #value}
+     */
     public Integer getValue() {
         return value;
     }
 
-    /** See {@link #value} */
+    /**
+     * See {@link #value}
+     */
     public void setValue(Integer value) {
         this.value = value;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

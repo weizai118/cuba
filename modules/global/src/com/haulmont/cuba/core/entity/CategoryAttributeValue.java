@@ -20,7 +20,10 @@ package com.haulmont.cuba.core.entity;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.DeletePolicy;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.ReferenceToEntitySupport;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
@@ -32,7 +35,7 @@ import java.util.List;
 @javax.persistence.Entity(name = "sys$CategoryAttributeValue")
 @Table(name = "SYS_ATTR_VALUE")
 @SystemLevel
-public class CategoryAttributeValue extends StandardTenantEntity {
+public class CategoryAttributeValue extends StandardEntity {
 
     private static final long serialVersionUID = -2861790889151226985L;
 

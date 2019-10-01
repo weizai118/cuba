@@ -56,7 +56,6 @@
         <class>com.haulmont.cuba.security.entity.Presentation</class>
         <class>com.haulmont.cuba.security.entity.ScreenHistoryEntity</class>
         <class>com.haulmont.cuba.security.entity.SessionLogEntry</class>
-        <class>com.haulmont.cuba.security.entity.Tenant</class>
 
         <class>com.haulmont.cuba.core.entity.CategorizedEntity</class>
         <class>com.haulmont.cuba.core.entity.Category</class>

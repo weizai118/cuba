@@ -29,7 +29,6 @@ import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.security.sys.UserSessionManager;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
@@ -61,8 +60,8 @@ public class AnonymousAuthenticationProvider extends AbstractAuthenticationProvi
                 messages.getTools().trimLocale(messages.getTools().getDefaultLocale()) : anonymous.getLocale();
 
         String tenantId = null;
-        if(ObjectUtils.isNotEmpty(anonymous.getParams())){
-            tenantId = (String) anonymous.getParams().get(TenantProvider.TENANT_ADMIN);
+        if (anonymous.getParams() != null) {
+            tenantId = (String) anonymous.getParams().get(globalConfig.getTenantIdName());
         }
         User user = loadUser(login, tenantId);
         if (user == null) {

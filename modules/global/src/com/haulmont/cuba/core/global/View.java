@@ -339,6 +339,7 @@ public class View implements Serializable {
         addSystemPropertiesFrom(Creatable.class, entityClass, metaClass, metadata, result);
         addSystemPropertiesFrom(Updatable.class, entityClass, metaClass, metadata, result);
         addSystemPropertiesFrom(SoftDelete.class, entityClass, metaClass, metadata, result);
+        addSystemPropertiesFrom(HasTenant.class, entityClass, metaClass, metadata, result);
 
         return result;
     }

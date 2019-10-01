@@ -19,17 +19,15 @@ package com.haulmont.cuba.core.entity;
 
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
-import javax.persistence.*;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity(name = "sys$QueryResult")
 @Table(name = "SYS_QUERY_RESULT")
 @SystemLevel
-public class QueryResult extends BaseIdentityIdEntity implements HasTenant {
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
+public class QueryResult extends BaseIdentityIdEntity {
 
     @Column(name = "SESSION_ID")
     private UUID sessionId;
@@ -48,16 +46,6 @@ public class QueryResult extends BaseIdentityIdEntity implements HasTenant {
 
     @Column(name = "LONG_ENTITY_ID")
     protected Long longEntityId;
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public UUID getSessionId() {
         return sessionId;

@@ -19,18 +19,15 @@ package com.haulmont.cuba.core.entity;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.cuba.core.entity.annotation.UnavailableInSecurityConstraints;
 
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 import java.util.Date;
 
 /**
  * The most widely used base class for entities. <br>
  * Optimistically locked, implements Updatable and SoftDelete.
- *
- * @deprecated Use {@code com.haulmont.cuba.core.entity.StandardTenantEntity}.
  */
-@Deprecated
 @MappedSuperclass
 @MetaClass(name = "sys$StandardEntity")
 @UnavailableInSecurityConstraints

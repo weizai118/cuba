@@ -16,7 +16,8 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.StandardTenantEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -25,12 +26,11 @@ import javax.persistence.*;
 
 /**
  * Link between users and roles.
- *
  */
 @Entity(name = "sec$UserRole")
 @Table(name = "SEC_USER_ROLE")
 @SystemLevel
-public class UserRole extends StandardTenantEntity {
+public class UserRole extends StandardEntity implements HasTenant {
 
     private static final long serialVersionUID = 8543853035155300992L;
 
@@ -43,6 +43,9 @@ public class UserRole extends StandardTenantEntity {
     @JoinColumn(name = "ROLE_ID")
     @OnDeleteInverse(DeletePolicy.CASCADE)
     private Role role;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     public User getUser() {
         return user;
@@ -58,5 +61,15 @@ public class UserRole extends StandardTenantEntity {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

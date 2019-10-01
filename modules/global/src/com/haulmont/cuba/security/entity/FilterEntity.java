@@ -18,7 +18,8 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.AbstractSearchFolder;
-import com.haulmont.cuba.core.entity.StandardTenantEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import javax.persistence.*;
@@ -30,7 +31,7 @@ import javax.persistence.*;
 @Table(name = "SEC_FILTER")
 @NamePattern("%s|name")
 @SystemLevel
-public class FilterEntity extends StandardTenantEntity {
+public class FilterEntity extends StandardEntity implements HasTenant {
 
     @Column(name = "COMPONENT")
     protected String componentId;
@@ -51,6 +52,9 @@ public class FilterEntity extends StandardTenantEntity {
 
     @Column(name = "GLOBAL_DEFAULT")
     protected Boolean globalDefault = false;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     @Transient
     protected Boolean isDefault = false;
@@ -104,12 +108,12 @@ public class FilterEntity extends StandardTenantEntity {
         isDefault = aDefault;
     }
 
-    public Boolean getApplyDefault(){
+    public Boolean getApplyDefault() {
         return applyDefault;
     }
 
-    public void setApplyDefault(Boolean applyDefault){
-        this.applyDefault=applyDefault;
+    public void setApplyDefault(Boolean applyDefault) {
+        this.applyDefault = applyDefault;
     }
 
     public AbstractSearchFolder getFolder() {
@@ -128,12 +132,12 @@ public class FilterEntity extends StandardTenantEntity {
         this.code = code;
     }
 
-    public Boolean getIsSet(){
+    public Boolean getIsSet() {
         return isSet;
     }
 
-    public void setIsSet(Boolean isSet){
-        this.isSet=isSet;
+    public void setIsSet(Boolean isSet) {
+        this.isSet = isSet;
     }
 
     public Boolean getGlobalDefault() {
@@ -142,5 +146,15 @@ public class FilterEntity extends StandardTenantEntity {
 
     public void setGlobalDefault(Boolean globalDefault) {
         this.globalDefault = globalDefault;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

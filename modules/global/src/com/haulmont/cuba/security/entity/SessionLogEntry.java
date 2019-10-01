@@ -16,7 +16,8 @@
 
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.StandardTenantEntity;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.global.ClientType;
 
 import javax.persistence.*;
@@ -25,7 +26,7 @@ import java.util.UUID;
 
 @Table(name = "SEC_SESSION_LOG")
 @Entity(name = "sec$SessionLogEntry")
-public class SessionLogEntry extends StandardTenantEntity {
+public class SessionLogEntry extends StandardEntity implements HasTenant {
     private static final long serialVersionUID = -2218273202879030900L;
 
     public static final String DEFAULT_VIEW = "sessionLogEntry-view";
@@ -67,6 +68,9 @@ public class SessionLogEntry extends StandardTenantEntity {
 
     @Column(name = "SERVER_ID")
     protected String server;
+
+    @Column(name = "TENANT_ID")
+    protected String tenantId;
 
     public void setLastAction(SessionAction lastAction) {
         this.lastAction = lastAction == null ? null : lastAction.getId();
@@ -154,5 +158,15 @@ public class SessionLogEntry extends StandardTenantEntity {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

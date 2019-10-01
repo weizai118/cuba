@@ -28,12 +28,11 @@ import java.util.List;
 
 /**
  * Entity to store information about sending emails.
- *
  */
 @Entity(name = "sys$SendingMessage")
 @Table(name = "SYS_SENDING_MESSAGE")
 @SystemLevel
-public class SendingMessage extends StandardTenantEntity {
+public class SendingMessage extends StandardEntity {
 
     private static final long serialVersionUID = -8156998515878702538L;
 

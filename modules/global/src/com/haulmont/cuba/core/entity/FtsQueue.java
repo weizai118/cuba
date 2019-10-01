@@ -27,7 +27,7 @@ import java.util.UUID;
 @Entity(name = "sys$FtsQueue")
 @Table(name = "SYS_FTS_QUEUE")
 @SystemLevel
-public class FtsQueue extends BaseUuidEntity implements Creatable, HasTenant {
+public class FtsQueue extends BaseUuidEntity implements Creatable {
 
     private static final long serialVersionUID = 6488459370269702942L;
 
@@ -36,9 +36,6 @@ public class FtsQueue extends BaseUuidEntity implements Creatable, HasTenant {
 
     @Column(name = "CREATED_BY", length = 50)
     protected String createdBy;
-
-    @Column(name = "TENANT_ID")
-    protected String tenantId;
 
     @Column(name = "ENTITY_ID")
     protected UUID entityId;
@@ -85,16 +82,6 @@ public class FtsQueue extends BaseUuidEntity implements Creatable, HasTenant {
     @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public UUID getEntityId() {
@@ -159,8 +146,7 @@ public class FtsQueue extends BaseUuidEntity implements Creatable, HasTenant {
             } else {
                 setIntEntityId((Integer) realId);
             }
-        }
-        else if (objectEntityId == null) {
+        } else if (objectEntityId == null) {
             setEntityId(null);
             setLongEntityId(null);
             setIntEntityId(null);

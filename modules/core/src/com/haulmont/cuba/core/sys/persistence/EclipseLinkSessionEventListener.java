@@ -23,7 +23,6 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.impl.AbstractInstance;
 import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.SoftDelete;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -97,19 +96,12 @@ public class EclipseLinkSessionEventListener extends SessionEventAdapter {
                 desc.getEventManager().addListener(descriptorEventListener);
             }
 
-            if (HasTenant.class.isAssignableFrom(desc.getJavaClass()) && SoftDelete.class.isAssignableFrom(desc.getJavaClass())) {
-                desc.getQueryManager().setAdditionalCriteria(
-                        "this.deleteTs is null and (CAST(:tenantId VARCHAR(255)) = 'tenant_admin' or this.tenantId = :tenantId)");
+            setAdditionalCriteria(desc);
+
+            if (SoftDelete.class.isAssignableFrom(desc.getJavaClass())) {
                 desc.setDeletePredicate(entity -> entity instanceof SoftDelete &&
                         PersistenceHelper.isLoaded(entity, "deleteTs") &&
                         ((SoftDelete) entity).isDeleted());
-            } else if (SoftDelete.class.isAssignableFrom(desc.getJavaClass())) {
-                desc.getQueryManager().setAdditionalCriteria("this.deleteTs is null");
-                desc.setDeletePredicate(entity -> entity instanceof SoftDelete &&
-                        PersistenceHelper.isLoaded(entity, "deleteTs") &&
-                        ((SoftDelete) entity).isDeleted());
-            } else if (HasTenant.class.isAssignableFrom(desc.getJavaClass())) {
-                desc.getQueryManager().setAdditionalCriteria("CAST(:tenantId VARCHAR(255)) = 'tenant_admin' or this.tenantId = :tenantId");
             }
 
             List<DatabaseMapping> mappings = desc.getMappings();
@@ -174,7 +166,22 @@ public class EclipseLinkSessionEventListener extends SessionEventAdapter {
         }
 
         logCheckResult(wrongFetchTypes, missingEnhancements);
+    }
 
+    private void setAdditionalCriteria(ClassDescriptor desc) {
+        Map<String, AdditionalCriteriaProvider> additionalCriteriaProviderMap = AppBeans.getAll(AdditionalCriteriaProvider.class);
+
+        StringBuilder criteriaBuilder = new StringBuilder();
+        additionalCriteriaProviderMap.values().stream()
+                .filter(item -> item.isNeedToAdditionalCriteria(desc.getJavaClass()))
+                .forEach(additionalCriteriaProvider ->
+                        criteriaBuilder.append(additionalCriteriaProvider.getAdditionalCriteria()).append(" AND")
+                );
+
+        if (criteriaBuilder.length() != 0) {
+            String additionalCriteriaResult = criteriaBuilder.substring(0, criteriaBuilder.length() - 4);
+            desc.getQueryManager().setAdditionalCriteria(additionalCriteriaResult);
+        }
     }
 
     protected void enhancementCheck(Class entityClass, List<Pair<Class, String>> missingEnhancements) {

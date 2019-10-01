@@ -44,7 +44,7 @@ import java.util.*;
 @NamePattern("%s (%s)|localeName,code")
 @SystemLevel
 @Listeners("report_CategoryAttributeListener")
-public class CategoryAttribute extends StandardTenantEntity {
+public class CategoryAttribute extends StandardEntity {
 
     private static final long serialVersionUID = -6959392628534815752L;
 
