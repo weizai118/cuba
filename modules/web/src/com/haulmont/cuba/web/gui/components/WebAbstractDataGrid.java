@@ -192,8 +192,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected final List<HeaderRow> headerRows = new ArrayList<>();
     protected final List<FooterRow> footerRows = new ArrayList<>();
 
-    protected com.vaadin.ui.components.grid.HeaderRow topAggregationRow;
-    protected com.vaadin.ui.components.grid.FooterRow bottomAggregationRow;
+    protected com.vaadin.ui.components.grid.HeaderRow headerAggregationRow;
+    protected com.vaadin.ui.components.grid.FooterRow footerAggregationRow;
 
     protected Collection<String> aggregationPropertyIds;
 
@@ -2869,6 +2869,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public HeaderRow getHeaderRow(int index) {
+        index = calculateHeaderIndex(index);
         return getHeaderRowByGridRow(component.getHeaderRow(index));
     }
 
@@ -2884,8 +2885,10 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public HeaderRow appendHeaderRow() {
-        com.vaadin.ui.components.grid.HeaderRow headerRow = component.appendHeaderRow();
-        return addHeaderRowInternal(headerRow);
+        boolean isAggregated = isAggregatable() && headerAggregationRow != null;
+        return addHeaderRowInternal(isAggregated ?
+                component.addHeaderRowAt(calculateHeaderIndex(headerRows.size())) :
+                component.appendHeaderRow());
     }
 
     @Override
@@ -2896,8 +2899,20 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public HeaderRow addHeaderRowAt(int index) {
+        index = calculateHeaderIndex(index);
         com.vaadin.ui.components.grid.HeaderRow headerRow = component.addHeaderRowAt(index);
         return addHeaderRowInternal(headerRow);
+    }
+
+    protected int calculateHeaderIndex(int index) {
+        if (isAggregatable() && headerAggregationRow != null) {
+            // if trying to add on aggregation row position
+            if (index == headerRows.size()) {
+                index = index - 1;
+                return Math.max(index, 0);
+            }
+        }
+        return index;
     }
 
     protected HeaderRow addHeaderRowInternal(com.vaadin.ui.components.grid.HeaderRow headerRow) {
@@ -2939,6 +2954,9 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public FooterRow getFooterRow(int index) {
+        if (isAggregatable() && footerAggregationRow != null) {
+            index++;
+        }
         return getFooterRowByGridRow(component.getFooterRow(index));
     }
 
@@ -2960,14 +2978,27 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public FooterRow prependFooterRow() {
-        com.vaadin.ui.components.grid.FooterRow footerRow = component.prependFooterRow();
-        return addFooterRowInternal(footerRow);
+        boolean isAggregated = isAggregatable() && footerAggregationRow != null;
+        return addFooterRowInternal(isAggregated ?
+                component.addFooterRowAt(1) :
+                component.appendFooterRow());
     }
 
     @Override
     public FooterRow addFooterRowAt(int index) {
+        index = calculateFooterIndex(index);
         com.vaadin.ui.components.grid.FooterRow footerRow = component.addFooterRowAt(index);
         return addFooterRowInternal(footerRow);
+    }
+
+    protected int calculateFooterIndex(int index) {
+        if (isAggregatable() && footerAggregationRow != null) {
+            // trying to add on aggregation row position
+            if (index == 0) {
+                return index + 1;
+            }
+        }
+        return index;
     }
 
     protected FooterRow addFooterRowInternal(com.vaadin.ui.components.grid.FooterRow footerRow) {
@@ -3112,6 +3143,11 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                     fillAggregationRow(results);
                 });
             }
+
+            if (getItems() instanceof AggregatableDataGridItems) {
+                Map<String, String> results = __aggregate();
+                fillAggregationRow(results);
+            }
         }
     }
 
@@ -3230,19 +3266,19 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected void fillAggregationRow(Map<String, String> values) {
         if (aggregationStyle == AggregationStyle.TOP) {
-            if (topAggregationRow == null) {
+            if (headerAggregationRow == null) {
                 initAggregationRow();
             }
             for (Map.Entry<String, String> value : values.entrySet()) {
-                com.vaadin.ui.components.grid.HeaderCell headerCell = topAggregationRow.getCell(value.getKey());
+                com.vaadin.ui.components.grid.HeaderCell headerCell = headerAggregationRow.getCell(value.getKey());
                 headerCell.setText(value.getValue());
             }
         } else {
-            if (bottomAggregationRow == null) {
+            if (footerAggregationRow == null) {
                 initAggregationRow();
             }
             for (Map.Entry<String, String> value : values.entrySet()) {
-                com.vaadin.ui.components.grid.FooterCell footerCell = bottomAggregationRow.getCell(value.getKey());
+                com.vaadin.ui.components.grid.FooterCell footerCell = footerAggregationRow.getCell(value.getKey());
                 footerCell.setText(value.getValue());
             }
         }
@@ -3251,10 +3287,12 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected void initAggregationRow() {
         if (isAggregatable()) {
             if (aggregationStyle == AggregationStyle.TOP) {
-                topAggregationRow = component.appendHeaderRow();
+                headerAggregationRow = component.appendHeaderRow();
+                headerAggregationRow.setStyleName("c-aggregation-row");
+
                 for (Column<E> column : columns.values()) {
                     if (column.getAggregation() != null) {
-                        com.vaadin.ui.components.grid.HeaderCell headerCell = topAggregationRow.getCell(column.getId());
+                        com.vaadin.ui.components.grid.HeaderCell headerCell = headerAggregationRow.getCell(column.getId());
                         String description = column.getValueDescription() != null ?
                                 column.getValueDescription() :
                                 getColumnAggregationDescriptionByType(column);
@@ -3262,12 +3300,14 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                         headerCell.setDescription(description);
                     }
                 }
-                addHeaderRowInternal(topAggregationRow);
+                addHeaderRowInternal(headerAggregationRow);
             } else {
-                bottomAggregationRow = component.prependFooterRow();
+                footerAggregationRow = component.prependFooterRow();
+                footerAggregationRow.setStyleName("c-aggregation-row");
+
                 for (Column<E> column : columns.values()) {
                     if (column.getAggregation() != null) {
-                        com.vaadin.ui.components.grid.FooterCell footerCell = bottomAggregationRow.getCell(column.getId());
+                        com.vaadin.ui.components.grid.FooterCell footerCell = footerAggregationRow.getCell(column.getId());
                         String description = column.getValueDescription() != null ?
                                 column.getValueDescription() :
                                 getColumnAggregationDescriptionByType(column);
@@ -3275,7 +3315,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                         footerCell.setDescription(description);
                     }
                 }
-                addFooterRowInternal(bottomAggregationRow);
+                addFooterRowInternal(footerAggregationRow);
             }
         }
     }
