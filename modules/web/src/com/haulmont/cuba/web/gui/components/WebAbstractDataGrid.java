@@ -3291,11 +3291,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 for (Column<E> column : columns.values()) {
                     if (column.getAggregation() != null) {
                         com.vaadin.ui.components.grid.HeaderCell headerCell = headerAggregationRow.getCell(column.getId());
-                        String description = column.getValueDescription() != null ?
-                                column.getValueDescription() :
-                                getColumnAggregationDescriptionByType(column);
-
-                        headerCell.setDescription(description);
+                        headerCell.setDescription(getColumnAggregationDescription(column));
                     }
                 }
                 addHeaderRowInternal(headerAggregationRow);
@@ -3306,16 +3302,21 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                 for (Column<E> column : columns.values()) {
                     if (column.getAggregation() != null) {
                         com.vaadin.ui.components.grid.FooterCell footerCell = footerAggregationRow.getCell(column.getId());
-                        String description = column.getValueDescription() != null ?
-                                column.getValueDescription() :
-                                getColumnAggregationDescriptionByType(column);
-
-                        footerCell.setDescription(description);
+                        footerCell.setDescription(getColumnAggregationDescription(column));
                     }
                 }
                 addFooterRowInternal(footerAggregationRow);
             }
         }
+    }
+
+    protected String getColumnAggregationDescription(Column<E> column) {
+        String descriptionByType = null;
+        if (column.getAggregation().getType() != AggregationInfo.Type.CUSTOM) {
+            descriptionByType = getColumnAggregationDescriptionByType(column);
+        }
+
+        return column.getValueDescription() != null ? column.getValueDescription() : descriptionByType;
     }
 
     protected String getColumnAggregationDescriptionByType(Column<E> column) {
