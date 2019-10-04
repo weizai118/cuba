@@ -16,7 +16,9 @@
 
 package com.haulmont.cuba.web.app.login;
 
+import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.bali.util.URLEncodeUtils;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
@@ -24,12 +26,7 @@ import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.screen.OpenMode;
-import com.haulmont.cuba.gui.screen.Screen;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiControllerUtils;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.app.UserManagementService;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
 import com.haulmont.cuba.security.auth.Credentials;
@@ -49,7 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.haulmont.cuba.web.App.*;
 
@@ -260,7 +259,8 @@ public class LoginScreen extends Screen {
     protected void doLogin() {
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
-        String tenantId = urlRouting.getState().getParams().get(globalConfig.getTenantIdName());
+
+        Map<String, Object> params = new HashMap<>(urlRouting.getState().getParams());
 
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             notifications.create(Notifications.NotificationType.WARNING)
@@ -273,7 +273,7 @@ public class LoginScreen extends Screen {
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, tenantId));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, params));
 
             // locale could be set on the server
             if (connection.getSession() != null) {
@@ -339,7 +339,7 @@ public class LoginScreen extends Screen {
         }
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, rememberMeTenantId);
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, ParamsMap.of(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, rememberMeTenantId));
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
             try {
                 connection.login(credentials);

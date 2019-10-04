@@ -266,12 +266,4 @@ public interface GlobalConfig extends Config {
     @Property("cuba.rememberMeExpirationTimeoutSec")
     @DefaultInt(30 * 24 * 60 * 60)
     int getRememberMeExpirationTimeoutSec();
-
-    /**
-     * @return The name attribute of a user's session to save the Tenant ID.
-     */
-    @Property("cuba.multitenancy.tenantIdName")
-    @Source(type = SourceType.DATABASE)
-    @DefaultString("tenantId")
-    String getTenantIdName();
 }

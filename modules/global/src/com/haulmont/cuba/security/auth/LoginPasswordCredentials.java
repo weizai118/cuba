@@ -29,7 +29,6 @@ public class LoginPasswordCredentials extends AbstractClientCredentials {
 
     private String login;
     private String password;
-    private String tenantId;
 
     public LoginPasswordCredentials() {
     }
@@ -39,22 +38,13 @@ public class LoginPasswordCredentials extends AbstractClientCredentials {
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale) {
-        this(login, password, locale, null, Collections.emptyMap());
+        this(login, password, locale, Collections.emptyMap());
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale, Map<String, Object> params) {
-        this(login, password, locale, null, params);
-    }
-
-    public LoginPasswordCredentials(String login, String password, Locale locale, String tenantId) {
-        this(login, password, locale, tenantId, Collections.emptyMap());
-    }
-
-    public LoginPasswordCredentials(String login, String password, Locale locale, String tenantId, Map<String, Object> params) {
         super(locale, params);
         this.login = login;
         this.password = password;
-        this.tenantId = tenantId;
     }
 
     @Override
@@ -76,14 +66,6 @@ public class LoginPasswordCredentials extends AbstractClientCredentials {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     @Override

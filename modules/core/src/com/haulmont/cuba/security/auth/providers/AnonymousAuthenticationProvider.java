@@ -18,7 +18,6 @@ package com.haulmont.cuba.security.auth.providers;
 
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.app.ServerConfig;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.auth.AnonymousUserCredentials;
@@ -59,11 +58,7 @@ public class AnonymousAuthenticationProvider extends AbstractAuthenticationProvi
         Locale credentialsLocale = anonymous.getLocale() == null ?
                 messages.getTools().trimLocale(messages.getTools().getDefaultLocale()) : anonymous.getLocale();
 
-        String tenantId = null;
-        if (anonymous.getParams() != null) {
-            tenantId = (String) anonymous.getParams().get(globalConfig.getTenantIdName());
-        }
-        User user = loadUser(login, tenantId);
+        User user = loadUser(login);
         if (user == null) {
             throw new LoginException(getInvalidCredentialsMessage(login, credentialsLocale));
         }

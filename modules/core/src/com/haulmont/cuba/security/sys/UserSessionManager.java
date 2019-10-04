@@ -167,9 +167,9 @@ public class UserSessionManager {
 
     protected void setTenantIdAttribute(UserSession session, User user) {
         if (user.getTenantId() == null) {
-            session.setAttribute(globalConfig.getTenantIdName(), TenantProvider.TENANT_ADMIN);
+            session.setAttribute(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, TenantProvider.TENANT_ADMIN);
         } else {
-            session.setAttribute(globalConfig.getTenantIdName(), user.getTenantId());
+            session.setAttribute(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, user.getTenantId());
         }
     }
 

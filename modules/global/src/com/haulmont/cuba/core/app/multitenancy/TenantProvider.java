@@ -23,7 +23,20 @@ public interface TenantProvider {
 
     String NAME = "cuba_TenantProvider";
 
+    /**
+     * The name attribute of a user's session to save the Tenant ID.
+     */
+    String TENANT_ID_ATTRIBUTE_NAME = "tenantAttrId";
+
+    /**
+     * Constant attribute user session for global visibility of all objects, regardless of the value of tenant.
+     */
     String TENANT_ADMIN = "tenant_admin";
 
+    /**
+     * Provides the current tenant id for save to user session.
+     *
+     * @return the current tenant id.
+     */
     String getTenantId();
 }

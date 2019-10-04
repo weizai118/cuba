@@ -16,7 +16,9 @@
 
 package com.haulmont.cuba.web.app.loginwindow;
 
+import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.bali.util.URLEncodeUtils;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
@@ -40,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -284,7 +287,8 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
     protected void doLogin() {
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
-        String tenantId = urlRouting.getState().getParams().get(globalConfig.getTenantIdName());
+
+        Map<String, Object> params = new HashMap<>(urlRouting.getState().getParams());
 
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             showNotification(messages.getMainMessage("loginWindow.emptyLoginOrPassword"), NotificationType.WARNING);
@@ -295,7 +299,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, tenantId));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, params));
 
             // locale could be set on the server
             if (connection.getSession() != null) {
@@ -361,7 +365,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         }
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, rememberMeTenantId);
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, ParamsMap.of(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, rememberMeTenantId));
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
             try {
                 connection.login(credentials);
