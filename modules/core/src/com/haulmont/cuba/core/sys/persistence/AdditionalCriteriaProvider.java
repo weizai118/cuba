@@ -27,10 +27,10 @@ public interface AdditionalCriteriaProvider {
     /**
      * Checks if the class needs additional criteria.
      *
-     * @param clazz a class.
+     * @param entityClass a class.
      * @return true if a query to this class requires additional criteria.
      */
-    boolean isNeedToAdditionalCriteria(Class clazz);
+    boolean requiresAdditionalCriteria(Class entityClass);
 
     /**
      * Returns the additional criteria.

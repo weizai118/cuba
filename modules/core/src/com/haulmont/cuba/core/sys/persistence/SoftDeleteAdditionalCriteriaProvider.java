@@ -29,8 +29,8 @@ public class SoftDeleteAdditionalCriteriaProvider implements AdditionalCriteriaP
 
     private static final String DELETE_TS_IS_NULL = "this.deleteTs is null";
 
-    public boolean isNeedToAdditionalCriteria(Class clazz) {
-        return SoftDelete.class.isAssignableFrom(clazz);
+    public boolean requiresAdditionalCriteria(Class entityClass) {
+        return SoftDelete.class.isAssignableFrom(entityClass);
     }
 
     @Override
