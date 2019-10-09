@@ -29,7 +29,6 @@
         <class>com.haulmont.cuba.core.entity.BaseIdentityIdEntity</class>
         <class>com.haulmont.cuba.core.entity.BaseIntIdentityIdEntity</class>
         <class>com.haulmont.cuba.core.entity.StandardEntity</class>
-        <class>com.haulmont.cuba.core.entity.StandardTenantEntity</class>
         <class>com.haulmont.cuba.core.entity.EmbeddableEntity</class>
 
         <class>com.haulmont.cuba.core.entity.dummy.DummyStringIdEntity</class>
