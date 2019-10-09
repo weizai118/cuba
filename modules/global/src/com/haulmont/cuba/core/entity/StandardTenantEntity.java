@@ -16,14 +16,19 @@
 
 package com.haulmont.cuba.core.entity;
 
+import com.haulmont.chile.core.annotations.MetaClass;
+import com.haulmont.cuba.core.entity.annotation.UnavailableInSecurityConstraints;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 /**
  * The base class for the implementation of the Multitenant. <br>
- * Optimistically locked, implements Updatable and SoftDelete.
+ * Optimistically locked, implements Updatable, SoftDelete and HasTenant.
  */
 @MappedSuperclass
+@MetaClass(name = "sys$StandardTenantEntity")
+@UnavailableInSecurityConstraints
 public class StandardTenantEntity extends StandardEntity implements HasTenant {
 
     @Column(name = "TENANT_ID")
