@@ -14,6 +14,42 @@
  * limitations under the License.
  */
 
+/**
+ * Defines min width of field caption.
+ * @group bulkeditor
+ */
+$c-bulk-editor-label-min-width: 270px !default;
+
+/**
+ * Defines max width of field caption.
+ * @group bulkeditor
+ */
+$c-bulk-editor-label-max-width: 270px !default;
+
+/**
+ * Defines width of field caption.
+ * @group bulkeditor
+ */
+$c-bulk-editor-label-width: 100% !default;
+
+/**
+ * Defines min width of field.
+ * @group bulkeditor
+ */
+$c-bulk-editor-field-min-width: 240px !default;
+
+/**
+ * Defines max width of field.
+ * @group bulkeditor
+ */
+$c-bulk-editor-field-max-width: none !default;
+
+/*
+ * Defines field width.
+ * @group bulkeditor
+ */
+$c-bulk-editor-field-width: 100% !default;
+
 @mixin cuba-bulk-editor($primary-stylename: c-bulk-editor) {
   .#{$primary-stylename}-grid .field-label {
     line-height: $v-unit-size;
@@ -24,38 +60,121 @@
   }
 
   .#{$primary-stylename}-fields-layout {
-    $cuba-bulk-editor-horizontal-spacing: $v-layout-spacing-horizontal;
-    $cuba-bulk-editor-vertical-spacing: $v-layout-spacing-vertical;
+    $c-bulk-editor-horizontal-spacing: $v-layout-spacing-horizontal;
+    $c-bulk-editor-vertical-spacing: $v-layout-spacing-vertical;
 
     display: flex;
     flex-wrap: wrap;
 
     .#{$primary-stylename}-column {
-      flex-grow: 1;
-      margin-right: $cuba-bulk-editor-horizontal-spacing;
+      padding-right: $c-bulk-editor-horizontal-spacing;
 
       .#{$primary-stylename}-row {
         display: flex;
-        margin-bottom: $cuba-bulk-editor-vertical-spacing;
+        margin-bottom: $c-bulk-editor-vertical-spacing;
+
+        /* wrapper is added for FireFox, Edge and IE11 */
+        .#{$primary-stylename}-picker-field-wrapper {
+          margin-right: $c-bulk-editor-horizontal-spacing;
+          width: $c-bulk-editor-field-width;
+          display: flex;
+
+          .#{$primary-stylename}-field {
+            margin-right: 0;
+            flex-basis: 100%;
+          }
+        }
 
         .#{$primary-stylename}-field {
-          flex-grow: 1;
-          margin-right: $cuba-bulk-editor-horizontal-spacing;
-          min-width: 200px;
-          width:100%;
+          margin-right: $c-bulk-editor-horizontal-spacing;
+          max-width: $c-bulk-editor-field-max-width;
+          min-width: $c-bulk-editor-field-min-width;
+          width: $c-bulk-editor-field-width;
+
+          .c-listeditor-layout {
+            display: flex;
+            width: 100%;
+
+            .v-slot-c-listeditor-text {
+              /* listeditor width is calculated as: input width + button width
+                 as we wont to configure min-width by one variable we need to remove button width */
+              min-width: $c-bulk-editor-field-min-width - $v-unit-size;
+              width: 100%;
+
+              .c-listeditor-text {
+                width: 100%;
+              }
+            }
+          }
         }
 
         .#{$primary-stylename}-label {
-          flex-grow: 1;
-          margin-right: $cuba-bulk-editor-horizontal-spacing;
-          min-width:150px;
-          width:50%;
+          margin-right: $c-bulk-editor-horizontal-spacing;
+          max-width: $c-bulk-editor-label-max-width;
+          min-width: $c-bulk-editor-label-min-width;
+          width: $c-bulk-editor-label-width;
           white-space: normal;
+          line-height: $v-unit-size;
         }
 
         .#{$primary-stylename}-spacer {
           visibility: hidden;
         }
+      }
+    }
+  }
+
+  .c-bulk-editor-columns-1 {
+    .c-bulk-editor-column {
+      flex: 0 0 100%;
+
+      .v-ie11 & {
+        min-width: 100%;
+        flex: none;
+      }
+    }
+  }
+
+  .c-bulk-editor-columns-2 {
+    .c-bulk-editor-column {
+      flex: 0 0 50%;
+
+      .v-ie11 & {
+        min-width: 50%;
+        flex: none;
+      }
+    }
+  }
+
+  .c-bulk-editor-columns-3 {
+    .c-bulk-editor-column {
+      flex: 0 0 33.33%;
+
+      .v-ie11 & {
+        min-width: 33.33%;
+        flex: none;
+      }
+    }
+  }
+
+  .c-bulk-editor-columns-4 {
+    .c-bulk-editor-column {
+      flex: 0 0 25%;
+
+      .v-ie11 & {
+        min-width: 25%;
+        flex: none;
+      }
+    }
+  }
+
+  .c-bulk-editor-columns-5 {
+    .c-bulk-editor-column {
+      flex: 0 0 20%;
+
+      .v-ie11 & {
+        min-width: 20%;
+        flex: none;
       }
     }
   }

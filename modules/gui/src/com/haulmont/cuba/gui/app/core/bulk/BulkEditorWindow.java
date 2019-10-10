@@ -28,14 +28,13 @@ import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.AppConfig;
-import com.haulmont.cuba.gui.BulkEditors;
-import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.WindowParam;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Action.Status;
 import com.haulmont.cuba.gui.components.DialogAction.Type;
 import com.haulmont.cuba.gui.components.validators.AbstractBeanValidator;
+import com.haulmont.cuba.gui.config.DeviceInfo;
+import com.haulmont.cuba.gui.config.DeviceInfoProvider;
 import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.NestedDatasource;
@@ -59,6 +58,9 @@ import java.util.stream.Collectors;
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
 
 public class BulkEditorWindow extends AbstractWindow {
+
+    public static final String COLUMN_COUNT_STYLE = "c-bulk-editor-columns-";
+
     @Inject
     protected ViewRepository viewRepository;
     @Inject
@@ -73,6 +75,8 @@ public class BulkEditorWindow extends AbstractWindow {
     protected UiComponents uiComponents;
     @Inject
     protected Security security;
+    @Inject
+    protected DeviceInfoProvider deviceInfoProvider;
 
     @Inject
     protected BulkEditorDataService bulkEditorDataService;
@@ -197,6 +201,9 @@ public class BulkEditorWindow extends AbstractWindow {
 
         CssLayout fieldsLayout = uiComponents.create(CssLayout.NAME);
         fieldsLayout.setStyleName("c-bulk-editor-fields-layout");
+        if (columns >= 1 && columns <= 5) {
+            fieldsLayout.addStyleName(COLUMN_COUNT_STYLE + columns);
+        }
         fieldsLayout.setWidthFull();
         fieldsLayout.setHeightFull();
 
@@ -207,10 +214,12 @@ public class BulkEditorWindow extends AbstractWindow {
             int fromRow = toRow;
             toRow = toRow + (fieldsSize / columns);
 
-            // increment if column sizes are not equal, only for first time
-            if (fieldsSize % columns != 0 && col == 0) {
+            // increment if column fields count is not equal, only for last column
+            if (fieldsSize % columns != 0 && col == (columns - 1)) {
                 toRow++;
             }
+
+            DeviceInfo deviceInfo = deviceInfoProvider.getDeviceInfo();
 
             VBoxLayout column = uiComponents.create(VBoxLayout.NAME);
             column.setStyleName("c-bulk-editor-column");
@@ -225,7 +234,6 @@ public class BulkEditorWindow extends AbstractWindow {
 
                 Label<String> label = uiComponents.create(Label.NAME);
                 label.setValue(field.getLocalizedName());
-                label.setAlignment(Alignment.TOP_LEFT);
                 label.setStyleName("c-bulk-editor-label");
                 if (AppConfig.getClientType() == ClientType.DESKTOP) {
                     label.setHeight("25px");
@@ -244,7 +252,15 @@ public class BulkEditorWindow extends AbstractWindow {
                 if (editField != null) {
                     editField.setFrame(getFrame());
                     editField.setStyleName("c-bulk-editor-field");
-                    row.add(editField);
+
+                    if (isFieldWrapperNeed(editField, deviceInfo)) {
+                        CssLayout wrapper = uiComponents.create(CssLayout.NAME);
+                        wrapper.setStyleName("c-bulk-editor-picker-field-wrapper");
+                        wrapper.add(editField);
+                        row.add(wrapper);
+                    } else {
+                        row.add(editField);
+                    }
 
                     boolean required = editField.isRequired();
                     if (!required) {
@@ -320,6 +336,18 @@ public class BulkEditorWindow extends AbstractWindow {
                 .ifPresent(f ->
                         ((Focusable) f).focus()
                 );
+    }
+
+    protected boolean isFieldWrapperNeed(Field field, DeviceInfo deviceInfo) {
+        if (deviceInfo == null) {
+            return false;
+        }
+
+        boolean isPickerField = field instanceof PickerField;
+        boolean isAffectedBrowser = deviceInfo.isFirefox() || deviceInfo.isEdge() || deviceInfo.isIE()
+                || deviceInfo.isSafari();
+
+        return isPickerField && isAffectedBrowser;
     }
 
     protected BulkEditorFieldFactory getFieldFactory() {
