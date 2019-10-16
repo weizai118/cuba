@@ -139,10 +139,9 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
                 "Illegal colSpan number %s, available amount of columns is %s, column number is %s",
                 colSpan, this.component.getColumns(), column);
 
-        // TODO: gg, possibly we need to check overall rows count
         int rowsCount = detectRowsCount(column);
         checkArgument(row >= 0 && row <= rowsCount,
-                "Illegal row number %s, available amount of rows is %s", row, rowsCount);
+                "Illegal row number %s, available amount of rows in column %s is %s", row, column, rowsCount);
 
         checkExistingOverlaps(column, row, colSpan, rowSpan);
 
@@ -198,7 +197,7 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
                 }
             }
         }
-        return insertIndex;
+        return Math.min(insertIndex, componentPositions.size());
     }
 
     protected void managedComponentAssigned(Component childComponent) {
