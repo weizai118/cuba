@@ -48,7 +48,7 @@ public interface Form extends Component, Component.BelongToFrame, Component.HasC
     }
 
     /**
-     * Adds a component to a columns with a given index.
+     * Adds a component to the column with the given index.
      *
      * @param childComponent a component to add
      * @param column         a columns index
@@ -56,13 +56,34 @@ public interface Form extends Component, Component.BelongToFrame, Component.HasC
     void add(Component childComponent, int column);
 
     /**
-     * Adds a component to a columns with a given index to a given position.
+     * Adds a component to a column with the given index with the given span.
+     *
+     * @param childComponent a component to add
+     * @param column         a columns index
+     * @param colSpan        a number of columns a component should span
+     * @param rowSpan        a number of rows a component should span
+     */
+    void add(Component childComponent, int column, int colSpan, int rowSpan);
+
+    /**
+     * Adds a component to a column with the given index to the given position.
      *
      * @param childComponent a component to add
      * @param column         a columns index
      * @param row            a row index
      */
     void add(Component childComponent, int column, int row);
+
+    /**
+     * Adds a component to a column with the given index to the given position with the given span.
+     *
+     * @param childComponent a component to add
+     * @param column         a columns index
+     * @param row            a row index
+     * @param colSpan        a number of columns a component should span
+     * @param rowSpan        a number of rows a component should span
+     */
+    void add(Component childComponent, int column, int row, int colSpan, int rowSpan);
 
     /**
      * @param column a column index
