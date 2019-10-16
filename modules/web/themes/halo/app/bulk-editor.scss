@@ -82,6 +82,7 @@ $c-bulk-editor-field-width: 100% !default;
           .#{$primary-stylename}-field {
             margin-right: 0;
             flex-basis: 100%;
+            width:100%;
           }
         }
 
@@ -108,6 +109,24 @@ $c-bulk-editor-field-width: 100% !default;
           }
         }
 
+        .#{$primary-stylename}-field.c-datefield-layout {
+          display: flex;
+
+          .c-datefield {
+            width:100%;
+            flex-basis:100%;
+          }
+        }
+
+
+        .v-ie11 & .#{$primary-stylename}-field.v-filterselect {
+          display: flex;
+
+          .v-filterselect-input {
+            flex-basis: 100%;
+          }
+        }
+
         .#{$primary-stylename}-label {
           margin-right: $c-bulk-editor-horizontal-spacing;
           max-width: $c-bulk-editor-label-max-width;
@@ -126,55 +145,55 @@ $c-bulk-editor-field-width: 100% !default;
 
   .c-bulk-editor-columns-1 {
     .c-bulk-editor-column {
-      flex: 0 0 100%;
+      flex: 1 0 100%;
 
       .v-ie11 & {
-        min-width: 100%;
         flex: none;
+        flex-grow: 1;
       }
     }
   }
 
   .c-bulk-editor-columns-2 {
     .c-bulk-editor-column {
-      flex: 0 0 50%;
+      flex: 1 0 50%;
 
       .v-ie11 & {
-        min-width: 50%;
         flex: none;
+        flex-grow: 1;
       }
     }
   }
 
   .c-bulk-editor-columns-3 {
     .c-bulk-editor-column {
-      flex: 0 0 33.33%;
+      flex: 1 0 33.33%;
 
       .v-ie11 & {
-        min-width: 33.33%;
         flex: none;
+        flex-grow: 1;
       }
     }
   }
 
   .c-bulk-editor-columns-4 {
     .c-bulk-editor-column {
-      flex: 0 0 25%;
+      flex: 1 0 25%;
 
       .v-ie11 & {
-        min-width: 25%;
         flex: none;
+        flex-grow: 1;
       }
     }
   }
 
   .c-bulk-editor-columns-5 {
     .c-bulk-editor-column {
-      flex: 0 0 20%;
+      flex: 1 0 20%;
 
       .v-ie11 & {
-        min-width: 20%;
         flex: none;
+        flex-grow: 1;
       }
     }
   }
