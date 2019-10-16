@@ -65,20 +65,6 @@ public class ContainerDataGridItems<E extends Entity>
         this.aggregatableDelegate = createAggregatableDelegate();
     }
 
-    protected AggregatableDelegate createAggregatableDelegate() {
-        return new AggregatableDelegate() {
-            @Override
-            public Object getItem(Object itemId) {
-                return container.getItem(itemId);
-            }
-
-            @Override
-            public Object getItemValue(MetaPropertyPath property, Object itemId) {
-                return container.getItem(itemId).getValueEx(property);
-            }
-        };
-    }
-
     @Override
     public CollectionContainer<E> getContainer() {
         return container;
@@ -244,5 +230,19 @@ public class ContainerDataGridItems<E extends Entity>
     @Override
     public Map<AggregationInfo, Object> aggregateValues(AggregationInfo[] aggregationInfos, Collection<?> itemIds) {
         return aggregatableDelegate.aggregateValues(aggregationInfos, itemIds);
+    }
+
+    protected AggregatableDelegate createAggregatableDelegate() {
+        return new AggregatableDelegate() {
+            @Override
+            public Object getItem(Object itemId) {
+                return container.getItem(itemId);
+            }
+
+            @Override
+            public Object getItemValue(MetaPropertyPath property, Object itemId) {
+                return container.getItem(itemId).getValueEx(property);
+            }
+        };
     }
 }

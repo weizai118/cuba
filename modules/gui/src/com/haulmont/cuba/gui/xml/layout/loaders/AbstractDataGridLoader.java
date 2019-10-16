@@ -131,7 +131,7 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         loadEmptyStateMessage(resultComponent, element);
         loadEmptyStateLinkMessage(resultComponent, element);
         loadAggregatable(resultComponent, element);
-        loadAggregationStyle(resultComponent, element);
+        loadAggregationPosition(resultComponent, element);
 
         Element columnsElement = element.element("columns");
 
@@ -763,10 +763,10 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         }
     }
 
-    protected void loadAggregationStyle(DataGrid component, Element element) {
-        String aggregationStyle = element.attributeValue("aggregationStyle");
-        if (!StringUtils.isEmpty(aggregationStyle)) {
-            component.setAggregationStyle(DataGrid.AggregationStyle.valueOf(aggregationStyle));
+    protected void loadAggregationPosition(DataGrid component, Element element) {
+        String aggregationPosition = element.attributeValue("aggregationPosition");
+        if (!StringUtils.isEmpty(aggregationPosition)) {
+            component.setAggregationPosition(DataGrid.AggregationPosition.valueOf(aggregationPosition));
         }
     }
 
@@ -776,38 +776,51 @@ public abstract class AbstractDataGridLoader<T extends DataGrid> extends Actions
         if (aggregationElement != null) {
             AggregationInfo aggregation = new AggregationInfo();
             aggregation.setPropertyPath(column.getPropertyPath());
-            String aggregationType = aggregationElement.attributeValue("type");
-            if (StringUtils.isNotEmpty(aggregationType)) {
-                aggregation.setType(AggregationInfo.Type.valueOf(aggregationType));
-            }
 
-            String valueDescription = aggregationElement.attributeValue("valueDescription");
-            if (StringUtils.isNotEmpty(valueDescription)) {
-                column.setValueDescription(loadResourceString(valueDescription));
-            }
+            loadAggregationType(aggregation, aggregationElement);
+
+            loadValueDescription(column, aggregationElement);
 
             Function formatter = loadFormatter(aggregationElement);
             aggregation.setFormatter(formatter == null ? column.getDescriptionProvider() : formatter);
             column.setAggregation(aggregation);
 
-            String strategyClass = aggregationElement.attributeValue("strategyClass");
-            if (StringUtils.isNotEmpty(strategyClass)) {
-                Class<?> aggregationClass = getScripting().loadClass(strategyClass);
-                if (aggregationClass == null) {
-                    throw new GuiDevelopmentException(String.format("Class %s is not found", strategyClass), context);
-                }
+            loadStrategyClass(aggregation, aggregationElement);
 
-                try {
-                    Constructor<?> constructor = aggregationClass.getDeclaredConstructor();
-                    AggregationStrategy customStrategy = (AggregationStrategy) constructor.newInstance();
-                    aggregation.setStrategy(customStrategy);
-                } catch (Exception e) {
-                    throw new RuntimeException("Unable to instantiate strategy for aggregation", e);
-                }
+            if (aggregation.getType() == null && aggregation.getStrategy() == null) {
+                throw new GuiDevelopmentException("Incorrect aggregation - type or strategyClass is required", context);
+            }
+        }
+    }
+
+    protected void loadAggregationType(AggregationInfo aggregation, Element aggregationElement) {
+        String aggregationType = aggregationElement.attributeValue("type");
+        if (StringUtils.isNotEmpty(aggregationType)) {
+            aggregation.setType(AggregationInfo.Type.valueOf(aggregationType));
+        }
+    }
+
+    protected void loadValueDescription(DataGrid.Column column, Element aggregationElement) {
+        String valueDescription = aggregationElement.attributeValue("valueDescription");
+        if (StringUtils.isNotEmpty(valueDescription)) {
+            column.setValueDescription(loadResourceString(valueDescription));
+        }
+    }
+
+    protected void loadStrategyClass(AggregationInfo aggregation, Element aggregationElement) {
+        String strategyClass = aggregationElement.attributeValue("strategyClass");
+        if (StringUtils.isNotEmpty(strategyClass)) {
+            Class<?> aggregationClass = getScripting().loadClass(strategyClass);
+            if (aggregationClass == null) {
+                throw new GuiDevelopmentException(String.format("Class %s is not found", strategyClass), context);
             }
 
-            if (aggregationType == null && strategyClass == null) {
-                throw new GuiDevelopmentException("Incorrect aggregation - type or strategyClass is required", context);
+            try {
+                Constructor<?> constructor = aggregationClass.getDeclaredConstructor();
+                AggregationStrategy customStrategy = (AggregationStrategy) constructor.newInstance();
+                aggregation.setStrategy(customStrategy);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to instantiate strategy for aggregation", e);
             }
         }
     }

@@ -26,21 +26,10 @@ $cuba-datagrid-header-font-weight: $v-font-weight !default;
 $cuba-datagrid-highlight-hover-row: false !default;
 
 /**
- * Defines default background color of datagrid total aggregation row. Calculated automatically.
- * @group dataGrid
- */
-$cuba-datagrid-aggregation-background-color-default: rgba(255,255,255, 1);
-@if is-dark-color($v-app-background-color) {
-  $cuba-datagrid-aggregation-background-color-default: scale-color($v-app-background-color, $lightness: 10%, $saturation: 80%);
-} @else {
-  $cuba-datagrid-aggregation-background-color-default: scale-color($v-app-background-color, $lightness: -10%, $saturation: 80%);
-}
-
-/**
  * Defines background color of datagrid total aggregation row.
  * @group dataGrid
  */
-$cuba-datagrid-aggregation-background-color: $cuba-datagrid-aggregation-background-color-default !default;
+$cuba-datagrid-aggregation-background-color: $cuba-aggregation-background-color-default !default;
 
 @mixin halo-datagrid($primary-stylename: v-grid) {
   $background-color: $v-table-background-color or valo-table-background-color();

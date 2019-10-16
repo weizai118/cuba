@@ -160,7 +160,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected Action enterPressAction;
 
     protected SelectionMode selectionMode;
-    protected AggregationStyle aggregationStyle = AggregationStyle.TOP;
+    protected AggregationPosition aggregationPosition = AggregationPosition.TOP;
 
     protected GridComposition componentComposition;
     protected HorizontalLayout topPanel;
@@ -3074,13 +3074,13 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     @Override
-    public AggregationStyle getAggregationStyle() {
-        return aggregationStyle;
+    public AggregationPosition getAggregationPosition() {
+        return aggregationPosition;
     }
 
     @Override
-    public void setAggregationStyle(AggregationStyle style) {
-        this.aggregationStyle = style;
+    public void setAggregationPosition(AggregationPosition style) {
+        this.aggregationPosition = style;
     }
 
     @Override
@@ -3263,7 +3263,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     protected void fillAggregationRow(Map<String, String> values) {
-        if (aggregationStyle == AggregationStyle.TOP) {
+        if (aggregationPosition == AggregationPosition.TOP) {
             if (headerAggregationRow == null) {
                 initAggregationRow();
             }
@@ -3284,7 +3284,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected void initAggregationRow() {
         if (isAggregatable()) {
-            if (aggregationStyle == AggregationStyle.TOP) {
+            if (aggregationPosition == AggregationPosition.TOP) {
                 headerAggregationRow = component.appendHeaderRow();
                 headerAggregationRow.setStyleName("c-aggregation-row");
 
@@ -3295,7 +3295,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                     }
                 }
                 addHeaderRowInternal(headerAggregationRow);
-            } else if (aggregationStyle == AggregationStyle.BOTTOM) {
+            } else if (aggregationPosition == AggregationPosition.BOTTOM) {
                 footerAggregationRow = component.prependFooterRow();
                 footerAggregationRow.setStyleName("c-aggregation-row");
 

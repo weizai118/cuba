@@ -2395,7 +2395,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * Gets the header row at given index.
      *
      * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationStyle()} TOP, the last position is
+     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} TOP, the last position is
      * reserved by header aggregation row. If you will try to get by the last header row position it will be decremented
      * by one.
      *
@@ -2432,7 +2432,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * their indices).
      *
      * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationStyle()} TOP, the last position is
+     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} TOP, the last position is
      * reserved by header aggregation row. If you will try to add at the last header row position it will be decremented
      * by one.
      *
@@ -2507,7 +2507,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
     /**
      * Gets the footer row at given index.
      * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationStyle()} BOTTOM, so 0 is reserved by
+     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} BOTTOM, so 0 is reserved by
      * footer aggregation row. If you will try to get footer by 0 it will be incremented by one.
      *
      * @param index 0 based index for row. Counted from top to bottom
@@ -2542,7 +2542,7 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * row currently at that position and any subsequent rows down (adds one to
      * their indices).
      * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationStyle()} BOTTOM, 0 is reserved by
+     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} BOTTOM, 0 is reserved by
      * footer aggregation row. If you will try to add footer at 0 it will be incremented by one.
      *
      * @param index the position at which to insert the row
@@ -2607,24 +2607,16 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
     void setAggregatable(boolean aggregatable);
 
     /**
-     * Defines the position of aggregation row.
-     */
-    enum AggregationStyle {
-        TOP,
-        BOTTOM
-    }
-
-    /**
      * @return return aggregation row position
      */
-    AggregationStyle getAggregationStyle();
+    AggregationPosition getAggregationPosition();
 
     /**
-     * Sets aggregation row position. Default value is {@link AggregationStyle#TOP}.
+     * Sets aggregation row position. Default value is {@link AggregationPosition#TOP}.
      *
-     * @param style style: {@link AggregationStyle#TOP} or {@link AggregationStyle#BOTTOM}
+     * @param position position: {@link AggregationPosition#TOP} or {@link AggregationPosition#BOTTOM}
      */
-    void setAggregationStyle(AggregationStyle style);
+    void setAggregationPosition(AggregationPosition position);
 
     /**
      * @return aggregated values for columns
@@ -3172,5 +3164,13 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
         public DataGrid<E> getSource() {
             return (DataGrid<E>) super.getSource();
         }
+    }
+
+    /**
+     * Defines the position of aggregation row.
+     */
+    enum AggregationPosition {
+        TOP,
+        BOTTOM
     }
 }

@@ -180,7 +180,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="aggregationStyle">
+    <xs:simpleType name="aggregationPosition">
         <xs:restriction base="xs:string">
             <xs:enumeration value="TOP"/>
             <xs:enumeration value="BOTTOM"/>
@@ -1178,7 +1178,7 @@
         <xs:attribute name="textSelectionEnabled" type="xs:boolean"/>
 
         <xs:attribute name="aggregatable" type="xs:boolean"/>
-        <xs:attribute name="aggregationStyle" type="aggregationStyle"/>
+        <xs:attribute name="aggregationStyle" type="aggregationPosition"/>
         <xs:attribute name="showTotalAggregation" type="xs:boolean"/>
         <xs:attribute name="presentations" type="xs:boolean"/>
         <xs:attribute name="contextMenuEnabled" type="xs:boolean"/>
@@ -2640,7 +2640,7 @@
                 <xs:attribute name="emptyStateMessage" type="resourceString"/>
                 <xs:attribute name="emptyStateLinkMessage" type="resourceString"/>
                 <xs:attribute name="aggregatable" type="xs:boolean"/>
-                <xs:attribute name="aggregationStyle" type="aggregationStyle"/>
+                <xs:attribute name="aggregationPosition" type="aggregationPosition"/>
 
                 <xs:attributeGroup ref="hasSettings"/>
                 <xs:attributeGroup ref="hasTabIndex"/>

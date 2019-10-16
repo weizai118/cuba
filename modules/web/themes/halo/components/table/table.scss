@@ -27,10 +27,10 @@ $cuba-table-header-font-weight: $v-font-weight !default;
 $cuba-table-highlight-hover-row: false !default;
 
 /**
- * Defines default background color of table total aggregation row. Calculated automatically.
+ * Defines default background color of table and datagrid total aggregation row. Calculated automatically.
  * @group table
  */
-$cuba-table-aggregation-background-color-default: rgba(255,255,255, 1);
+$cuba-aggregation-background-color-default: rgba(255,255,255, 1);
 @if is-dark-color($v-app-background-color) {
   $cuba-table-aggregation-background-color-default: scale-color($v-app-background-color, $lightness: 10%, $saturation: 80%);
 } @else {
