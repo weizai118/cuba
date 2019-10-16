@@ -297,6 +297,7 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
 
     protected List<ComponentArea> calculateComponentAreas() {
         List<ComponentArea> componentAreas = new ArrayList<>();
+        // Inspired by GridLayoutLoader logic
         boolean[][] spanMatrix = new boolean[this.component.getColumns()][this.component.getRows()];
 
         for (int col = 0; col < columnComponentMapping.size(); col++) {
@@ -433,7 +434,7 @@ public class WebForm extends WebAbstractComponent<CubaFieldGroupLayout> implemen
         checkArgument(column >= 0 && column < component.getColumns()
                         && row >= 0 && row < component.getRows(),
                 "Illegal coordinates for the component: [%s, %s]. Must be between [0, 0] - [%s, %s]",
-                column, row, component.getColumns(), component.getRows());
+                column, row, component.getColumns() - 1, component.getRows() - 1);
 
         List<ComponentArea> componentAreas = calculateComponentAreas();
         for (ComponentArea area : componentAreas) {
