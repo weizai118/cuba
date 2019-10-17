@@ -201,23 +201,16 @@ public class BulkEditorWindow extends AbstractWindow {
 
         CssLayout fieldsLayout = uiComponents.create(CssLayout.NAME);
         fieldsLayout.setStyleName("c-bulk-editor-fields-layout");
-        if (columns >= 1 && columns <= 5) {
-            fieldsLayout.addStyleName(COLUMN_COUNT_STYLE + columns);
-        }
         fieldsLayout.setWidthFull();
         fieldsLayout.setHeightFull();
 
-        int toRow = 0;
-        int fieldsSize = editFields.size();
+        int fromField;
+        int toField = 0;
+        int addedColumns = 0;
 
         for (int col = 0; col < columns; col++) {
-            int fromRow = toRow;
-            toRow = toRow + (fieldsSize / columns);
-
-            // increment if column fields count is not equal, only for last column
-            if (fieldsSize % columns != 0 && col == (columns - 1)) {
-                toRow++;
-            }
+            fromField = toField;
+            toField += getFieldsCountForColumn(editFields.size() - toField, columns - col);
 
             DeviceInfo deviceInfo = deviceInfoProvider.getDeviceInfo();
 
@@ -225,7 +218,7 @@ public class BulkEditorWindow extends AbstractWindow {
             column.setStyleName("c-bulk-editor-column");
             column.setWidth(Component.AUTO_SIZE);
 
-            for (int fieldIndex = fromRow; fieldIndex < toRow; fieldIndex++) {
+            for (int fieldIndex = fromField; fieldIndex < toField; fieldIndex++) {
                 ManagedField field = editFields.get(fieldIndex);
 
                 CssLayout row = uiComponents.create(CssLayout.NAME);
@@ -253,7 +246,7 @@ public class BulkEditorWindow extends AbstractWindow {
                     editField.setFrame(getFrame());
                     editField.setStyleName("c-bulk-editor-field");
 
-                    if (isFieldWrapperNeed(editField, deviceInfo)) {
+                    if (isPickerFieldWrapperNeeded(editField, deviceInfo)) {
                         CssLayout wrapper = uiComponents.create(CssLayout.NAME);
                         wrapper.setStyleName("c-bulk-editor-picker-field-wrapper");
                         wrapper.add(editField);
@@ -327,7 +320,13 @@ public class BulkEditorWindow extends AbstractWindow {
                 }
             }
             fieldsLayout.add(column);
+            // if there is no fields remain
+            if (editFields.size() - toField == 0) {
+                addedColumns = col + 1;
+                break;
+            }
         }
+        fieldsLayout.addStyleName(COLUMN_COUNT_STYLE + addedColumns);
         fieldsScrollBox.add(fieldsLayout);
 
         dataFields.values().stream()
@@ -338,7 +337,12 @@ public class BulkEditorWindow extends AbstractWindow {
                 );
     }
 
-    protected boolean isFieldWrapperNeed(Field field, DeviceInfo deviceInfo) {
+    protected int getFieldsCountForColumn(int remainFields, int remainColumns) {
+        int fieldsForColumn = remainFields / remainColumns;
+        return remainFields % remainColumns == 0 ? fieldsForColumn : ++fieldsForColumn;
+    }
+
+    protected boolean isPickerFieldWrapperNeeded(Field field, DeviceInfo deviceInfo) {
         if (deviceInfo == null) {
             return false;
         }
