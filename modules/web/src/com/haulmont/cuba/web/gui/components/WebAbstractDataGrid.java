@@ -154,13 +154,11 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected boolean columnsCollapsingAllowed = true;
     protected boolean textSelectionEnabled = false;
     protected boolean editorCrossFieldValidate = true;
-    protected boolean aggregatable = false;
 
     protected Action itemClickAction;
     protected Action enterPressAction;
 
     protected SelectionMode selectionMode;
-    protected AggregationPosition aggregationPosition = AggregationPosition.TOP;
 
     protected GridComposition componentComposition;
     protected HorizontalLayout topPanel;
@@ -194,8 +192,6 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected com.vaadin.ui.components.grid.HeaderRow headerAggregationRow;
     protected com.vaadin.ui.components.grid.FooterRow footerAggregationRow;
-
-    protected Collection<String> aggregationPropertyIds;
 
     protected static final Map<Class<? extends Renderer>, Class<? extends Renderer>> rendererClasses;
 
@@ -818,7 +814,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         columnGenerators.remove(column.getId());
 
         if (column.getAggregation() != null) {
-            removeAggregationPropertyId(column.getId());
+            component.removeAggregationPropertyId(column.getId());
         }
 
         ((ColumnImpl<E>) column).setGridColumn(null);
@@ -3065,22 +3061,22 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public boolean isAggregatable() {
-        return aggregatable;
+        return component.isAggregatable();
     }
 
     @Override
     public void setAggregatable(boolean aggregatable) {
-        this.aggregatable = aggregatable;
+        component.setAggregatable(aggregatable);
     }
 
     @Override
     public AggregationPosition getAggregationPosition() {
-        return aggregationPosition;
+        return AggregationPosition.valueOf(component.getAggregationPosition().name());
     }
 
     @Override
-    public void setAggregationPosition(AggregationPosition style) {
-        this.aggregationPosition = style;
+    public void setAggregationPosition(AggregationPosition position) {
+        component.setAggregationPosition(CubaEnhancedGrid.AggregationPosition.valueOf(position.name()));
     }
 
     @Override
@@ -3160,31 +3156,6 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         }
     }
 
-    protected Collection<String> getAggregationPropertyIds() {
-        if (aggregationPropertyIds == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableCollection(aggregationPropertyIds);
-    }
-
-    protected void addAggregationPropertyId(String propertyId) {
-        if (aggregationPropertyIds == null) {
-            aggregationPropertyIds = new ArrayList<>();
-        } else if (aggregationPropertyIds.contains(propertyId)) {
-            throw new IllegalStateException(String.format("Aggregation property %s already exists", propertyId));
-        }
-        aggregationPropertyIds.add(propertyId);
-    }
-
-    protected void removeAggregationPropertyId(String propertyId) {
-        if (aggregationPropertyIds != null) {
-            aggregationPropertyIds.remove(propertyId);
-            if (aggregationPropertyIds.isEmpty()) {
-                aggregationPropertyIds = null;
-            }
-        }
-    }
-
     @SuppressWarnings("unchecked")
     protected Map<String, String> __aggregate() {
         if (!(getItems() instanceof AggregatableDataGridItems)) {
@@ -3219,7 +3190,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected <V> Map<String, V> convertAggregationKeyMapToColumnIdKeyMap(Map<AggregationInfo, V> aggregationInfoMap) {
         Map<String, V> resultsByColumns = new LinkedHashMap<>();
-        for (String propertyId : getAggregationPropertyIds()) {
+        for (String propertyId : component.getAggregationPropertyIds()) {
             DataGrid.Column column = columns.get(propertyId);
             if (column.getAggregation() != null) {
                 resultsByColumns.put(column.getId(), aggregationInfoMap.get(column.getAggregation()));
@@ -3230,7 +3201,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected List<AggregationInfo> getAggregationInfos() {
         List<AggregationInfo> aggregationInfos = new ArrayList<>();
-        for (String propertyId : getAggregationPropertyIds()) {
+        for (String propertyId : component.getAggregationPropertyIds()) {
             DataGrid.Column column = columns.get(propertyId);
             AggregationInfo aggregation = column.getAggregation();
             if (aggregation != null) {
@@ -3263,7 +3234,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     }
 
     protected void fillAggregationRow(Map<String, String> values) {
-        if (aggregationPosition == AggregationPosition.TOP) {
+        if (getAggregationPosition() == AggregationPosition.TOP) {
             if (headerAggregationRow == null) {
                 initAggregationRow();
             }
@@ -3284,7 +3255,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected void initAggregationRow() {
         if (isAggregatable()) {
-            if (aggregationPosition == AggregationPosition.TOP) {
+            if (getAggregationPosition() == AggregationPosition.TOP) {
                 headerAggregationRow = component.appendHeaderRow();
                 headerAggregationRow.setStyleName("c-aggregation-row");
 
@@ -3295,7 +3266,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                     }
                 }
                 addHeaderRowInternal(headerAggregationRow);
-            } else if (aggregationPosition == AggregationPosition.BOTTOM) {
+            } else if (getAggregationPosition() == AggregationPosition.BOTTOM) {
                 footerAggregationRow = component.prependFooterRow();
                 footerAggregationRow.setStyleName("c-aggregation-row");
 
@@ -4158,7 +4129,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             this.aggregation = info;
 
             if (owner != null && id != null) {
-                owner.addAggregationPropertyId(id);
+                owner.getComponent().addAggregationPropertyId(id);
             }
         }
 
