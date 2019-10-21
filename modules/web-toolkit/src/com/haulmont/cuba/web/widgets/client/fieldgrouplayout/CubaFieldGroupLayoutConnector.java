@@ -126,10 +126,12 @@ public class CubaFieldGroupLayoutConnector extends CubaGridLayoutConnector {
             if (cell != null) {
                 VCaption caption = cell.slot.getCaption();
 
-                if (alignment == CaptionAlignment.RIGHT) {
-                    caption.addStyleName(ALIGN_RIGHT_STYLENAME);
-                } else {
-                    caption.removeStyleName(ALIGN_RIGHT_STYLENAME);
+                if (caption != null) {
+                    if (alignment == CaptionAlignment.RIGHT) {
+                        caption.addStyleName(ALIGN_RIGHT_STYLENAME);
+                    } else {
+                        caption.removeStyleName(ALIGN_RIGHT_STYLENAME);
+                    }
                 }
             }
         }
