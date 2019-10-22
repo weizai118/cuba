@@ -814,6 +814,14 @@ public class EntityLog implements EntityLogAPI {
                 sb.deleteCharAt(sb.length() - 1);
             sb.append("]");
             return sb.toString();
+        } else if (metaProperty.getRange().isEnum()) {
+            Class enumClass = metaProperty.getJavaType();
+            try {
+                Enum e = Enum.valueOf(enumClass, String.valueOf(value));
+                return metadataTools.format(e, metaProperty);
+            } catch (Exception e) {
+                return String.valueOf(value);
+            }
         } else {
             return String.valueOf(value);
         }
