@@ -23,6 +23,7 @@ import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.TimeSource;
 import com.haulmont.cuba.core.sys.SpringBeanLoader;
 import com.haulmont.cuba.core.sys.javacl.compiler.CharSequenceCompiler;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -61,6 +63,7 @@ public class JavaClassLoader extends URLClassLoader {
 
     protected final ProxyClassLoader proxyClassLoader;
     protected final SourceProvider sourceProvider;
+    protected final ClassFilesProvider classFilesProvider;
 
     @Inject
     protected TimeSource timeSource;
@@ -77,6 +80,7 @@ public class JavaClassLoader extends URLClassLoader {
         this.cubaClassPath = config.getCubaClasspathDirectories();
         this.classPath = buildClasspath();
         this.sourceProvider = new SourceProvider(rootDir);
+        this.classFilesProvider = new ClassFilesProvider(rootDir);
     }
 
     //Please use this constructor only in tests
@@ -92,6 +96,7 @@ public class JavaClassLoader extends URLClassLoader {
         this.cubaClassPath = cubaClassPath;
         this.classPath = buildClasspath();
         this.sourceProvider = new SourceProvider(rootDir);
+        this.classFilesProvider = new ClassFilesProvider(rootDir);
     }
 
     public void clearCache() {
@@ -107,57 +112,130 @@ public class JavaClassLoader extends URLClassLoader {
             lock(containerClassName);
             Class clazz;
 
-            if (!sourceProvider.getSourceFile(containerClassName).exists()) {
-                clazz = super.loadClass(fullClassName, resolve);
-                return clazz;
+            //first check if the ".java" source file is deployed to the "conf" directory
+            if (sourceProvider.getSourceFile(containerClassName).exists()) {
+                return loadClassFromJavaSources(fullClassName, containerClassName);
             }
 
-            CompilationScope compilationScope = new CompilationScope(this, containerClassName);
-            if (!compilationScope.compilationNeeded()) {
-                TimestampClass timestampClass = getTimestampClass(fullClassName);
-                if (timestampClass == null) {
-                    throw new ClassNotFoundException(fullClassName);
-                }
-                return timestampClass.clazz;
+            //then check if there is the ".class" file in the "conf" directory
+            File classFile = classFilesProvider.getClassFile(containerClassName);
+            if (classFile.exists()) {
+                return loadClassFromClassFile(fullClassName, containerClassName, classFile);
             }
 
-            String src;
-            try {
-                src = sourceProvider.getSourceString(containerClassName);
-            } catch (IOException e) {
-                throw new ClassNotFoundException("Could not load java sources for class " + containerClassName);
-            }
-
-            try {
-                log.debug("Compiling " + containerClassName);
-                final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<>();
-
-                SourcesAndDependencies sourcesAndDependencies = new SourcesAndDependencies(rootDir, this);
-                sourcesAndDependencies.putSource(containerClassName, src);
-                sourcesAndDependencies.collectDependencies(containerClassName);
-                Map<String, CharSequence> sourcesForCompilation = sourcesAndDependencies.collectSourcesForCompilation(containerClassName);
-
-                @SuppressWarnings("unchecked")
-                Map<String, Class> compiledClasses = createCompiler().compile(sourcesForCompilation, errs);
-
-                Map<String, TimestampClass> compiledTimestampClasses = wrapCompiledClasses(compiledClasses);
-                compiled.putAll(compiledTimestampClasses);
-                linkDependencies(compiledTimestampClasses, sourcesAndDependencies.dependencies);
-
-                clazz = compiledClasses.get(fullClassName);
-
-                springBeanLoader.updateContext(compiledClasses.values());
-
-                return clazz;
-            } catch (Exception e) {
-                proxyClassLoader.restoreRemoved();
-                throw new RuntimeException(e);
-            } finally {
-                proxyClassLoader.cleanupRemoved();
-            }
+            //default class loading
+            clazz = super.loadClass(fullClassName, resolve);
+            return clazz;
         } finally {
             unlock(containerClassName);
             loadingWatch.stop();
+        }
+    }
+
+    protected Class loadClassFromJavaSources(String fullClassName, String containerClassName) throws ClassNotFoundException {
+        Class clazz;
+        CompilationScope compilationScope = new CompilationScope(this, containerClassName);
+        if (!compilationScope.compilationNeeded()) {
+            TimestampClass timestampClass = getTimestampClass(fullClassName);
+            if (timestampClass == null) {
+                throw new ClassNotFoundException(fullClassName);
+            }
+            return timestampClass.clazz;
+        }
+
+        String src;
+        try {
+            src = sourceProvider.getSourceString(containerClassName);
+        } catch (IOException e) {
+            throw new ClassNotFoundException("Could not load java sources for class " + containerClassName);
+        }
+
+        try {
+            log.debug("Compiling " + containerClassName);
+            final DiagnosticCollector<JavaFileObject> errs = new DiagnosticCollector<>();
+
+            SourcesAndDependencies sourcesAndDependencies = new SourcesAndDependencies(rootDir, this);
+            sourcesAndDependencies.putSource(containerClassName, src);
+            sourcesAndDependencies.collectDependencies(containerClassName);
+            Map<String, CharSequence> sourcesForCompilation = sourcesAndDependencies.collectSourcesForCompilation(containerClassName);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Class> compiledClasses = createCompiler().compile(sourcesForCompilation, errs);
+
+            Map<String, TimestampClass> compiledTimestampClasses = wrapCompiledClasses(compiledClasses);
+            compiled.putAll(compiledTimestampClasses);
+            linkDependencies(compiledTimestampClasses, sourcesAndDependencies.dependencies);
+
+            clazz = compiledClasses.get(fullClassName);
+
+            springBeanLoader.updateContext(compiledClasses.values());
+
+            return clazz;
+        } catch (Exception e) {
+            proxyClassLoader.restoreRemoved();
+            throw new RuntimeException(e);
+        } finally {
+            proxyClassLoader.cleanupRemoved();
+        }
+    }
+
+    protected Class loadClassFromClassFile(String fullClassName, String containerClassName, File classFile) {
+        TimestampClass timestampClass = compiled.get(containerClassName);
+        if (timestampClass != null && !FileUtils.isFileNewer(classFile, timestampClass.timestamp)) {
+            return timestampClass.clazz;
+        }
+
+        Map<String, Class> modifiedClasses = loadModifiedClassFiles(rootDir);
+        compiled.putAll(wrapCompiledClasses(modifiedClasses));
+        springBeanLoader.updateContext(modifiedClasses.values());
+        return modifiedClasses.get(fullClassName);
+    }
+
+    /**
+     * Method finds all modified class files in the "conf" directory and builds class instances from the files
+     * @return a map where the key is class FQN and the value is the loaded {@link Class}
+     */
+    protected Map<String, Class> loadModifiedClassFiles(String rootDir) {
+        Map<String, Class> classes = new HashMap<>();
+        Path root = Paths.get(rootDir);
+        FileClassLoader fileClassLoader = new FileClassLoader(this);
+        try {
+            Files.walk(root)
+                    .forEach(path -> {
+                        if (Files.isDirectory(path) || !path.toString().endsWith(".class")) {
+                            return;
+                        }
+                        String fqn = root.relativize(path).toString();
+                        fqn = fqn.substring(0, fqn.length() - 6).replace(File.separator, ".");
+
+                        TimestampClass timeStampClass = getTimestampClass(fqn);
+                        if (timeStampClass == null || FileUtils.isFileNewer(path.toFile(), timeStampClass.timestamp)) {
+                            try {
+                                Class clazz = fileClassLoader.loadClass(fqn, path);
+                                classes.put(fqn, clazz);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Error on class loading: " + fqn, e);
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException("Error on traversing the directory " + rootDir , e);
+        }
+        return classes;
+    }
+
+    /**
+     * Class loader is used for building class instances from ".class" files
+     */
+    protected static class FileClassLoader extends ClassLoader {
+
+        FileClassLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        Class loadClass(String fqn, Path pathToClassFile) throws IOException {
+            byte[] bytes = Files.readAllBytes(pathToClassFile);
+            return defineClass(fqn, bytes, 0, bytes.length);
         }
     }
 
