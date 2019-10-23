@@ -112,15 +112,15 @@ public class JavaClassLoader extends URLClassLoader {
             lock(containerClassName);
             Class clazz;
 
-            //first check if the ".java" source file is deployed to the "conf" directory
-            if (sourceProvider.getSourceFile(containerClassName).exists()) {
-                return loadClassFromJavaSources(fullClassName, containerClassName);
-            }
-
-            //then check if there is the ".class" file in the "conf" directory
+            //first check if there is the ".class" file in the "conf" directory
             File classFile = classFilesProvider.getClassFile(containerClassName);
             if (classFile.exists()) {
                 return loadClassFromClassFile(fullClassName, containerClassName, classFile);
+            }
+
+            //then check if the ".java" source file is deployed to the "conf" directory
+            if (sourceProvider.getSourceFile(containerClassName).exists()) {
+                return loadClassFromJavaSources(fullClassName, containerClassName);
             }
 
             //default class loading
@@ -184,21 +184,29 @@ public class JavaClassLoader extends URLClassLoader {
         if (timestampClass != null && !FileUtils.isFileNewer(classFile, timestampClass.timestamp)) {
             return timestampClass.clazz;
         }
-
-        Map<String, Class> modifiedClasses = loadModifiedClassFiles(rootDir);
-        compiled.putAll(wrapCompiledClasses(modifiedClasses));
-        springBeanLoader.updateContext(modifiedClasses.values());
-        return modifiedClasses.get(fullClassName);
+        Map<String, Class> loadedClasses = new HashMap<>();
+        Map<String, Path> modifiedClassFiles = collectModifiedClassFiles(rootDir);
+        FileClassLoader fileClassLoader = new FileClassLoader(proxyClassLoader, rootDir, modifiedClassFiles.keySet());
+        for (String fqn : modifiedClassFiles.keySet()) {
+            Class clazz;
+            try {
+                clazz = fileClassLoader.loadClass(fqn);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Class not found", e);
+            }
+            loadedClasses.put(fqn, clazz);
+            compiled.put(fqn, new TimestampClass(clazz, getCurrentTimestamp()));
+        }
+        springBeanLoader.updateContext(loadedClasses.values());
+        return loadedClasses.get(fullClassName);
     }
 
     /**
-     * Method finds all modified class files in the "conf" directory and builds class instances from the files
-     * @return a map where the key is class FQN and the value is the loaded {@link Class}
+     * Collects class files that were modified or not loaded yet from the "conf" directory
      */
-    protected Map<String, Class> loadModifiedClassFiles(String rootDir) {
-        Map<String, Class> classes = new HashMap<>();
+    protected Map<String, Path> collectModifiedClassFiles(String rootDir) {
+        Map<String, Path> result = new HashMap<>();
         Path root = Paths.get(rootDir);
-        FileClassLoader fileClassLoader = new FileClassLoader(this);
         try {
             Files.walk(root)
                     .forEach(path -> {
@@ -207,35 +215,61 @@ public class JavaClassLoader extends URLClassLoader {
                         }
                         String fqn = root.relativize(path).toString();
                         fqn = fqn.substring(0, fqn.length() - 6).replace(File.separator, ".");
-
                         TimestampClass timeStampClass = getTimestampClass(fqn);
                         if (timeStampClass == null || FileUtils.isFileNewer(path.toFile(), timeStampClass.timestamp)) {
-                            try {
-                                Class clazz = fileClassLoader.loadClass(fqn, path);
-                                classes.put(fqn, clazz);
-                            } catch (IOException e) {
-                                throw new RuntimeException("Error on class loading: " + fqn, e);
-                            }
+                            result.put(fqn, path);
                         }
                     });
         } catch (IOException e) {
-            throw new RuntimeException("Error on traversing the directory " + rootDir , e);
+            throw new RuntimeException("Error on traversing the directory " + rootDir, e);
         }
-        return classes;
+        return result;
     }
 
     /**
-     * Class loader is used for building class instances from ".class" files
+     * Class loader is used for building class instances from ".class" files. Loading from file happens only for classes with FQN from the {@code
+     * modifiedFQNs} collection passed to the constructor. Loading of all other classes is delegated to parent class loaders.
      */
     protected static class FileClassLoader extends ClassLoader {
 
-        FileClassLoader(ClassLoader parent) {
+        private final Map<String, Class> loadedClasses = new HashMap<>();
+        private String rootDir;
+        private Set<String> modifiedFQNs;
+
+        /**
+         * @param parent parent class loader
+         * @param rootDir a root directory (usually a "conf" dir)
+         * @param modifiedFQNs a set of classes fully qualified names that should be loaded by this class loader
+         */
+        FileClassLoader(ClassLoader parent, String rootDir, Set<String> modifiedFQNs) {
             super(parent);
+            this.rootDir = rootDir;
+            this.modifiedFQNs = modifiedFQNs;
         }
 
-        Class loadClass(String fqn, Path pathToClassFile) throws IOException {
-            byte[] bytes = Files.readAllBytes(pathToClassFile);
-            return defineClass(fqn, bytes, 0, bytes.length);
+        @Override
+        protected Class<?> loadClass(String fqn, boolean resolve) throws ClassNotFoundException {
+            Class clazz = loadedClasses.get(fqn);
+            if (clazz != null) return clazz;
+            if (modifiedFQNs.contains(fqn)) {
+                Path pathToClassFile = fqnToPath(fqn);
+                if (Files.exists(pathToClassFile)) {
+                    try {
+                        byte[] bytes = Files.readAllBytes(pathToClassFile);
+                        clazz = defineClass(fqn, bytes, 0, bytes.length);
+                        loadedClasses.put(fqn, clazz);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error on reading file content", e);
+                    }
+                }
+            }
+            return super.loadClass(fqn, resolve);
+        }
+
+        private Path fqnToPath(String fqn) {
+            String[] packageNameParts = fqn.split("\\.");
+            packageNameParts[packageNameParts.length - 1] = packageNameParts[packageNameParts.length - 1] + ".class";
+            return Paths.get(rootDir, packageNameParts);
         }
     }
 
