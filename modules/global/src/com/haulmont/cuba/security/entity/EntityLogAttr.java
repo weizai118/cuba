@@ -95,39 +95,17 @@ public class EntityLogAttr extends BaseUuidEntity {
 
     @MetaProperty
     public String getDisplayValue() {
-        return getDisplayValue(getValue());
+        return getValue();
     }
 
     @MetaProperty
     public String getDisplayOldValue() {
-        return getDisplayValue(getOldValue());
+        return getOldValue();
     }
 
+    @Deprecated
     protected String getDisplayValue(String value) {
-        if (StringUtils.isEmpty(value)) {
-            return value;
-        }
-        final String entityName = getLogItem().getEntity();
-        com.haulmont.chile.core.model.MetaClass metaClass = getClassFromEntityName(entityName);
-        if (metaClass != null) {
-            com.haulmont.chile.core.model.MetaProperty property = metaClass.getProperty(getName());
-            if (property != null) {
-                if (property.getRange().isDatatype()) {
-                    return value;
-                } else if (property.getRange().isEnum()) {
-                    String nameKey = property.getRange().asEnumeration().getJavaClass().getSimpleName() + "." + value;
-                    String packageName = property.getRange().asEnumeration().getJavaClass().getPackage().getName();
-                    Messages messages = AppBeans.get(Messages.NAME);
-                    return messages.getMessage(packageName, nameKey);
-                } else {
-                    return value;
-                }
-            } else {
-                return value;
-            }
-        } else {
-            return value;
-        }
+        return value;
     }
 
     public String getValueId() {
