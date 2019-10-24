@@ -15,6 +15,15 @@
  */
 
 /**
+ * Default color for aggregation row in DataGrid and Table
+ */
+$cuba-aggregation-background-color-default: rgba(255,255,255, 1);
+@if is-dark-color($v-app-background-color) {
+  $cuba-aggregation-background-color-default: scale-color($v-app-background-color, $lightness: 10%, $saturation: 80%);
+} @else {
+  $cuba-aggregation-background-color-default: scale-color($v-app-background-color, $lightness: -10%, $saturation: 80%);
+}
+/**
  * The font weight of datagrid header
  * @group dataGrid
  */
