@@ -21,6 +21,9 @@ import com.haulmont.cuba.security.entity.RoleType;
 /**
  * Main interface for working with predefined roles. Regardless of how the role is created
  * (using the builder or using the Role annotation), it must implement this interface.
+ *
+ * <p>Each {@code UserSession} contains an instance of this interface ({@code effectiveRole} field).
+ * This object stores all user permissions.
  */
 public interface RoleDef extends ApplicationRole, GenericUiRole {
 

@@ -21,16 +21,21 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.security.entity.Permission;
+import com.haulmont.cuba.security.entity.PermissionType;
+import com.haulmont.cuba.security.entity.Role;
+import com.haulmont.cuba.security.entity.UserRole;
 import com.haulmont.cuba.security.role.Permissions;
 import com.haulmont.cuba.security.role.PermissionsUtils;
 import com.haulmont.cuba.security.role.RoleDef;
 import com.haulmont.cuba.security.role.RolesStorageMode;
-import com.haulmont.cuba.security.entity.*;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -54,9 +59,6 @@ public class RolesRepository {
     protected GlobalConfig config;
 
     protected Map<String, RoleDef> nameToPredefinedRoleMapping;
-
-    protected static final int ROLES_FROM_DATABASE_MODE = 1;
-    protected static final int ROLES_FROM_CODE_MODE = 2;
 
     public Collection<RoleDef> getRoleDefs(@Nullable Collection<UserRole> userRoles) {
         if (userRoles == null) {
@@ -103,7 +105,7 @@ public class RolesRepository {
     }
 
     public RoleDef getRoleDefByName(String roleName) {
-        return getNameToPredefinedRoleMapping().get(roleName);
+        return nameToPredefinedRoleMapping.get(roleName);
     }
 
     public Map<String, Role> getDefaultRoles() {
@@ -115,7 +117,7 @@ public class RolesRepository {
         Map<String, Role> defaultUserRoles = new HashMap<>();
 
         if (isPredefinedRolesModeAvailable()) {
-            for (Map.Entry<String, RoleDef> entry : getNameToPredefinedRoleMapping().entrySet()) {
+            for (Map.Entry<String, RoleDef> entry : nameToPredefinedRoleMapping.entrySet()) {
                 if (entry.getValue().isDefault()) {
                     defaultUserRoles.put(entry.getKey(), null);
                 }
@@ -221,37 +223,34 @@ public class RolesRepository {
     }
 
     public boolean isDatabaseModeAvailable() {
-        return (getMode() & ROLES_FROM_DATABASE_MODE) == ROLES_FROM_DATABASE_MODE;
+        RolesStorageMode valueFromConfig = config.getRolesStorageMode();
+        if (valueFromConfig == null) {
+            return true;
+        }
+
+        return RolesStorageMode.DATABASE.equals(valueFromConfig) || RolesStorageMode.MIXED.equals(valueFromConfig);
     }
 
     public boolean isPredefinedRolesModeAvailable() {
-        return (getMode() & ROLES_FROM_CODE_MODE) == ROLES_FROM_CODE_MODE;
-    }
-
-    protected int getMode() {
         RolesStorageMode valueFromConfig = config.getRolesStorageMode();
-        if (valueFromConfig != null) {
-            switch (valueFromConfig) {
-                case DATABASE:
-                    return 1;
-                case SOURCE_CODE:
-                    return 2;
-                case MIXED:
-                    return 3;
-            }
+        if (valueFromConfig == null) {
+            return true;
         }
-        return 3;
+
+        return RolesStorageMode.SOURCE_CODE.equals(valueFromConfig) || RolesStorageMode.MIXED.equals(valueFromConfig);
     }
 
     protected Map<String, RoleDef> getNameToPredefinedRoleMapping() {
-        if (nameToPredefinedRoleMapping == null) {
-            nameToPredefinedRoleMapping = new HashMap<>();
-
-            for (RoleDef role : predefinedRoles) {
-                nameToPredefinedRoleMapping.put(role.getName(), role);
-            }
-        }
         return nameToPredefinedRoleMapping;
+    }
+
+    @PostConstruct
+    private void initNameToPredefinedRoleMapping() {
+        nameToPredefinedRoleMapping = new ConcurrentHashMap<>();
+
+        for (RoleDef role : predefinedRoles) {
+            nameToPredefinedRoleMapping.put(role.getName(), role);
+        }
     }
 
     /**
@@ -261,6 +260,6 @@ public class RolesRepository {
      * @param roleDef role to register
      */
     public void registerRole(RoleDef roleDef) {
-        getNameToPredefinedRoleMapping().put(roleDef.getName(), roleDef);
+        nameToPredefinedRoleMapping.put(roleDef.getName(), roleDef);
     }
 }

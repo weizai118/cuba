@@ -581,10 +581,22 @@ public class UserSession implements Serializable {
         return system;
     }
 
+    /**
+     * Returns an instance of RoleDef interface. It can be used to retrieve information about user permissions.
+     * <p>
+     * If you need to modify user permissions, use {@code RoleDefBuilder} to construct a suitable role and then
+     * apply it using {@link UserSession#applyEffectiveRole} method.
+     */
     public RoleDef getEffectiveRole() {
         return effectiveRole;
     }
 
+    /**
+     * Applies {@code effectiveRole} to the UserSession.
+     * After that user will only have permissions defined in the specified role.
+     * <p>
+     * Use {@code RoleDefBuilder} to construct a suitable role.
+     */
     public void applyEffectiveRole(RoleDef effectiveRole) {
         this.effectiveRole = effectiveRole;
     }
