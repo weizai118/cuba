@@ -2394,11 +2394,6 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
     /**
      * Gets the header row at given index.
      *
-     * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} TOP, the last position is
-     * reserved by header aggregation row. If you will try to get by the last header row position it will be decremented
-     * by one.
-     *
      * @param index 0 based index for row. Counted from top to bottom
      * @return header row at given index
      */
@@ -2430,11 +2425,6 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * Inserts a new row at the given position to the header section. Shifts the
      * row currently at that position and any subsequent rows down (adds one to
      * their indices).
-     *
-     * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} TOP, the last position is
-     * reserved by header aggregation row. If you will try to add at the last header row position it will be decremented
-     * by one.
      *
      * @param index the position at which to insert the row
      * @return the new row
@@ -2506,9 +2496,6 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
 
     /**
      * Gets the footer row at given index.
-     * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} BOTTOM, so 0 is reserved by
-     * footer aggregation row. If you will try to get footer by 0 it will be incremented by one.
      *
      * @param index 0 based index for row. Counted from top to bottom
      * @return footer row at given index
@@ -2541,9 +2528,6 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * Inserts a new row at the given position to the footer section. Shifts the
      * row currently at that position and any subsequent rows down (adds one to
      * their indices).
-     * <p>
-     * Note, if DataGrid {@link #isAggregatable()} and has {@link #getAggregationPosition()} BOTTOM, 0 is reserved by
-     * footer aggregation row. If you will try to add footer at 0 it will be incremented by one.
      *
      * @param index the position at which to insert the row
      * @return the new row

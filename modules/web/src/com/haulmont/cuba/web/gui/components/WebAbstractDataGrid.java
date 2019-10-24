@@ -177,9 +177,6 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     protected Registration columnResizeListenerRegistration;
     protected Registration contextClickListenerRegistration;
 
-    protected Subscription itemsSizeChangedSubscription;
-    protected Subscription itemChangedSubscription;
-
     protected Document defaultSettings;
 
     protected Registration editorCancelListener;
@@ -858,7 +855,6 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         if (this.dataBinding != null) {
             this.dataBinding.unbind();
             this.dataBinding = null;
-            removeDataBindingListeners();
 
             clearFieldDatasources(null);
 
@@ -876,7 +872,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             // Bind new datasource
             this.dataBinding = createDataGridDataProvider(dataGridItems);
             this.component.setDataProvider(this.dataBinding);
-            addDataBindingListeners();
+            updateAggregationRow();
 
             List<Column<E>> visibleColumnsOrder = getInitialVisibleColumns();
 
@@ -1026,11 +1022,15 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
             }
         }
 
+        updateAggregationRow();
+
         refreshActionsState();
     }
 
     @Override
     public void dataGridSourcePropertyValueChanged(DataGridItems.ValueChangeEvent<E> event) {
+        updateAggregationRow();
+
         refreshActionsState();
     }
 
@@ -2865,7 +2865,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public HeaderRow getHeaderRow(int index) {
-        index = calculateHeaderIndex(index);
+        checkHeaderIndexInRange(index, true);
         return getHeaderRowByGridRow(component.getHeaderRow(index));
     }
 
@@ -2883,7 +2883,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     public HeaderRow appendHeaderRow() {
         boolean isAggregated = isAggregatable() && headerAggregationRow != null;
         return addHeaderRowInternal(isAggregated ?
-                component.addHeaderRowAt(calculateHeaderIndex(headerRows.size())) :
+                component.addHeaderRowAt(headerRows.size() - 1) :
                 component.appendHeaderRow());
     }
 
@@ -2895,20 +2895,20 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public HeaderRow addHeaderRowAt(int index) {
-        index = calculateHeaderIndex(index);
+        checkHeaderIndexInRange(index, false);
         com.vaadin.ui.components.grid.HeaderRow headerRow = component.addHeaderRowAt(index);
         return addHeaderRowInternal(headerRow);
     }
 
-    protected int calculateHeaderIndex(int index) {
+    protected void checkHeaderIndexInRange(int index, boolean includeBounds) {
         if (isAggregatable() && headerAggregationRow != null) {
-            // if the same position as aggregation row
-            if (index == headerRows.size()) {
-                index = index - 1;
-                return Math.max(index, 0);
+            boolean outOfBounds = includeBounds ?
+                    index >= (headerRows.size() - 1) : // for getting row
+                    index > (headerRows.size() - 1); // for adding row
+            if (outOfBounds) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + (headerRows.size() - 1));
             }
         }
-        return index;
     }
 
     protected HeaderRow addHeaderRowInternal(com.vaadin.ui.components.grid.HeaderRow headerRow) {
@@ -2975,7 +2975,7 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         boolean isAggregated = isAggregatable() && footerAggregationRow != null;
         return addFooterRowInternal(isAggregated ?
                 component.addFooterRowAt(1) :
-                component.appendFooterRow());
+                component.prependFooterRow());
     }
 
     @Override
@@ -2987,10 +2987,11 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     protected int calculateFooterIndex(int index) {
         if (isAggregatable() && footerAggregationRow != null) {
-            // if the same position as aggregation row
-            if (index == 0) {
-                return index + 1;
+            int calculated = index + 1;
+            if (calculated <= 0 || calculated > footerRows.size()) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + (footerRows.size() - 1));
             }
+            return calculated;
         }
         return index;
     }
@@ -3118,41 +3119,14 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
         return emptyStateClickEventHandler;
     }
 
-    protected void addDataBindingListeners() {
-        if (dataBinding == null) {
-            return;
-        }
-
+    protected void updateAggregationRow() {
         if (isAggregatable()) {
-            DataGridItems<E> dataGridItems = dataBinding.getDataGridItems();
-            if (dataGridItems != null) {
-                removeDataBindingListeners();
-
-                itemsSizeChangedSubscription = dataGridItems.addItemSetChangeListener(setChangeEvent -> {
-                    Map<String, String> results = __aggregate();
-                    fillAggregationRow(results);
-                });
-                itemChangedSubscription = dataGridItems.addValueChangeListener(itemChangeEvent -> {
-                    Map<String, String> results = __aggregate();
-                    fillAggregationRow(results);
-                });
-            }
-
             if (getItems() instanceof AggregatableDataGridItems) {
                 Map<String, String> results = __aggregate();
                 fillAggregationRow(results);
-            }
-        }
-    }
+            } else {
 
-    protected void removeDataBindingListeners() {
-        if (itemsSizeChangedSubscription != null) {
-            itemsSizeChangedSubscription.remove();
-            itemsSizeChangedSubscription = null;
-        }
-        if (itemChangedSubscription != null) {
-            itemChangedSubscription.remove();
-            itemChangedSubscription = null;
+            }
         }
     }
 
