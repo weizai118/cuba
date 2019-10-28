@@ -2945,7 +2945,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public int getHeaderRowCount() {
-        return component.getHeaderRowCount();
+        boolean isAggregated = isAggregatable() && headerAggregationRow != null;
+        return isAggregated ? headerRows.size() - 1 : headerRows.size();
     }
 
     @Override
@@ -3020,7 +3021,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
 
     @Override
     public int getFooterRowCount() {
-        return component.getFooterRowCount();
+        boolean isAggregated = isAggregatable() && footerAggregationRow != null;
+        return isAggregated ? footerRows.size() - 1 : footerRows.size();
     }
 
     @Nullable

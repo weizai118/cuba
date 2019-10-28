@@ -45,6 +45,7 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
 
+        // Check that aggregation row is added. Note, for public API getHeaderRowCount() will return 1
         when:
         setDataGridItems(dataGrid)
         then:
@@ -80,6 +81,7 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
 
+        // Check that aggregation row is added. Note, for public API getHeaderRowCount() will return 1
         when:
         setDataGridItems(dataGrid)
         then:
@@ -93,6 +95,27 @@ class DataGridAggregationTest extends UiScreenSpec {
         header == addedHeader
     }
 
+    def "header rows size should be independent from aggregation row"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dataGridScreen = screens.create(DataGridAggregationScreen)
+        dataGridScreen.show()
+
+        // Check that aggregation row is added. Note, for public API getHeaderRowCount() will return 1
+        when:
+        def aggregatableDataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregatableHeaderSizesDataGrid")
+        then:
+        aggregatableDataGrid.headerRows.size() == 2
+
+        when:
+        def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("headerSizesDataGrid")
+        then:
+        aggregatableDataGrid.getHeaderRowCount() == dataGrid.getHeaderRowCount()
+    }
+
     def "add footer row at index"() {
         def screens = vaadinUi.screens
 
@@ -104,6 +127,7 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
 
+        // Check that aggregation row is added. Note, for public API getFooterRowCount() will return 0
         when:
         setDataGridItems(dataGrid)
         then:
@@ -139,6 +163,7 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
 
+        // Check that aggregation row is added. Note, for public API getFooterRowCount() will return 0
         when:
         setDataGridItems(dataGrid)
         then:
@@ -150,6 +175,27 @@ class DataGridAggregationTest extends UiScreenSpec {
         def addedFooter = dataGrid.getFooterRow(0)
         then:
         footer == addedFooter
+    }
+
+    def "footer rows size should be independent from aggregation row"() {
+        def screens = vaadinUi.screens
+
+        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
+        screens.show(mainWindow)
+
+        def dataGridScreen = screens.create(DataGridAggregationScreen)
+        dataGridScreen.show()
+
+        // Check that aggregation row is added. Note, for public API getFooterRowCount() will return 0
+        when:
+        def aggregatableDataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregatableFooterSizesDataGrid")
+        then:
+        aggregatableDataGrid.footerRows.size() == 1
+
+        when:
+        def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("footerSizesDataGrid")
+        then:
+        aggregatableDataGrid.getFooterRowCount() == dataGrid.getFooterRowCount()
     }
 
     protected void setDataGridItems(DataGrid dataGrid) {
