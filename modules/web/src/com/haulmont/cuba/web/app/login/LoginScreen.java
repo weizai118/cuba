@@ -106,7 +106,7 @@ public class LoginScreen extends Screen {
 
     @Subscribe
     private void onAfterShow(AfterShowEvent event) {
-        loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
+        doRememberMeLogin();
     }
 
     protected void initPoweredByLink() {
@@ -211,11 +211,19 @@ public class LoginScreen extends Screen {
     public void login() {
         doLogin();
 
+        setRememberMeCookies();
+    }
+
+    protected void setRememberMeCookies() {
         if (Boolean.TRUE.equals(rememberMeCheckBox.getValue())) {
             loginCookies.setRememberMeCookies(loginField.getValue());
         } else {
-            loginCookies.resetRememberCookies();
+            resetRememberCookies();
         }
+    }
+
+    protected void resetRememberCookies() {
+        loginCookies.resetRememberCookies();
     }
 
     protected void doLogin() {
@@ -257,6 +265,10 @@ public class LoginScreen extends Screen {
 
             showUnhandledExceptionOnLogin(e);
         }
+    }
+
+    protected void doRememberMeLogin() {
+        loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
     }
 
     protected void doLogin(Credentials credentials) throws LoginException {

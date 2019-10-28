@@ -130,7 +130,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
     protected void afterShow(AfterShowEvent event) {
         super.afterShow(event);
 
-        loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
+        doRememberMeLogin();
     }
 
     protected void initPoweredByLink() {
@@ -236,11 +236,19 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
     public void login() {
         doLogin();
 
+        setRememberMeCookies();
+    }
+
+    protected void setRememberMeCookies() {
         if (Boolean.TRUE.equals(rememberMeCheckBox.getValue())) {
             loginCookies.setRememberMeCookies(loginField.getValue());
         } else {
-            loginCookies.resetRememberCookies();
+            resetRememberCookies();
         }
+    }
+
+    protected void resetRememberCookies() {
+        loginCookies.resetRememberCookies();
     }
 
     protected void doLogin() {
@@ -287,5 +295,9 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
             ((AbstractClientCredentials) credentials).setOverrideLocale(localesSelect.isVisibleRecursive());
         }
         connection.login(credentials);
+    }
+
+    protected void doRememberMeLogin() {
+        loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
     }
 }
