@@ -36,7 +36,7 @@ public class ComponentArea {
                 "Component's coordinates can't be less than 0: [%s, %s] - [%s, %s]",
                 startColumn, endColumn, startRow, endRow);
         Preconditions.checkArgument(endColumn >= startColumn && endRow >= startRow,
-                "Illegal coordinates for the component: %s !<= %s, %s !<= %s", startColumn, endColumn, startRow, endRow);
+                "Illegal coordinates for the component: %s > %s, %s > %s", startColumn, endColumn, startRow, endRow);
 
         this.component = component;
         this.startColumn = startColumn;
