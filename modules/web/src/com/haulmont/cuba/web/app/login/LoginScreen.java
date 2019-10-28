@@ -28,9 +28,6 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.haulmont.cuba.security.auth.AbstractClientCredentials;
-import com.haulmont.cuba.security.auth.Credentials;
-import com.haulmont.cuba.security.auth.LoginPasswordCredentials;
 import com.haulmont.cuba.security.global.InternalAuthenticationException;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.web.App;
@@ -38,6 +35,7 @@ import com.haulmont.cuba.web.Connection;
 import com.haulmont.cuba.web.WebConfig;
 import com.haulmont.cuba.web.auth.WebAuthConfig;
 import com.haulmont.cuba.web.security.LoginCookies;
+import com.haulmont.cuba.web.security.LoginScreenAuthDelegate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +73,8 @@ public class LoginScreen extends Screen {
     protected Connection connection;
     @Inject
     protected LoginCookies loginCookies;
+    @Inject
+    protected LoginScreenAuthDelegate authDelegate;
 
     @Inject
     protected Image logoImage;
@@ -132,7 +132,7 @@ public class LoginScreen extends Screen {
         localesSelect.addValueChangeListener(e -> {
             app.setLocale(e.getValue());
 
-            AuthInfo authInfo = new AuthInfo(loginField.getValue(),
+            LoginScreenAuthDelegate.AuthInfo authInfo = new LoginScreenAuthDelegate.AuthInfo(loginField.getValue(),
                     passwordField.getValue(),
                     rememberMeCheckBox.getValue());
 
@@ -238,19 +238,7 @@ public class LoginScreen extends Screen {
         }
 
         try {
-            Locale selectedLocale = localesSelect.getValue();
-            app.setLocale(selectedLocale);
-
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
-
-            // locale could be set on the server
-            if (connection.getSession() != null) {
-                Locale loggedInLocale = connection.getSession().getLocale();
-
-                if (globalConfig.getLocaleSelectVisible()) {
-                    app.addCookie(App.COOKIE_LOCALE, loggedInLocale.toLanguageTag());
-                }
-            }
+            authDelegate.doLogin(login, password, localesSelect.getValue(), localesSelect.isVisibleRecursive());
         } catch (InternalAuthenticationException e) {
             log.error("Internal error during login", e);
 
@@ -271,43 +259,11 @@ public class LoginScreen extends Screen {
         loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
     }
 
-    protected void doLogin(Credentials credentials) throws LoginException {
-        if (credentials instanceof AbstractClientCredentials) {
-            ((AbstractClientCredentials) credentials).setOverrideLocale(localesSelect.isVisibleRecursive());
-        }
-        connection.login(credentials);
-    }
-
-    protected void setAuthInfo(AuthInfo authInfo) {
+    protected void setAuthInfo(LoginScreenAuthDelegate.AuthInfo authInfo) {
         loginField.setValue(authInfo.getLogin());
         passwordField.setValue(authInfo.getPassword());
         rememberMeCheckBox.setValue(authInfo.getRememberMe());
 
         localesSelect.focus();
-    }
-
-    public static class AuthInfo {
-
-        protected final String login;
-        protected final String password;
-        protected final Boolean rememberMe;
-
-        public AuthInfo(String login, String password, Boolean rememberMe) {
-            this.login = login;
-            this.password = password;
-            this.rememberMe = rememberMe;
-        }
-
-        public String getLogin() {
-            return login;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public Boolean getRememberMe() {
-            return rememberMe;
-        }
     }
 }

@@ -18,9 +18,6 @@ package com.haulmont.cuba.web.app.loginwindow;
 
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.security.auth.AbstractClientCredentials;
-import com.haulmont.cuba.security.auth.Credentials;
-import com.haulmont.cuba.security.auth.LoginPasswordCredentials;
 import com.haulmont.cuba.security.global.InternalAuthenticationException;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.web.App;
@@ -29,6 +26,7 @@ import com.haulmont.cuba.web.WebConfig;
 import com.haulmont.cuba.web.app.login.LoginScreen;
 import com.haulmont.cuba.web.auth.WebAuthConfig;
 import com.haulmont.cuba.web.security.LoginCookies;
+import com.haulmont.cuba.web.security.LoginScreenAuthDelegate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.Locale;
 import java.util.Map;
-
-import static com.haulmont.cuba.web.App.*;
 
 /**
  * Legacy base class for a controller of application Login window.
@@ -48,31 +44,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
     private static final Logger log = LoggerFactory.getLogger(AppLoginWindow.class);
 
-    protected static final ThreadLocal<AuthInfo> authInfoThreadLocal = new ThreadLocal<>();
-
-    public static class AuthInfo {
-        private String login;
-        private String password;
-        private Boolean rememberMe;
-
-        public AuthInfo(String login, String password, Boolean rememberMe) {
-            this.login = login;
-            this.password = password;
-            this.rememberMe = rememberMe;
-        }
-
-        public String getLogin() {
-            return login;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public Boolean getRememberMe() {
-            return rememberMe;
-        }
-    }
+    protected static final ThreadLocal<LoginScreenAuthDelegate.AuthInfo> authInfoThreadLocal = new ThreadLocal<>();
 
     @Inject
     protected GlobalConfig globalConfig;
@@ -90,7 +62,10 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
     protected Connection connection;
 
     @Inject
-    private LoginCookies loginCookies;
+    protected LoginCookies loginCookies;
+
+    @Inject
+    protected LoginScreenAuthDelegate authDelegate;
 
     @Inject
     protected Image logoImage;
@@ -158,7 +133,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
             app.setLocale(selectedLocale);
 
-            authInfoThreadLocal.set(new AuthInfo(loginField.getValue(), passwordField.getValue(),
+            authInfoThreadLocal.set(new LoginScreenAuthDelegate.AuthInfo(loginField.getValue(), passwordField.getValue(),
                     rememberMeCheckBox.getValue()));
             try {
                 app.createTopLevelWindow();
@@ -192,7 +167,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
     }
 
     protected void initDefaultCredentials() {
-        AuthInfo authInfo = authInfoThreadLocal.get();
+        LoginScreenAuthDelegate.AuthInfo authInfo = authInfoThreadLocal.get();
         if (authInfo != null) {
             loginField.setValue(authInfo.getLogin());
             passwordField.setValue(authInfo.getPassword());
@@ -261,19 +236,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         }
 
         try {
-            Locale selectedLocale = localesSelect.getValue();
-            app.setLocale(selectedLocale);
-
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
-
-            // locale could be set on the server
-            if (connection.getSession() != null) {
-                Locale loggedInLocale = connection.getSession().getLocale();
-
-                if (globalConfig.getLocaleSelectVisible()) {
-                    app.addCookie(App.COOKIE_LOCALE, loggedInLocale.toLanguageTag());
-                }
-            }
+            authDelegate.doLogin(login, password, localesSelect.getValue(), localesSelect.isVisibleRecursive());
         } catch (InternalAuthenticationException e) {
             log.error("Internal error during login", e);
 
@@ -288,13 +251,6 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
             showUnhandledExceptionOnLogin(e);
         }
-    }
-
-    protected void doLogin(Credentials credentials) throws LoginException {
-        if (credentials instanceof AbstractClientCredentials) {
-            ((AbstractClientCredentials) credentials).setOverrideLocale(localesSelect.isVisibleRecursive());
-        }
-        connection.login(credentials);
     }
 
     protected void doRememberMeLogin() {
