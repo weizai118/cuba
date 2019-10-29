@@ -45,9 +45,11 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
 
-        when: "data items are added"
+        when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
-        then: "aggregation row must be added, note, public API getHeaderRowCount() will return 1"
+
+        then: """aggregation row must be added, note, public API getHeaderRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.headerRows.size() == 2
         dataGrid.getHeaderRowCount() == 1
 
@@ -79,9 +81,10 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
 
-        when: "data items are added"
+        when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
-        then: "aggregation row must be added, note, public API getHeaderRowCount() will return 1"
+        then: """aggregation row must be added, note, public API getHeaderRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.headerRows.size() == 2
         dataGrid.getHeaderRowCount() == 1
 
@@ -101,15 +104,17 @@ class DataGridAggregationTest extends UiScreenSpec {
         def dataGridScreen = screens.create(DataGridAggregationScreen)
         dataGridScreen.show()
 
-        when: "getting aggregatable dataGrid"
+        when: "getting a DataGrid with aggregation enabled"
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
-        then: "aggregation row must be added, note, public API getHeaderRowCount() will return 1"
+        then: """aggregation row must be added, note, public API getHeaderRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.headerRows.size() == 2
         dataGrid.getHeaderRowCount() == 1
 
-        when: "setting aggregatable to false"
+        when: "disabling aggregation in a DataGrid"
         dataGrid.setAggregatable(false)
-        then: "aggregation row is removed, public API getFooterRowCount() still return 1 header"
+        then: """aggregation row is removed, public API getHeaderRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.headerRows.size() == 1
         dataGrid.getHeaderRowCount() == 1
     }
@@ -125,9 +130,10 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
 
-        when: "data items are added"
+        when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
-        then: "aggregation row must be added, note, public API getFooterRowCount() will return 0"
+        then: """aggregation row must be added, note, public API getFooterRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.footerRows.size() == 1
         dataGrid.getFooterRowCount() == 0
 
@@ -159,9 +165,10 @@ class DataGridAggregationTest extends UiScreenSpec {
 
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
 
-        when: "data items are added"
+        when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
-        then: "aggregation row must be added, note, public API getFooterRowCount() will return 0"
+        then: """aggregation row must be added, note, public API getFooterRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.footerRows.size() == 1
         dataGrid.getFooterRowCount() == 0
 
@@ -181,15 +188,17 @@ class DataGridAggregationTest extends UiScreenSpec {
         def dataGridScreen = screens.create(DataGridAggregationScreen)
         dataGridScreen.show()
 
-        when: "getting aggregatable dataGrid"
+        when: "getting a DataGrid with aggregation enabled"
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
-        then: "aggregation row must be added, note, public API getFooterRowCount() will return 0"
+        then: """aggregation row must be added, note, public API getFooterRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.footerRows.size() == 1
         dataGrid.getFooterRowCount() == 0
 
-        when: "setting aggregatable to false"
+        when: "disabling aggregation in a DataGrid"
         dataGrid.setAggregatable(false)
-        then: "aggregation row must be removed, public API getFooterRowCount() still return 0"
+        then: """aggregation row must be removed, public API getFooterRowCount() returns a value without regard to
+                 the aggregation row, even though it physically stores it"""
         dataGrid.footerRows.size() == 0
         dataGrid.getFooterRowCount() == 0
     }
