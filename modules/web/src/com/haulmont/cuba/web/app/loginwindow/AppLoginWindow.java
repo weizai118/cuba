@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.app.loginwindow;
 
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.security.auth.Credentials;
 import com.haulmont.cuba.security.global.InternalAuthenticationException;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.web.App;
@@ -251,6 +252,10 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
             showUnhandledExceptionOnLogin(e);
         }
+    }
+
+    protected void doLogin(Credentials credentials) throws LoginException {
+        authDelegate.doLogin(credentials, localesSelect.isVisibleRecursive());
     }
 
     protected void doRememberMeLogin() {

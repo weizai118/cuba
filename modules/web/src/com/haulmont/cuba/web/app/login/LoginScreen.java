@@ -28,6 +28,7 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.auth.Credentials;
 import com.haulmont.cuba.security.global.InternalAuthenticationException;
 import com.haulmont.cuba.security.global.LoginException;
 import com.haulmont.cuba.web.App;
@@ -253,6 +254,10 @@ public class LoginScreen extends Screen {
 
             showUnhandledExceptionOnLogin(e);
         }
+    }
+
+    protected void doLogin(Credentials credentials) throws LoginException {
+        authDelegate.doLogin(credentials, localesSelect.isVisibleRecursive());
     }
 
     protected void doRememberMeLogin() {
