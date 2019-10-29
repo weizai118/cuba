@@ -63,35 +63,5 @@
                 </column>
             </columns>
         </dataGrid>
-
-        <dataGrid id="aggregatableHeaderSizesDataGrid" width="100%" height="100%" aggregatable="true"
-                  dataContainer="goodStatisticDc">
-            <columns>
-                <column property="count">
-                    <aggregation type="SUM"/>
-                </column>
-            </columns>
-        </dataGrid>
-        <dataGrid id="headerSizesDataGrid" width="100%" height="100%" dataContainer="goodStatisticDc">
-            <columns>
-                <column property="count"/>
-            </columns>
-        </dataGrid>
-
-        <dataGrid id="aggregatableFooterSizesDataGrid" width="100%" height="100%" aggregatable="true"
-                  aggregationPosition="BOTTOM"
-                  dataContainer="goodStatisticDc">
-            <columns>
-                <column property="count">
-                    <aggregation type="SUM"/>
-                </column>
-            </columns>
-        </dataGrid>
-        <dataGrid id="footerSizesDataGrid" width="100%" height="100%" aggregationPosition="BOTTOM"
-                  dataContainer="goodStatisticDc">
-            <columns>
-                <column property="count"/>
-            </columns>
-        </dataGrid>
     </layout>
 </window>

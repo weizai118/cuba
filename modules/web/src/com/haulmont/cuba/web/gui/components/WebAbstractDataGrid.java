@@ -3070,6 +3070,8 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     @Override
     public void setAggregatable(boolean aggregatable) {
         component.setAggregatable(aggregatable);
+
+        updateAggregationRow();
     }
 
     @Override
@@ -3119,17 +3121,6 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
     @Override
     public Consumer<EmptyStateClickEvent<E>> getEmptyStateLinkClickHandler() {
         return emptyStateClickEventHandler;
-    }
-
-    protected void updateAggregationRow() {
-        if (isAggregatable()) {
-            if (getItems() instanceof AggregatableDataGridItems) {
-                Map<String, String> results = __aggregate();
-                fillAggregationRow(results);
-            } else {
-
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -3253,6 +3244,30 @@ public abstract class WebAbstractDataGrid<C extends Grid<E> & CubaEnhancedGrid<E
                     }
                 }
                 addFooterRowInternal(footerAggregationRow);
+            }
+        }
+    }
+
+    protected void updateAggregationRow() {
+        boolean isAggregatable = isAggregatable() && getItems() instanceof AggregatableDataGridItems;
+        if (isAggregatable) {
+            Map<String, String> results = __aggregate();
+            fillAggregationRow(results);
+        } else {
+            removeAggregationRow();
+        }
+    }
+
+    protected void removeAggregationRow() {
+        if (getAggregationPosition() == AggregationPosition.TOP) {
+            if (headerAggregationRow != null) {
+                removeHeaderRow(getHeaderRowByGridRow(headerAggregationRow));
+                headerAggregationRow = null;
+            }
+        } else if (getAggregationPosition() == AggregationPosition.BOTTOM) {
+            if (footerAggregationRow != null) {
+                removeFooterRow(getFooterRowByGridRow(footerAggregationRow));
+                footerAggregationRow = null;
             }
         }
     }
