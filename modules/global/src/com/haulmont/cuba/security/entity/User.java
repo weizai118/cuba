@@ -110,7 +110,7 @@ public class User extends StandardEntity implements HasTenant {
     @Column(name = "IP_MASK", length = 200)
     protected String ipMask;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     @Transient

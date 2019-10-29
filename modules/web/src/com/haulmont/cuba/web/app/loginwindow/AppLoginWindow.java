@@ -268,9 +268,6 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
                 User user = session.getUser();
                 String rememberMeToken = userManagementService.generateRememberMeToken(user.getId());
                 app.addCookie(COOKIE_PASSWORD, rememberMeToken, rememberMeExpiration);
-
-                String rememberMeTenantId = user.getTenantId();
-                app.addCookie(COOKIE_TENANT_ID, rememberMeTenantId, rememberMeExpiration);
             } else {
                 resetRememberCookies();
             }
@@ -281,7 +278,6 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         app.removeCookie(COOKIE_REMEMBER_ME);
         app.removeCookie(COOKIE_LOGIN);
         app.removeCookie(COOKIE_PASSWORD);
-        app.removeCookie(COOKIE_TENANT_ID);
     }
 
     protected void doLogin() {
@@ -349,23 +345,19 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         String rememberMeToken = app.getCookieValue(COOKIE_PASSWORD) != null
                 ? app.getCookieValue(COOKIE_PASSWORD) : "";
 
-        String rememberMeTenantId = app.getCookieValue(COOKIE_TENANT_ID) != null
-                ? app.getCookieValue(COOKIE_TENANT_ID) : "";
-
         if (StringUtils.isEmpty(login)
-                || StringUtils.isEmpty(rememberMeToken)
-                || StringUtils.isEmpty(rememberMeTenantId)) {
+                || StringUtils.isEmpty(rememberMeToken)) {
             return;
         }
 
-        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken, rememberMeTenantId);
+        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken);
         if (!tokenValid) {
             resetRememberCookies();
             return;
         }
 
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, null, ParamsMap.of(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, rememberMeTenantId));
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken);
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
             try {
                 connection.login(credentials);

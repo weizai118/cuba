@@ -52,7 +52,7 @@ public class UserSubstitution extends StandardEntity implements HasTenant {
     @Temporal(TemporalType.DATE)
     protected Date endDate;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     public User getUser() {

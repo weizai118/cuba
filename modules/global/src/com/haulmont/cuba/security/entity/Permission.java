@@ -54,7 +54,7 @@ public class Permission extends StandardEntity implements HasTenant {
     @JoinColumn(name = "ROLE_ID")
     private Role role;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     public Role getRole() {

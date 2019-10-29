@@ -62,7 +62,7 @@ public class Group extends StandardEntity implements HasTenant {
     @OnDelete(DeletePolicy.CASCADE)
     private Set<SessionAttribute> sessionAttributes;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     public String getName() {

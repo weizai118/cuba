@@ -47,7 +47,7 @@ public class FileDescriptor extends StandardEntity implements HasTenant {
     @Column(name = "CREATE_DATE")
     private Date createDate;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     /**

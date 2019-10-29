@@ -40,7 +40,7 @@ public class GroupHierarchy extends BaseUuidEntity implements Creatable, HasTena
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

@@ -49,7 +49,7 @@ public class ScreenHistoryEntity extends BaseUuidEntity implements Creatable, Ha
     @Column(name = "CREATED_BY", length = 50)
     protected String createdBy;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     @ManyToOne(fetch = FetchType.LAZY)

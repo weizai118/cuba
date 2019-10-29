@@ -48,7 +48,7 @@ create table SYS_FILE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     NAME varchar(500) not null,
     EXT varchar(20),
@@ -100,7 +100,7 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     BEAN_NAME varchar(50),
     METHOD_NAME varchar(50),
@@ -134,7 +134,7 @@ create table SYS_SCHEDULED_EXECUTION (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     TASK_ID varchar(36),
     SERVER varchar(512),
@@ -160,7 +160,7 @@ create table SEC_ROLE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     LOC_NAME varchar(255),
@@ -197,7 +197,7 @@ create table SEC_GROUP (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     PARENT_ID varchar(36),
@@ -214,7 +214,7 @@ create table SEC_GROUP_HIERARCHY (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     GROUP_ID varchar(36),
     PARENT_ID varchar(36),
@@ -236,7 +236,7 @@ create table SEC_USER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     LOGIN varchar(50) not null,
     LOGIN_LC varchar(50) not null,
@@ -272,7 +272,7 @@ create table SEC_USER_ROLE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     USER_ID varchar(36),
     ROLE_ID varchar(36),
@@ -294,7 +294,7 @@ create table SEC_PERMISSION (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     PERMISSION_TYPE integer,
     TARGET varchar(100),
@@ -317,7 +317,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     CODE varchar(255),
     CHECK_TYPE varchar(50) default 'db',
@@ -345,7 +345,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     ENTITY_NAME varchar(255) not null,
     OPERATION_TYPE varchar(50) not null,
@@ -368,7 +368,7 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     NAME varchar(50),
     STR_VALUE varchar(1000),
@@ -407,7 +407,7 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     USER_ID varchar(36) not null,
     SUBSTITUTED_USER_ID varchar(36) not null,
@@ -456,7 +456,7 @@ create table SEC_ENTITY_LOG (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     EVENT_TS timestamp,
     USER_ID varchar(36),
@@ -484,7 +484,7 @@ create table SEC_FILTER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -508,7 +508,7 @@ create table SYS_FOLDER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     FOLDER_TYPE char(1),
     PARENT_ID varchar(36),
@@ -523,8 +523,6 @@ create table SYS_FOLDER (
 ------------------------------------------------------------------------------------------------------------
 
 create table SYS_APP_FOLDER (
-    TENANT_ID varchar(255),
-    --
     FOLDER_ID varchar(36) not null,
     FILTER_COMPONENT varchar(200),
     FILTER_XML varchar(7000),
@@ -544,7 +542,7 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar(50),
     UPDATE_TS timestamp,
     UPDATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -559,8 +557,6 @@ create table SEC_PRESENTATION (
 ------------------------------------------------------------------------------------------------------------
 
 create table SEC_SEARCH_FOLDER (
-    TENANT_ID varchar(255),
-    --
     FOLDER_ID varchar(36) not null,
     FILTER_COMPONENT varchar(200),
     FILTER_XML varchar(7000),
@@ -606,7 +602,7 @@ create table SEC_SCREEN_HISTORY (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     USER_ID varchar(36),
     CAPTION varchar(255),
@@ -635,7 +631,7 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     ADDRESS_TO longvarchar,
     ADDRESS_CC longvarchar,
@@ -667,7 +663,7 @@ create table SYS_SENDING_ATTACHMENT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     MESSAGE_ID varchar(36),
     CONTENT longvarbinary,
@@ -693,7 +689,7 @@ create table SYS_ENTITY_SNAPSHOT (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     ENTITY_META_CLASS varchar(50),
     ENTITY_ID varchar(36),
@@ -881,7 +877,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
-    TENANT_ID varchar(255),
+    CUBA_TENANT_ID varchar(255),
     --
     SESSION_ID varchar(36) not null,
     SUBSTITUTED_USER_ID varchar(36),

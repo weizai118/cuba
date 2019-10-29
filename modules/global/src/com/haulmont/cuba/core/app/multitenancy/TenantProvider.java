@@ -31,7 +31,7 @@ public interface TenantProvider {
     /**
      * Constant attribute user session for global visibility of all objects, regardless of the value of tenant.
      */
-    String TENANT_ADMIN = "tenant_admin";
+    String NO_TENANT = "no_tenant";
 
     /**
      * Provides the current tenant id for save to user session.

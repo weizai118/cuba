@@ -110,7 +110,7 @@ public interface UserManagementService {
      *
      * @return true if token is valid or false otherwise
      */
-    boolean isRememberMeTokenValid(String login, String rememberMeToken, String tenantId);
+    boolean isRememberMeTokenValid(String login, String rememberMeToken);
 
     /**
      * Generate and store to DB {@link com.haulmont.cuba.security.entity.RememberMeToken}

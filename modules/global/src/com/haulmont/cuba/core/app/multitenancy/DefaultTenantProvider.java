@@ -26,6 +26,6 @@ public class DefaultTenantProvider implements TenantProvider {
 
     @Override
     public String getTenantId() {
-        return TENANT_ADMIN;
+        return NO_TENANT;
     }
 }

@@ -316,8 +316,8 @@ public class UserManagementServiceBean implements UserManagementService {
     }
 
     @Override
-    public boolean isRememberMeTokenValid(String login, String rememberMeToken, String tenantId) {
-        RememberMeToken token = loadRememberMeToken(login, rememberMeToken, tenantId);
+    public boolean isRememberMeTokenValid(String login, String rememberMeToken) {
+        RememberMeToken token = loadRememberMeToken(login, rememberMeToken);
         if (token == null) {
             log.debug("Remember me token '{}' is not found. Consider it as not valid", rememberMeToken);
             return false;
@@ -735,18 +735,16 @@ public class UserManagementServiceBean implements UserManagementService {
     }
 
     @Nullable
-    protected RememberMeToken loadRememberMeToken(String login, String rememberMeToken, String tenantId) {
+    protected RememberMeToken loadRememberMeToken(String login, String rememberMeToken) {
         RememberMeToken token;
         try (Transaction tx = persistence.createTransaction()) {
             EntityManager em = persistence.getEntityManager();
 
             TypedQuery<RememberMeToken> query = em.createQuery(
-                    "select rt from sec$RememberMeToken rt " +
-                            "where (:tenantId is null or rt.tenantId = :tenantId) and rt.token = :token and rt.user.login = :userLogin",
+                    "select rt from sec$RememberMeToken rt where rt.token = :token and rt.user.login = :userLogin",
                     RememberMeToken.class);
             query.setParameter("token", rememberMeToken);
             query.setParameter("userLogin", login);
-            query.setParameter("tenantId", tenantId);
 
             token = query.getFirstResult();
 

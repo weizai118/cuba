@@ -63,7 +63,7 @@ public class Presentation extends BaseUuidEntity implements Creatable, Updatable
     @Column(name = "UPDATED_BY", length = 50)
     protected String updatedBy;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     @Transient

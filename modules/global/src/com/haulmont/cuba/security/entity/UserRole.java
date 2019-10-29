@@ -44,7 +44,7 @@ public class UserRole extends StandardEntity implements HasTenant {
     @OnDeleteInverse(DeletePolicy.CASCADE)
     private Role role;
 
-    @Column(name = "TENANT_ID")
+    @Column(name = "CUBA_TENANT_ID")
     protected String tenantId;
 
     public User getUser() {
