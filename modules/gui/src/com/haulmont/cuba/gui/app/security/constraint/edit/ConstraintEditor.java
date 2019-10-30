@@ -86,6 +86,8 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
     @Inject
     protected Button testConstraint;
     @Inject
+    protected LinkButton wizard;
+    @Inject
     protected Button windowCommit;
     @Inject
     protected GridLayout grid;
@@ -400,9 +402,13 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
     }
 
     protected void restrictAccessForPredefinedGroup() {
-        windowCommit.setVisible(false);
-        testConstraint.setVisible(false);
-        grid.setEnabled(false);
+        setReadOnly(true);
+        testConstraint.setEnabled(false);
+        whereClause.setEnabled(false);
+        joinClause.setEnabled(false);
+        groovyScript.setEnabled(false);
+        wizard.setEnabled(false);
+
         showNotification(getMessage("predefinedGroupIsUnchangeable"));
     }
 }

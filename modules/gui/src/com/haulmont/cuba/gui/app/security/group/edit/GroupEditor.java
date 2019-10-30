@@ -33,9 +33,6 @@ public class GroupEditor extends AbstractEditor<Group> {
     protected PickerField<Group> parentField;
     @Named("fieldGroup.name")
     protected TextField<String> nameField;
-    @Inject
-    protected Button windowCommit;
-
 
     @Override
     protected void postInit() {
@@ -47,13 +44,7 @@ public class GroupEditor extends AbstractEditor<Group> {
             parentField.addAction(lookupAction);
         }
         if (group.isPredefined()) {
-            restrictAccessForPredefinedGroup();
+            setReadOnly(true);
         }
-    }
-
-    protected void restrictAccessForPredefinedGroup() {
-        windowCommit.setVisible(false);
-        parentField.setEditable(false);
-        nameField.setEditable(false);
     }
 }

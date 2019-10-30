@@ -67,7 +67,8 @@ public class SessionAttributeEditor extends AbstractEditor<SessionAttribute> {
     protected void postInit() {
         super.postInit();
         if (getItem().isPredefined()) {
-            restrictAccessForPredefinedGroup();
+            setReadOnly(true);
+            showNotification(getMessage("predefinedGroupIsUnchangeable"));
         }
     }
 
@@ -85,11 +86,5 @@ public class SessionAttributeEditor extends AbstractEditor<SessionAttribute> {
             }
         }
         super.commitAndClose();
-    }
-
-    protected void restrictAccessForPredefinedGroup() {
-        windowCommit.setVisible(false);
-        fields.setEditable(false);
-        showNotification(getMessage("predefinedGroupIsUnchangeable"));
     }
 }
