@@ -585,7 +585,6 @@ create table SYS_FTS_QUEUE (
     ID uuid,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
-    --
     ENTITY_ID uuid,
     STRING_ENTITY_ID varchar(255),
     INT_ENTITY_ID integer,
@@ -871,7 +870,6 @@ create sequence SYS_QUERY_RESULT_SEQ
 
 create table SYS_QUERY_RESULT (
     ID bigint not null default nextval('SYS_QUERY_RESULT_SEQ'),
-    --
 	SESSION_ID uuid not null,
 	QUERY_KEY integer not null,
 	ENTITY_ID uuid,

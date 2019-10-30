@@ -28,6 +28,7 @@ import java.util.List;
 
 /**
  * Entity to store information about sending emails.
+ *
  */
 @Entity(name = "sys$SendingMessage")
 @Table(name = "SYS_SENDING_MESSAGE")

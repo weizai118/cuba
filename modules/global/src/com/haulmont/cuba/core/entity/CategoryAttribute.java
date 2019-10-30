@@ -35,8 +35,8 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.Entity;
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Entity(name = "sys$CategoryAttribute")
@@ -78,10 +78,10 @@ public class CategoryAttribute extends StandardEntity {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "entityId", column = @Column(name = "DEFAULT_ENTITY_VALUE")),
-            @AttributeOverride(name = "stringEntityId", column = @Column(name = "DEFAULT_STR_ENTITY_VALUE")),
-            @AttributeOverride(name = "intEntityId", column = @Column(name = "DEFAULT_INT_ENTITY_VALUE")),
-            @AttributeOverride(name = "longEntityId", column = @Column(name = "DEFAULT_LONG_ENTITY_VALUE"))
+            @AttributeOverride(name="entityId", column=@Column(name="DEFAULT_ENTITY_VALUE")),
+            @AttributeOverride(name="stringEntityId", column=@Column(name="DEFAULT_STR_ENTITY_VALUE")),
+            @AttributeOverride(name="intEntityId", column=@Column(name="DEFAULT_INT_ENTITY_VALUE")),
+            @AttributeOverride(name="longEntityId", column=@Column(name="DEFAULT_LONG_ENTITY_VALUE"))
     })
     @EmbeddedParameters(nullAllowed = false)
     private ReferenceToEntity defaultEntity;

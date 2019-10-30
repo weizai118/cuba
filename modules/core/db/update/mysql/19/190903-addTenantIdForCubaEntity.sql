@@ -24,5 +24,3 @@ alter table SEC_SESSION_LOG add CUBA_TENANT_ID varchar(255)^
 drop index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER^
 
 create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, CUBA_TENANT_ID, DELETE_TS_NN)^
-
-

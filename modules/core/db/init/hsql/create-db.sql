@@ -822,7 +822,6 @@ alter table SYS_ATTR_VALUE add constraint SYS_ATTR_VALUE_ATTR_VALUE_PARENT_ID fo
 
 create table SYS_QUERY_RESULT (
     ID identity not null,
-    --
     SESSION_ID varchar(36) not null,
     QUERY_KEY integer not null,
     ENTITY_ID varchar(36),

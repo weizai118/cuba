@@ -19,8 +19,8 @@ package com.haulmont.cuba.core.entity;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.cuba.core.entity.annotation.UnavailableInSecurityConstraints;
 
-import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Column;
 import javax.persistence.Version;
 import java.util.Date;
 

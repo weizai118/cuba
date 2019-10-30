@@ -164,7 +164,6 @@ public class EclipseLinkSessionEventListener extends SessionEventAdapter {
                 }
             }
         }
-
         logCheckResult(wrongFetchTypes, missingEnhancements);
     }
 

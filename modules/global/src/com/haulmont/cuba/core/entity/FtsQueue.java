@@ -146,7 +146,8 @@ public class FtsQueue extends BaseUuidEntity implements Creatable {
             } else {
                 setIntEntityId((Integer) realId);
             }
-        } else if (objectEntityId == null) {
+        }
+        else if (objectEntityId == null) {
             setEntityId(null);
             setLongEntityId(null);
             setIntEntityId(null);

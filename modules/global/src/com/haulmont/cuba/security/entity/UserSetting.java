@@ -27,6 +27,7 @@ import java.util.Date;
 /**
  * Record for user setting.
  * Used by <code>UserSettingServiceBean</code>.
+ *
  */
 @Entity(name = "sec$UserSetting")
 @Table(name = "SEC_USER_SETTING")

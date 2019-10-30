@@ -18,6 +18,7 @@ package com.haulmont.cuba.gui.components;
 
 import com.haulmont.chile.core.datatypes.FormatStringsRegistry;
 import com.haulmont.cuba.client.testsupport.CubaClientTestCase;
+import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.AbstractComponentTestCase.TestValueBinder;
@@ -55,6 +56,8 @@ public class FieldGroupTest extends CubaClientTestCase {
     protected BackgroundWorker backgroundWorker;
     @Mocked
     protected ApplicationContext applicationContext;
+    @Mocked
+    protected TenantProvider tenantProvider;
     @Mocked
     protected AutowireCapableBeanFactory beanFactory;
     @Mocked

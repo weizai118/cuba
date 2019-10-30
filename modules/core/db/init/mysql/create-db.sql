@@ -4,7 +4,6 @@ create table SYS_SERVER (
     CREATED_BY varchar(50),
     UPDATE_TS datetime(3),
     UPDATED_BY varchar(50),
-    --
     NAME varchar(190),
     IS_RUNNING boolean,
     DATA text,
@@ -908,7 +907,6 @@ create table SYS_JMX_INSTANCE (
 
 create table SYS_QUERY_RESULT (
     ID bigint auto_increment not null,
-    --
     SESSION_ID varchar(32) not null,
     QUERY_KEY integer not null,
     ENTITY_ID varchar(32),

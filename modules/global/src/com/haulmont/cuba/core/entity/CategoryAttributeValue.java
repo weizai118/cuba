@@ -20,10 +20,7 @@ package com.haulmont.cuba.core.entity;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.DeletePolicy;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.core.global.ReferenceToEntitySupport;
+import com.haulmont.cuba.core.global.*;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
@@ -31,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @javax.persistence.Entity(name = "sys$CategoryAttributeValue")
 @Table(name = "SYS_ATTR_VALUE")

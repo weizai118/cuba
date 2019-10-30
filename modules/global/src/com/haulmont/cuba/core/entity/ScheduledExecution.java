@@ -26,7 +26,6 @@ import java.util.Date;
 
 /**
  * Entity that reflects the fact of a {@link ScheduledTask} execution.
- *
  */
 @Entity(name = "sys$ScheduledExecution")
 @Table(name = "SYS_SCHEDULED_EXECUTION")
@@ -82,12 +81,12 @@ public class ScheduledExecution extends BaseUuidEntity implements Creatable, Has
 
     @Override
     public String getTenantId() {
-        return null;
+        return tenantId;
     }
 
     @Override
     public void setTenantId(String tenantId) {
-
+        this.tenantId = tenantId;
     }
 
     public ScheduledTask getTask() {

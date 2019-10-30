@@ -142,9 +142,9 @@ public class ScheduledTask extends BaseUuidEntity implements Creatable, Updatabl
     protected String description;
 
     //the following field is part of private API, please do not use it
-
     @Transient
     protected volatile long currentStartTimestamp;
+
     @Override
     public Date getCreateTs() {
         return createTs;

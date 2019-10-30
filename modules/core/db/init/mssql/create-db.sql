@@ -893,7 +893,6 @@ create table SYS_JMX_INSTANCE (
 
 create table SYS_QUERY_RESULT (
     ID bigint identity not null,
-    --
     SESSION_ID uniqueidentifier not null,
     QUERY_KEY integer not null,
     ENTITY_ID uniqueidentifier,

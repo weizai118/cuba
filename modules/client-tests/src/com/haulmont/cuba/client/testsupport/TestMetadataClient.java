@@ -17,6 +17,7 @@
 
 package com.haulmont.cuba.client.testsupport;
 
+import com.haulmont.cuba.core.app.multitenancy.DefaultTenantProvider;
 import com.haulmont.cuba.core.global.ExtendedEntities;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.sys.DatatypeRegistryImpl;
@@ -39,7 +40,7 @@ public class TestMetadataClient extends MetadataImpl {
         extendedEntities = new ExtendedEntities(this);
         tools = new TestMetadataTools(this);
         datatypeRegistry = new DatatypeRegistryImpl();
-
+        tenantProvider = new DefaultTenantProvider();
         config = globalConfig;
     }
 

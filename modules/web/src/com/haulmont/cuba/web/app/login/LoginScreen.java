@@ -16,9 +16,7 @@
 
 package com.haulmont.cuba.web.app.login;
 
-import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.bali.util.URLEncodeUtils;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
@@ -26,7 +24,12 @@ import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.app.UserManagementService;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
 import com.haulmont.cuba.security.auth.Credentials;

@@ -18,7 +18,11 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.datatypes.impl.EnumClass;
-import com.haulmont.cuba.core.entity.*;
+import com.haulmont.cuba.core.entity.BaseDbGeneratedIdEntity;
+import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import com.haulmont.cuba.core.entity.Creatable;
+import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.ReferenceToEntity;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.entity.annotation.Listeners;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
