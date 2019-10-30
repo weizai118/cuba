@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.app.group.annotation;
+package com.haulmont.cuba.security.group;
 
-import java.lang.annotation.*;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
- * Defines custom in-memory constraint for the access group.
- *
- * <p>Example:
- *
- * <pre>
- *     &#064;CustomConstraint("constraintCode")
- *     public boolean userConstraints(User user) {
- *          return Boolean.TRUE.equals(user.getActive());
- *     }
- * </pre>
- *
- * @see AccessGroup
+ * Represents set of constraints
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@Repeatable(CustomConstraintContainer.class)
-public @interface CustomConstraint {
+public interface SetOfAccessConstraints {
+
     /**
-     * Custom constraint code
+     * @return entity names for the corresponding access constraints set
      */
-    String value();
+    Set<String> getEntityTypes();
+
+    /**
+     * @return all access constraints for the specified entity type from constraints set
+     */
+    Stream<AccessConstraint> findConstraintsByEntity(String entityName);
+
+    /**
+     * @return true is set contains access constraints
+     */
+    boolean exists();
 }
 

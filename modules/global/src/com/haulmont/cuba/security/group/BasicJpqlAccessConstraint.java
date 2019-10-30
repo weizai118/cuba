@@ -16,23 +16,27 @@
 
 package com.haulmont.cuba.security.group;
 
-import com.haulmont.chile.core.model.MetaClass;
-import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.security.entity.EntityOp;
+public class BasicJpqlAccessConstraint extends BasicAccessConstraint implements JpqlAccessConstraint {
+    private static final long serialVersionUID = -4894897562097123345L;
 
-import java.util.function.Predicate;
+    protected String where;
+    protected String join;
 
-public interface EntityConstraint {
+    @Override
+    public String getWhere() {
+        return where;
+    }
 
-    MetaClass getEntityType();
+    @Override
+    public String getJoin() {
+        return join;
+    }
 
-    EntityOp getOperation();
+    public void setWhere(String where) {
+        this.where = where;
+    }
 
-    Predicate<? extends Entity> getPredicate();
-
-    boolean isInMemory();
-
-    boolean isCustom();
-
-    String getCode();
+    public void setJoin(String join) {
+        this.join = join;
+    }
 }

@@ -18,9 +18,6 @@
 package com.haulmont.cuba.core.sys;
 
 import com.google.common.collect.Streams;
-import com.haulmont.chile.core.datatypes.Datatype;
-import com.haulmont.chile.core.datatypes.Datatypes;
-import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.core.entity.*;
@@ -29,26 +26,19 @@ import com.haulmont.cuba.security.entity.ConstraintOperationType;
 import com.haulmont.cuba.security.entity.EntityAttrAccess;
 import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.entity.PermissionType;
-import com.haulmont.cuba.security.global.ConstraintData;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.security.group.EntityConstraint;
+import com.haulmont.cuba.security.group.AccessConstraint;
 import com.haulmont.cuba.security.group.PersistenceSecurityService;
-import com.haulmont.cuba.security.group.SetOfEntityConstraints;
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.groovy.runtime.MethodClosure;
+import com.haulmont.cuba.security.group.SetOfAccessConstraints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.text.ParseException;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.haulmont.cuba.security.entity.ConstraintOperationType.ALL;
-import static com.haulmont.cuba.security.entity.ConstraintOperationType.CUSTOM;
 import static java.lang.String.format;
 
 @Component(Security.NAME)
@@ -174,26 +164,12 @@ public class SecurityImpl implements Security {
             }
         }
         return true;
-//        return isPermitted(entity,
-//                constraint -> {
-//                    ConstraintOperationType operationType = constraint.getOperationType();
-//                    return constraint.getCheckType().memory()
-//                            && (
-//                            (targetOperationType == ALL && operationType != CUSTOM)
-//                                    || operationType == targetOperationType
-//                                    || operationType == ALL
-//                    );
-//                });
     }
 
     @Override
     public boolean isPermitted(Entity entity, String customCode) {
         return persistenceSecurityService.isPermitted(entity, customCode);
-//        return isPermitted(entity,
-//                constraint -> customCode.equals(constraint.getCode()) && constraint.getCheckType().memory());
     }
-
-
 
     @Override
     public boolean hasConstraints(MetaClass metaClass) {
@@ -215,70 +191,16 @@ public class SecurityImpl implements Security {
         return persistenceSecurityService.evaluateConstraintScript(entity, groovyScript);
     }
 
-    protected Stream<EntityConstraint> getConstraints(MetaClass metaClass) {
+    protected Stream<AccessConstraint> getConstraints(MetaClass metaClass) {
         UserSession userSession = userSessionSource.getUserSession();
         MetaClass mainMetaClass = extendedEntities.getOriginalOrThisMetaClass(metaClass);
 
-        SetOfEntityConstraints setOfConstraints = userSession.getConstraints();
+        SetOfAccessConstraints setOfConstraints = userSession.getConstraints();
 
-        Stream<EntityConstraint> constraints = setOfConstraints.findConstraintsByEntity(mainMetaClass.getName());
+        Stream<AccessConstraint> constraints = setOfConstraints.findConstraintsByEntity(mainMetaClass.getName());
         for (MetaClass parent : mainMetaClass.getAncestors()) {
             constraints = Streams.concat(constraints, setOfConstraints.findConstraintsByEntity(parent.getName()));
         }
         return constraints;
-    }
-
-
-    //TODO: refactor it
-    @Override
-    public Object evaluateConstraintScript(Entity entity, String groovyScript) {
-        Map<String, Object> context = new HashMap<>();
-        context.put("__entity__", entity);
-        context.put("parse", new MethodClosure(this, "parseValue"));
-        context.put("userSession", userSessionSource.getUserSession());
-        fillGroovyConstraintsContext(context);
-        return scripting.evaluateGroovy(groovyScript.replace("{E}", "__entity__"), context);
-    }
-
-    /**
-     * Override if you need specific context variables in Groovy constraints.
-     *
-     * @param context passed to Groovy evaluator
-     */
-    protected void fillGroovyConstraintsContext(Map<String, Object> context) {
-    }
-
-    @SuppressWarnings("unused")
-    protected Object parseValue(Class<?> clazz, String string) {
-        try {
-            if (Entity.class.isAssignableFrom(clazz)) {
-                Object entity = metadata.create(clazz);
-                if (entity instanceof BaseIntegerIdEntity) {
-                    ((BaseIntegerIdEntity) entity).setId(Integer.valueOf(string));
-                } else if (entity instanceof BaseLongIdEntity) {
-                    ((BaseLongIdEntity) entity).setId(Long.valueOf(string));
-                } else if (entity instanceof BaseStringIdEntity) {
-                    ((BaseStringIdEntity) entity).setId(string);
-                } else if (entity instanceof BaseIdentityIdEntity) {
-                    ((BaseIdentityIdEntity) entity).setId(IdProxy.of(Long.valueOf(string)));
-                } else if (entity instanceof BaseIntIdentityIdEntity) {
-                    ((BaseIntIdentityIdEntity) entity).setId(IdProxy.of(Integer.valueOf(string)));
-                } else if (entity instanceof HasUuid) {
-                    ((HasUuid) entity).setUuid(UUID.fromString(string));
-                }
-                return entity;
-            } else if (EnumClass.class.isAssignableFrom(clazz)) {
-                //noinspection unchecked
-                Enum parsedEnum = Enum.valueOf((Class<Enum>) clazz, string);
-                return parsedEnum;
-            } else {
-                Datatype datatype = Datatypes.get(clazz);
-                return datatype != null ? datatype.parse(string) : string;
-            }
-        } catch (ParseException | IllegalArgumentException e) {
-            log.error("Could not parse a value in constraint. Class [{}], value [{}].", clazz, string, e);
-            throw new RowLevelSecurityException(format("Could not parse a value in constraint. Class [%s], value [%s]. " +
-                    "See the log for details.", clazz, string), null);
-        }
     }
 }

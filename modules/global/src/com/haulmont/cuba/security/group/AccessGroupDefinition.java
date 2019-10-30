@@ -16,25 +16,31 @@
 
 package com.haulmont.cuba.security.group;
 
-public class BasicJpqlEntityConstraint extends BasicEntityConstraint implements JpqlEntityConstraint {
-    protected String where;
-    protected String join;
+import java.io.Serializable;
+import java.util.Map;
 
-    @Override
-    public String getWhere() {
-        return where;
-    }
+/**
+ * Represents access group with constraints and session attributes
+ */
+public interface AccessGroupDefinition {
 
-    @Override
-    public String getJoin() {
-        return join;
-    }
+    /**
+     * @return access group name
+     */
+    String getName();
 
-    public void setWhere(String where) {
-        this.where = where;
-    }
+    /**
+     * @return parent access group
+     */
+    String getParent();
 
-    public void setJoin(String join) {
-        this.join = join;
-    }
+    /**
+     * @return set of constraints for the access group
+     */
+    SetOfAccessConstraints accessConstraints();
+
+    /**
+     * @return session attributes
+     */
+    Map<String, Serializable> sessionAttributes();
 }

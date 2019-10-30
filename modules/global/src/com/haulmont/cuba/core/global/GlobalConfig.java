@@ -286,8 +286,16 @@ public interface GlobalConfig extends Config {
     @Factory(factory = SecurityStorageModeFactory.class)
     SecurityStorageMode getRolesStorageMode();
 
-    @Property("cuba.groupsStorageMode")
+    /**
+     * Defines the source from which access groups are used in the application. There are 3 possible values:
+     * DATABASE - only access groups from a database (sec$Group) will be used;
+     * SOURCE_CODE - only access groups defined in the source code will be used;
+     * MIXED - mixed mode, both sources will be used. If there are access groups with equal names in the database and in
+     * the source code, access group from database will be used.
+     * Application uses mixed mode by default.
+     */
+    @Property("cuba.accessGroupsStorageMode")
     @Default("MIXED")
     @Factory(factory = SecurityStorageModeFactory.class)
-    SecurityStorageMode getGroupsStorageMode();
+    SecurityStorageMode getAccessGroupsStorageMode();
 }

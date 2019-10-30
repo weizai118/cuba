@@ -60,13 +60,22 @@ public interface UserManagementService {
     Role copyRole(String predefinedRoleName);
 
     /**
-     * Move specified users to a new access group.
+     * Move specified users to a new database access group.
      *
      * @param userIds             Ids for moved users
      * @param targetAccessGroupId Id of target access group, may be null
      * @return Number of users moved to target group
      */
     Integer moveUsersToGroup(List<UUID> userIds, @Nullable UUID targetAccessGroupId);
+
+    /**
+     * Move specified users to a new predefined access group.
+     *
+     * @param userIds             Ids for moved users
+     * @param targetAccessGroupName target access group name
+     * @return Number of users moved to target group
+     */
+    Integer moveUsersToGroup(List<UUID> userIds, @Nullable String targetAccessGroupName);
 
     /**
      * Update passwords for specified users, send them emails with new generated passwords and make them change

@@ -34,7 +34,7 @@ import com.haulmont.cuba.core.sys.jpql.JpqlSyntaxException;
 import com.haulmont.cuba.security.entity.ConstraintOperationType;
 import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.security.group.JpqlEntityConstraint;
+import com.haulmont.cuba.security.group.JpqlAccessConstraint;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
@@ -78,9 +78,9 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         QueryParser parser = QueryTransformerFactory.createParser(query.getQueryString());
         String entityName = parser.getEntityName();
 
-        List<JpqlEntityConstraint> constraints = getConstraints(metadata.getClassNN(entityName))
-                .filter(c -> c instanceof JpqlEntityConstraint && c.getOperation() == EntityOp.READ)
-                .map(JpqlEntityConstraint.class::cast)
+        List<JpqlAccessConstraint> constraints = getConstraints(metadata.getClassNN(entityName))
+                .filter(c -> c instanceof JpqlAccessConstraint && c.getOperation() == EntityOp.READ)
+                .map(JpqlAccessConstraint.class::cast)
                 .collect(Collectors.toList());
 
         if (constraints.isEmpty())
@@ -88,7 +88,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
 
         QueryTransformer transformer = QueryTransformerFactory.createTransformer(query.getQueryString());
 
-        for (JpqlEntityConstraint constraint : constraints) {
+        for (JpqlAccessConstraint constraint : constraints) {
             processConstraint(transformer, constraint, entityName);
         }
         query.setQueryString(transformer.getResult());
@@ -275,7 +275,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         }
     }
 
-    protected void processConstraint(QueryTransformer transformer, JpqlEntityConstraint constraint, String entityName) {
+    protected void processConstraint(QueryTransformer transformer, JpqlAccessConstraint constraint, String entityName) {
         String join = constraint.getJoin();
         String where = constraint.getWhere();
         try {
@@ -452,7 +452,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
     protected Object parseValue(Class<?> clazz, String string) {
         try {
             if (Entity.class.isAssignableFrom(clazz)) {
-                Object entity = metadata.create(clazz);
+                Object entity = metadata.create((Class<Entity>)clazz);
                 if (entity instanceof BaseIntegerIdEntity) {
                     ((BaseIntegerIdEntity) entity).setId(Integer.valueOf(string));
                 } else if (entity instanceof BaseLongIdEntity) {

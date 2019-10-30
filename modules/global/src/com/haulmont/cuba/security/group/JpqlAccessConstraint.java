@@ -16,9 +16,17 @@
 
 package com.haulmont.cuba.security.group;
 
-public interface JpqlEntityConstraint extends EntityConstraint {
-
+/**
+ * Represents JPQL READ access constraint
+ */
+public interface JpqlAccessConstraint extends AccessConstraint {
+    /**
+     * @return JPQL where clause
+     */
     String getWhere();
 
+    /**
+     * @return JPQL join clause
+     */
     String getJoin();
 }

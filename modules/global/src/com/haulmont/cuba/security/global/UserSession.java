@@ -19,9 +19,8 @@ package com.haulmont.cuba.security.global;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.sys.UserInvocationContext;
 import com.haulmont.cuba.security.entity.*;
-import com.haulmont.cuba.security.group.BasicSetOfEntityConstraints;
-import com.haulmont.cuba.security.group.GroupDef;
-import com.haulmont.cuba.security.group.SetOfEntityConstraints;
+import com.haulmont.cuba.security.group.BasicSetOfAccessConstraints;
+import com.haulmont.cuba.security.group.SetOfAccessConstraints;
 import com.haulmont.cuba.security.role.BasicUserRoleDef;
 import com.haulmont.cuba.security.role.Permissions;
 import com.haulmont.cuba.security.role.PermissionsUtils;
@@ -35,8 +34,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Class that encapsulates an active user session.
@@ -61,7 +58,7 @@ public class UserSession implements Serializable {
     protected boolean system;
 
     protected RoleDef effectiveRole;
-    protected SetOfEntityConstraints setOfEntityConstraints;
+    protected SetOfAccessConstraints setOfAccessConstraints;
 
     protected Map<String, Serializable> attributes;
 
@@ -96,7 +93,7 @@ public class UserSession implements Serializable {
         effectiveRole = new BasicUserRoleDef();
         roleTypes.add(effectiveRole.getRoleType());
 
-        setOfEntityConstraints = new BasicSetOfEntityConstraints();
+        setOfAccessConstraints = new BasicSetOfAccessConstraints();
 
         attributes = new ConcurrentHashMap<>();
         localAttributes = new ConcurrentHashMap<>();
@@ -123,7 +120,7 @@ public class UserSession implements Serializable {
         locale = src.locale;
         timeZone = src.timeZone;
         effectiveRole = src.effectiveRole;
-        setOfEntityConstraints = src.setOfEntityConstraints;
+        setOfAccessConstraints = src.setOfAccessConstraints;
         attributes = src.attributes;
         roleTypes = src.roleTypes;
         localAttributes = src.localAttributes;
@@ -552,12 +549,12 @@ public class UserSession implements Serializable {
         this.effectiveRole = effectiveRole;
     }
 
-    public SetOfEntityConstraints getConstraints() {
-        return setOfEntityConstraints;
+    public SetOfAccessConstraints getConstraints() {
+        return setOfAccessConstraints;
     }
 
-    public void setSetOfEntityConstraints(SetOfEntityConstraints constraints) {
-        this.setOfEntityConstraints = constraints;
+    public void setSetOfAccessConstraints(SetOfAccessConstraints constraints) {
+        this.setOfAccessConstraints = constraints;
     }
 
     @Override

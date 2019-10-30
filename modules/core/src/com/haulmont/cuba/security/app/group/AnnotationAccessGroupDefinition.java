@@ -16,29 +16,34 @@
 
 package com.haulmont.cuba.security.app.group;
 
-import com.haulmont.cuba.security.group.GroupDef;
-import com.haulmont.cuba.security.group.SetOfEntityConstraints;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
+import com.haulmont.cuba.security.group.SetOfAccessConstraints;
 
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Map;
 
-public abstract class AnnotationGroupDef implements GroupDef {
+public abstract class AnnotationAccessGroupDefinition implements AccessGroupDefinition {
     @Inject
-    protected AnnotationGroupDefBuilder annotationGroupDefBuilder;
+    protected AnnotationGroupDefinitionBuilder annotationGroupDefinitionBuilder;
 
     @Override
     public String getName() {
-        return annotationGroupDefBuilder.getNameFromAnnotation(this);
+        return annotationGroupDefinitionBuilder.getNameFromAnnotation(this);
     }
 
     @Override
-    public SetOfEntityConstraints entityConstraints() {
-        return annotationGroupDefBuilder.buildSetOfEntityConstraints(this);
+    public String getParent() {
+        return annotationGroupDefinitionBuilder.getParentFromAnnotation(this);
     }
 
     @Override
-    public Map<String, Serializable> getSessionAttributes() {
-        return annotationGroupDefBuilder.buildSessionAttributes(this);
+    public SetOfAccessConstraints accessConstraints() {
+        return annotationGroupDefinitionBuilder.buildSetOfEntityConstraints(this);
+    }
+
+    @Override
+    public Map<String, Serializable> sessionAttributes() {
+        return annotationGroupDefinitionBuilder.buildSessionAttributes(this);
     }
 }

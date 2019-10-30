@@ -19,20 +19,20 @@ package com.haulmont.cuba.security.app.group;
 import com.google.common.base.Strings;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
-import com.haulmont.chile.core.datatypes.Datatypes;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.security.entity.Constraint;
-import com.haulmont.cuba.security.entity.ConstraintOperationType;
 import com.haulmont.cuba.security.entity.EntityOp;
+import com.haulmont.cuba.security.entity.Group;
 import com.haulmont.cuba.security.entity.SessionAttribute;
-import com.haulmont.cuba.security.group.GroupDef;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.GroupIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component(GroupsRepository.NAME)
-public class BasicGroupsRepository implements GroupsRepository {
+public class GroupsRepositoryImpl implements GroupsRepository {
     @Inject
     protected Persistence persistence;
 
@@ -59,25 +59,25 @@ public class BasicGroupsRepository implements GroupsRepository {
     @Inject
     protected GlobalConfig config;
 
-    @Inject
-    protected List<GroupDef> groupDefinitions;
+    @Autowired(required = false)
+    protected List<AccessGroupDefinition> groupDefinitions;
 
-    protected Map<String, GroupDef> groupDefinitionsByName;
+    protected Map<String, AccessGroupDefinition> groupDefinitionsByName;
 
-    private final Logger log = LoggerFactory.getLogger(BasicGroupsRepository.class);
+    private final Logger log = LoggerFactory.getLogger(GroupsRepositoryImpl.class);
 
     @PostConstruct
     protected void init() {
         groupDefinitionsByName = new ConcurrentHashMap<>();
         if (groupDefinitions != null) {
-            for (GroupDef groupDefinition : groupDefinitions) {
+            for (AccessGroupDefinition groupDefinition : groupDefinitions) {
                 groupDefinitionsByName.put(groupDefinition.getName(), groupDefinition);
             }
         }
     }
 
     @Override
-    public GroupDef getGroupDefinition(GroupIdentifier identifier) {
+    public AccessGroupDefinition getGroupDefinition(GroupIdentifier identifier) {
         if (identifier.getDbId() != null) {
             return getGroupDefinitionFromDB(identifier.getDbId());
         } else if (identifier.getGroupName() != null) {
@@ -87,29 +87,41 @@ public class BasicGroupsRepository implements GroupsRepository {
     }
 
     @Override
-    public void registerGroup(GroupDef groupDef) {
-        groupDefinitionsByName.put(groupDef.getName(), groupDef);
+    public Collection<AccessGroupDefinition> getGroupDefinitions() {
+        return Collections.unmodifiableCollection(groupDefinitionsByName.values());
     }
 
-    protected GroupDef getGroupDefinitionFromAnnotations(String groupName) {
-        GroupDef groupDefinition = groupDefinitionsByName.get(groupName);
+    @Override
+    public void registerGroupDefinition(AccessGroupDefinition groupDefinition) {
+        groupDefinitionsByName.put(groupDefinition.getName(), groupDefinition);
+    }
+
+    protected AccessGroupDefinition getGroupDefinitionFromAnnotations(String groupName) {
+        AccessGroupDefinition groupDefinition = groupDefinitionsByName.get(groupName);
         if (groupDefinition == null) {
             throw new IllegalStateException(String.format("Unable to find predefined group definition %s", groupName));
         }
         return groupDefinition;
     }
 
-    protected GroupDef getGroupDefinitionFromDB(UUID groupId) {
+    protected AccessGroupDefinition getGroupDefinitionFromDB(UUID groupId) {
         return persistence.callInTransaction(em -> {
-            GroupDefBuilder groupDefBuilder = GroupDefBuilder.create();
+            AccessGroupDefinitionBuilder groupDefinitionBuilder = AccessGroupDefinitionBuilder.create();
 
-            List<Constraint> constraints = em.createQuery("select c from sec$GroupHierarchy h join h.parent.constraints c " +
+            Group group = em.find(Group.class, groupId);
+
+            //noinspection ConstantConditions
+            List<Constraint> constraints = new ArrayList<>(group.getConstraints());
+
+            List<Constraint> parentConstraints = em.createQuery("select c from sec$GroupHierarchy h join h.parent.constraints c " +
                     "where h.group.id = ?1", Constraint.class)
                     .setParameter(1, groupId)
                     .getResultList();
 
+            constraints.addAll(parentConstraints);
+
             for (Constraint constraint : constraints) {
-                processConstraints(constraint, groupDefBuilder);
+                processConstraints(constraint, groupDefinitionBuilder);
             }
 
             List<SessionAttribute> attributes = em.createQuery("select a from sec$GroupHierarchy h join h.parent.sessionAttributes a " +
@@ -125,7 +137,7 @@ public class BasicGroupsRepository implements GroupsRepository {
                         log.warn("Duplicate definition of '{}' session attribute in the group hierarchy", attribute.getName());
                     }
 
-                    groupDefBuilder.withSessionAttribute(attribute.getName(), (Serializable) datatype.parse(attribute.getStringValue()));
+                    groupDefinitionBuilder.withSessionAttribute(attribute.getName(), (Serializable) datatype.parse(attribute.getStringValue()));
 
                     attributeKeys.add(attribute.getName());
                 } catch (ParseException e) {
@@ -133,21 +145,21 @@ public class BasicGroupsRepository implements GroupsRepository {
                 }
             }
 
-            return groupDefBuilder.build();
+            return groupDefinitionBuilder.build();
         });
     }
 
-    protected void processConstraints(Constraint constraint, GroupDefBuilder groupDefBuilder) {
+    protected void processConstraints(Constraint constraint, AccessGroupDefinitionBuilder groupDefinitionBuilder) {
         if (Boolean.TRUE.equals(constraint.getIsActive())) {
             Class<? extends Entity> targetClass = metadata.getClassNN(constraint.getEntityName()).getJavaClass();
             for (EntityOp operation : constraint.getOperationType().toEntityOps()) {
 
                 if (EntityOp.READ == operation && !Strings.isNullOrEmpty(constraint.getWhereClause())) {
-                    groupDefBuilder.withJpqlConstraint(targetClass, constraint.getWhereClause(), constraint.getJoinClause());
+                    groupDefinitionBuilder.withJpqlConstraint(targetClass, constraint.getWhereClause(), constraint.getJoinClause());
                 }
 
                 if (!Strings.isNullOrEmpty(constraint.getGroovyScript())) {
-                    groupDefBuilder.withGroovyConstraint(targetClass, operation, constraint.getGroovyScript());
+                    groupDefinitionBuilder.withGroovyConstraint(targetClass, operation, constraint.getGroovyScript());
                 }
 
             }

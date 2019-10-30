@@ -17,22 +17,23 @@
 package com.haulmont.cuba.security.group;
 
 import com.google.common.base.Strings;
-import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.security.entity.EntityOp;
 
 import java.io.Serializable;
 import java.util.function.Predicate;
 
-public class BasicEntityConstraint implements EntityConstraint, Serializable {
-    protected MetaClass entityType;
+public class BasicAccessConstraint implements AccessConstraint, Serializable {
+    private static final long serialVersionUID = -7454318989839542865L;
+
+    protected String entityType;
     protected EntityOp operation;
     protected String code;
     protected boolean inMemory;
     protected transient Predicate predicate;
 
     @Override
-    public MetaClass getEntityType() {
+    public String getEntityType() {
         return entityType;
     }
 
@@ -46,7 +47,7 @@ public class BasicEntityConstraint implements EntityConstraint, Serializable {
         return predicate;
     }
 
-    public void setEntityType(MetaClass entityType) {
+    public void setEntityType(String entityType) {
         this.entityType = entityType;
     }
 
@@ -61,7 +62,7 @@ public class BasicEntityConstraint implements EntityConstraint, Serializable {
 
     @Override
     public boolean isInMemory() {
-        return false;
+        return inMemory;
     }
 
     @Override

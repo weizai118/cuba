@@ -17,20 +17,18 @@
 package com.haulmont.cuba.security.app.group;
 
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.security.app.group.annotation.Constraint;
-import com.haulmont.cuba.security.app.group.annotation.Group;
+import com.haulmont.cuba.security.app.group.annotation.AccessGroup;
 import com.haulmont.cuba.security.app.group.annotation.JpqlConstraint;
 import com.haulmont.cuba.security.app.group.annotation.SessionAttribute;
 import com.haulmont.cuba.security.entity.EntityOp;
-import com.haulmont.cuba.security.group.GroupDef;
-import com.haulmont.cuba.security.group.SetOfEntityConstraints;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
+import com.haulmont.cuba.security.group.SetOfAccessConstraints;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -43,13 +41,13 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-@Component(AnnotationGroupDefBuilder.NAME)
-public class AnnotationGroupDefBuilder {
+@Component(AnnotationGroupDefinitionBuilder.NAME)
+public class AnnotationGroupDefinitionBuilder {
 
-    public static final String NAME = "cuba_AnnotationGroupDefBuilder";
+    public static final String NAME = "cuba_AnnotationGroupDefinitionBuilder";
 
     @Inject
     protected MetadataTools metadataTools;
@@ -57,11 +55,9 @@ public class AnnotationGroupDefBuilder {
     @Inject
     protected DatatypeRegistry datatypes;
 
-    protected Map<Class<? extends Annotation>, AnnotationProcessor> processors;
+    protected Map<Class<? extends Annotation>, AnnotationProcessor> processors = new HashMap<>();
 
-    protected Cache<Method, Predicate<? extends Entity>> predicateCache;
-
-    protected static final Set<String> FILTERED_METHOD_NAMES = ImmutableSet.of("getName", "getSessionAttributes");
+    protected static final Set<String> FILTERED_METHOD_NAMES = ImmutableSet.of("getName", "sessionAttributes");
 
     protected interface AnnotationProcessor<T extends AnnotationContext> {
         void processAnnotation(T annotationContext);
@@ -71,11 +67,15 @@ public class AnnotationGroupDefBuilder {
         protected Annotation annotation;
         protected Method method;
         protected Class ownerClass;
+        protected AccessGroupDefinition owner;
 
-        public AnnotationContext(Annotation annotation, Method method, Class ownerClass) {
+        public AnnotationContext(Annotation annotation,
+                                 Method method,
+                                 AccessGroupDefinition owner) {
             this.annotation = annotation;
             this.method = method;
-            this.ownerClass = ownerClass;
+            this.owner = owner;
+            this.ownerClass = owner.getClass();
         }
 
         public Annotation getAnnotation() {
@@ -89,26 +89,43 @@ public class AnnotationGroupDefBuilder {
         public Class getOwnerClass() {
             return ownerClass;
         }
+
+        public AccessGroupDefinition getOwner() {
+            return owner;
+        }
     }
 
     protected class ConstraintsAnnotationContext extends AnnotationContext {
         protected AccessConstraintsBuilder constraintsBuilder;
+        protected Map<Method, Predicate<Entity>> predicateCache;
 
-        public ConstraintsAnnotationContext(Annotation annotation, Method method, Class groupClass, AccessConstraintsBuilder constraintsBuilder) {
-            super(annotation, method, groupClass);
+        public ConstraintsAnnotationContext(Annotation annotation,
+                                            Method method,
+                                            AccessGroupDefinition owner,
+                                            AccessConstraintsBuilder constraintsBuilder,
+                                            Map<Method, Predicate<Entity>> predicateCache) {
+            super(annotation, method, owner);
             this.constraintsBuilder = constraintsBuilder;
+            this.predicateCache = predicateCache;
         }
 
         public AccessConstraintsBuilder getConstraintsBuilder() {
             return constraintsBuilder;
+        }
+
+        public Map<Method, Predicate<Entity>> getPredicateCache() {
+            return predicateCache;
         }
     }
 
     protected class SessionAttributesContext extends AnnotationContext {
         Map<String, Serializable> sessionAttributes;
 
-        public SessionAttributesContext(Annotation annotation, Method method, Class ownerClass, Map<String, Serializable> sessionAttributes) {
-            super(annotation, method, ownerClass);
+        public SessionAttributesContext(Annotation annotation,
+                                        Method method,
+                                        AccessGroupDefinition owner,
+                                        Map<String, Serializable> sessionAttributes) {
+            super(annotation, method, owner);
             this.sessionAttributes = sessionAttributes;
         }
 
@@ -122,25 +139,30 @@ public class AnnotationGroupDefBuilder {
         registerAnnotationProcessor(JpqlConstraint.class, new JpqlAnnotationProcessor());
         registerAnnotationProcessor(Constraint.class, new ConstraintAnnotationProcessor());
         registerAnnotationProcessor(SessionAttribute.class, new SessionAttributesAnnotationProcessor());
-
-        predicateCache = CacheBuilder.newBuilder().maximumSize(100).build();
     }
 
-    public String getNameFromAnnotation(GroupDef group) {
+    public String getNameFromAnnotation(AccessGroupDefinition group) {
         return getGroupAnnotationNN(group.getClass()).name();
     }
 
-    public SetOfEntityConstraints buildSetOfEntityConstraints(GroupDef group) {
-        Class<? extends GroupDef> clazz = group.getClass();
+    public String getParentFromAnnotation(AccessGroupDefinition group) {
+        return getGroupAnnotationNN(group.getClass()).parent();
+    }
+
+    public SetOfAccessConstraints buildSetOfEntityConstraints(AccessGroupDefinition group) {
+        Class<? extends AccessGroupDefinition> clazz = group.getClass();
 
         AccessConstraintsBuilder constraintsBuilder = AccessConstraintsBuilder.create();
+        Map<Method, Predicate<Entity>> predicateCache = new HashMap<>();
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (isConstraintMethod(method)) {
-                for (Annotation annotation : method.getDeclaredAnnotations()) {
-                    AnnotationProcessor<ConstraintsAnnotationContext> processor = findAnnotationProcessor(annotation);
-                    if (processor != null) {
-                        processor.processAnnotation(new ConstraintsAnnotationContext(annotation, method, clazz, constraintsBuilder));
+                for (Class<? extends Annotation> annotationType : getAvailableAnnotationTypes()) {
+                    for (Annotation annotation : method.getAnnotationsByType(annotationType)) {
+                        AnnotationProcessor<ConstraintsAnnotationContext> processor = findAnnotationProcessor(annotationType);
+                        if (processor != null) {
+                            processor.processAnnotation(new ConstraintsAnnotationContext(annotation, method, group, constraintsBuilder, predicateCache));
+                        }
                     }
                 }
             }
@@ -149,17 +171,19 @@ public class AnnotationGroupDefBuilder {
         return constraintsBuilder.build();
     }
 
-    public Map<String, Serializable> buildSessionAttributes(GroupDef group) {
-        Class<? extends GroupDef> clazz = group.getClass();
+    public Map<String, Serializable> buildSessionAttributes(AccessGroupDefinition group) {
+        Class<? extends AccessGroupDefinition> clazz = group.getClass();
 
         Map<String, Serializable> sessionAttributes = new HashMap<>();
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (isSessionAttributesMethod(method)) {
-                for (Annotation annotation : method.getDeclaredAnnotations()) {
-                    AnnotationProcessor<SessionAttributesContext> processor = findAnnotationProcessor(annotation);
-                    if (processor != null) {
-                        processor.processAnnotation(new SessionAttributesContext(annotation, method, clazz, sessionAttributes));
+                for (Class<? extends Annotation> annotationType : getAvailableAnnotationTypes()) {
+                    for (Annotation annotation : method.getAnnotationsByType(annotationType)) {
+                        AnnotationProcessor<SessionAttributesContext> processor = findAnnotationProcessor(annotationType);
+                        if (processor != null) {
+                            processor.processAnnotation(new SessionAttributesContext(annotation, method, group, sessionAttributes));
+                        }
                     }
                 }
             }
@@ -168,9 +192,13 @@ public class AnnotationGroupDefBuilder {
         return sessionAttributes;
     }
 
-    protected <T extends AnnotationContext> AnnotationProcessor<T> findAnnotationProcessor(Annotation annotation) {
+    protected <T extends AnnotationContext> AnnotationProcessor<T> findAnnotationProcessor(Class<? extends Annotation> annotationType) {
         //noinspection unchecked
-        return (AnnotationProcessor<T>) processors.get(annotation.getClass());
+        return (AnnotationProcessor<T>) processors.get(annotationType);
+    }
+
+    protected Set<Class<? extends Annotation>> getAvailableAnnotationTypes() {
+        return processors.keySet();
     }
 
     protected void registerAnnotationProcessor(Class<? extends Annotation> annotation, AnnotationProcessor processor) {
@@ -182,15 +210,11 @@ public class AnnotationGroupDefBuilder {
     }
 
     protected boolean isSessionAttributesMethod(Method method) {
-        return "getSessionAttributes".equals(method.getName());
+        return "sessionAttributes".equals(method.getName());
     }
 
-    protected Class<? extends GroupDef> getParentFromAnnotation(Class<? extends GroupDef> clazz) {
-        return getGroupAnnotationNN(clazz).parent();
-    }
-
-    protected Group getGroupAnnotationNN(Class<? extends GroupDef> clazz) {
-        Group annotation = clazz.getAnnotation(Group.class);
+    protected AccessGroup getGroupAnnotationNN(Class<? extends AccessGroupDefinition> clazz) {
+        AccessGroup annotation = clazz.getAnnotation(AccessGroup.class);
         if (annotation == null) {
             throw new IllegalStateException("The class must have @Group annotation.");
         }
@@ -219,7 +243,7 @@ public class AnnotationGroupDefBuilder {
             Class<? extends Entity> targetClass = resolveTargetClass(context.getMethod());
             if (!Entity.class.equals(targetClass)) {
                 for (EntityOp operation : constraint.operations()) {
-                    context.getConstraintsBuilder().withInMemory(targetClass, operation, createConstraintPredicate(context.getMethod(), context.getOwnerClass()));
+                    context.getConstraintsBuilder().withInMemory(targetClass, operation, createConstraintPredicate(context));
                 }
             }
         }
@@ -252,28 +276,24 @@ public class AnnotationGroupDefBuilder {
                 String.format("Method [%s] must have only one parameter with Entity argument", method.getName()));
     }
 
-    protected Predicate<? extends Entity> createConstraintPredicate(Method method, Class clazz) {
-        try {
-            return predicateCache.get(method, () -> {
-                Predicate<? extends Entity> result;
-                try {
-                    MethodHandles.Lookup caller = MethodHandles.lookup();
-                    CallSite site = LambdaMetafactory.metafactory(caller,
-                            "test",
-                            MethodType.methodType(Predicate.class),
-                            MethodType.methodType(boolean.class, Object.class),
-                            caller.findVirtual(clazz, method.getName(), MethodType.methodType(method.getReturnType())),
-                            MethodType.methodType(method.getReturnType(), clazz));
-                    MethodHandle factory = site.getTarget();
-                    //noinspection unchecked
-                    result = (Predicate<? extends Entity>) factory.invoke();
-                } catch (Throwable e) {
-                    throw new IllegalStateException("Can't create in-memory constraint predicate", e);
-                }
-                return result;
-            });
-        } catch (ExecutionException e) {
-            throw new IllegalStateException("Can't create in-memory constraint predicate", e);
-        }
+    protected Predicate<Entity> createConstraintPredicate(ConstraintsAnnotationContext context) {
+        return context.getPredicateCache().computeIfAbsent(context.getMethod(), method -> {
+            try {
+                Class argType = method.getParameterTypes()[0];
+                MethodHandles.Lookup caller = MethodHandles.lookup();
+                CallSite site = LambdaMetafactory.metafactory(caller,
+                        "test",
+                        MethodType.methodType(BiPredicate.class),
+                        MethodType.methodType(boolean.class, Object.class, Object.class),
+                        caller.findVirtual(context.getOwnerClass(), method.getName(), MethodType.methodType(method.getReturnType(), argType)),
+                        MethodType.methodType(boolean.class, context.getOwnerClass(), argType));
+                MethodHandle factory = site.getTarget();
+                //noinspection unchecked
+                BiPredicate<AccessGroupDefinition, Entity> result = (BiPredicate<AccessGroupDefinition, Entity>) factory.invoke();
+                return entity -> result.test(context.getOwner(), entity);
+            } catch (Throwable e) {
+                throw new IllegalStateException("Can't create in-memory constraint predicate", e);
+            }
+        });
     }
 }

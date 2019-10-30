@@ -16,24 +16,13 @@
 
 package com.haulmont.cuba.security.app.group.annotation;
 
-import com.haulmont.cuba.security.group.GroupDef;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface Group {
-
-    String name();
-
-    Class<? extends GroupDef> parent() default GroupDef.class;
-
-    @AliasFor(annotation = Component.class)
-    String value() default "";
+@Target(ElementType.METHOD)
+public @interface CustomConstraintContainer {
+    CustomConstraint[] value();
 }

@@ -20,6 +20,11 @@ import com.google.common.base.MoreObjects;
 
 import java.util.UUID;
 
+/**
+ * Group identifier.
+ * UUID identifier - for DB access groups
+ * String group name - for annotation bases access groups
+ */
 public class GroupIdentifier {
     protected String groupName;
     protected UUID dbId;

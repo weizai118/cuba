@@ -33,7 +33,7 @@ import com.haulmont.cuba.security.app.role.RolesRepository;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.global.NoUserSessionException;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.security.group.GroupDef;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.GroupIdentifier;
 import com.haulmont.cuba.security.role.PermissionsUtils;
 import com.haulmont.cuba.security.role.RoleDef;
@@ -116,10 +116,10 @@ public class UserSessionManager {
         UserSession session = new UserSession(sessionId, user, roles, locale, system);
         compilePermissions(session, roles);
 
-        if (user.getGroup() == null || Strings.isNullOrEmpty(user.getGroupNames())) {
+        if (user.getGroup() == null && Strings.isNullOrEmpty(user.getGroupNames())) {
             throw new IllegalStateException("User is not in a Group");
         }
-        GroupDef groupDefinition = compileGroupDefinition(user.getGroup(), user.getGroupNames());
+        AccessGroupDefinition groupDefinition = compileGroupDefinition(user.getGroup(), user.getGroupNames());
         compileConstraints(session, groupDefinition);
         compileSessionAttributes(session, groupDefinition);
 
@@ -143,11 +143,11 @@ public class UserSessionManager {
         }
         UserSession session = new UserSession(src, user, roles, src.getLocale());
         compilePermissions(session, roles);
-        if (user.getGroup() == null || Strings.isNullOrEmpty(user.getGroupNames())) {
+        if (user.getGroup() == null && Strings.isNullOrEmpty(user.getGroupNames())) {
             throw new IllegalStateException("User is not in a Group");
         }
 
-        GroupDef groupDefinition = compileGroupDefinition(user.getGroup(), user.getGroupNames());
+        AccessGroupDefinition groupDefinition = compileGroupDefinition(user.getGroup(), user.getGroupNames());
         compileConstraints(session, groupDefinition);
         compileSessionAttributes(session, groupDefinition);
 
@@ -192,8 +192,8 @@ public class UserSessionManager {
         return null;
     }
 
-    protected GroupDef compileGroupDefinition(Group group, String groupName) {
-        GroupDef groupDefinition;
+    protected AccessGroupDefinition compileGroupDefinition(Group group, String groupName) {
+        AccessGroupDefinition groupDefinition;
         if (group != null) {
             groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withDbId(group.getId()));
         } else {
@@ -202,12 +202,12 @@ public class UserSessionManager {
         return groupDefinition;
     }
 
-    protected void compileConstraints(UserSession session, GroupDef groupDefinition) {
-        session.setSetOfEntityConstraints(groupDefinition.entityConstraints());
+    protected void compileConstraints(UserSession session, AccessGroupDefinition groupDefinition) {
+        session.setSetOfAccessConstraints(groupDefinition.accessConstraints());
     }
 
-    protected void compileSessionAttributes(UserSession session, GroupDef groupDefinition) {
-        Map<String, Serializable> sessionAttributes = groupDefinition.getSessionAttributes();
+    protected void compileSessionAttributes(UserSession session, AccessGroupDefinition groupDefinition) {
+        Map<String, Serializable> sessionAttributes = groupDefinition.sessionAttributes();
 
         for (Map.Entry<String, Serializable> entry : sessionAttributes.entrySet()) {
             if (entry.getValue() != null) {

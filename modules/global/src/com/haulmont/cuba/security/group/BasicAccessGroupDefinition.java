@@ -20,9 +20,10 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
-public class BasicGroupDef implements GroupDef {
+public class BasicAccessGroupDefinition implements AccessGroupDefinition {
     protected String name;
-    protected SetOfEntityConstraints entityConstraints;
+    protected String parent;
+    protected SetOfAccessConstraints entityConstraints;
     protected Map<String, Serializable> sessionAttributes;
 
     @Override
@@ -35,17 +36,26 @@ public class BasicGroupDef implements GroupDef {
     }
 
     @Override
-    public SetOfEntityConstraints entityConstraints() {
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public SetOfAccessConstraints accessConstraints() {
         return entityConstraints;
     }
 
-    public void setEntityConstraints(SetOfEntityConstraints entityConstraints) {
+    public void setEntityConstraints(SetOfAccessConstraints entityConstraints) {
         this.entityConstraints = entityConstraints;
     }
 
     @Override
-    public Map<String, Serializable> getSessionAttributes() {
-        return Collections.unmodifiableMap(sessionAttributes);
+    public Map<String, Serializable> sessionAttributes() {
+        return sessionAttributes == null ? Collections.emptyMap() : Collections.unmodifiableMap(sessionAttributes);
     }
 
     public void setSessionAttributes(Map<String, Serializable> sessionAttributes) {

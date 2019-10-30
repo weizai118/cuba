@@ -16,19 +16,29 @@
 
 package com.haulmont.cuba.security.app.group;
 
-import com.haulmont.cuba.security.group.GroupDef;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.GroupIdentifier;
+
+import java.util.Collection;
 
 public interface GroupsRepository {
     String NAME = "cuba_GroupsRepository";
 
-    GroupDef getGroupDefinition(GroupIdentifier groupDefId);
+    /**
+     * @return group definition by specified group identifier
+     */
+    AccessGroupDefinition getGroupDefinition(GroupIdentifier groupDefId);
 
     /**
-     * Allows you to register a group created using the {@link GroupDefBuilder}.
+     * @return all annotation based group definitions
+     */
+    Collection<AccessGroupDefinition> getGroupDefinitions();
+
+    /**
+     * Allows you to register an access group created using the {@link AccessGroupDefinitionBuilder}.
      * This method should be invoked during application startup.
      *
-     * @param groupDef group to register
+     * @param groupDefinition group to register
      */
-    void registerGroup(GroupDef groupDef);
+    void registerGroupDefinition(AccessGroupDefinition groupDefinition);
 }

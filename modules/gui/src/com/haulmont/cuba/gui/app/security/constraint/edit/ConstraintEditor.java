@@ -83,28 +83,25 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
     protected LookupField<ConstraintOperationType> operationType;
     @Inject
     protected LookupField<ConstraintCheckType> type;
-
+    @Inject
+    protected Button testConstraint;
+    @Inject
+    protected Button windowCommit;
+    @Inject
+    protected GridLayout grid;
     @Inject
     protected Datasource<Constraint> constraint;
 
     @Inject
     protected Metadata metadata;
-
     @Inject
     protected ExtendedEntities extendedEntities;
-
-    @Inject
-    protected Button testConstraint;
-
     @Inject
     protected WindowConfig windowConfig;
-
     @Inject
     protected UserManagementService userManagementService;
-
     @Inject
     protected Security security;
-
     @Inject
     protected Dom4jTools dom4JTools;
 
@@ -151,6 +148,10 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
 
         String groupInstanceName = metadata.getTools().getInstanceName(getItem().getGroup());
         setCaption(formatMessage("caption", groupInstanceName));
+
+        if (getItem().isPredefined()) {
+            restrictAccessForPredefinedGroup();
+        }
     }
 
     protected void setupVisibility() {
@@ -389,12 +390,19 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
                         constraintScriptValidationService.evaluateConstraintScript(metadata.create(entityName), constraint.getGroovyScript());
                 if (result.isCompilationFailedException()) {
                     showMessageDialog(getMessage("notification.error"),
-                                formatMessage("notification.scriptCompilationError", result.getErrorMessage()), MessageType.WARNING_HTML);
+                            formatMessage("notification.scriptCompilationError", result.getErrorMessage()), MessageType.WARNING_HTML);
                     return;
                 }
             }
         }
 
         showNotification(getMessage("notification.success"), NotificationType.HUMANIZED);
+    }
+
+    protected void restrictAccessForPredefinedGroup() {
+        windowCommit.setVisible(false);
+        testConstraint.setVisible(false);
+        grid.setEnabled(false);
+        showNotification(getMessage("predefinedGroupIsUnchangeable"));
     }
 }

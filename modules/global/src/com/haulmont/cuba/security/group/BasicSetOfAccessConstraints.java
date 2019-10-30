@@ -20,26 +20,37 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
-public class BasicSetOfEntityConstraints implements SetOfEntityConstraints, Serializable {
-    protected Map<String, List<EntityConstraint>> constraints;
+public class BasicSetOfAccessConstraints implements SetOfAccessConstraints, Serializable {
+    private static final long serialVersionUID = 2265242471010129743L;
+
+    protected Map<String, List<AccessConstraint>> constraints;
 
     @Override
-    public Stream<EntityConstraint> findConstraintsByEntity(String entityName) {
-        List<EntityConstraint> result = constraints.get(entityName);
+    public Set<String> getEntityTypes() {
+        return constraints ==  null ? Collections.emptySet() : constraints.keySet();
+    }
+
+    @Override
+    public Stream<AccessConstraint> findConstraintsByEntity(String entityName) {
+        if (constraints == null) {
+            return Stream.empty();
+        }
+        List<AccessConstraint> result = constraints.get(entityName);
         return result != null ? result.stream() : Stream.empty();
     }
 
     public boolean exists() {
-        return !constraints.isEmpty();
+        return constraints != null && !constraints.isEmpty();
     }
 
-    public Map<String, List<EntityConstraint>> getConstraints() {
+    public Map<String, List<AccessConstraint>> getConstraints() {
         return constraints;
     }
 
-    public void setConstraints(Map<String, List<EntityConstraint>> constraints) {
+    public void setConstraints(Map<String, List<AccessConstraint>> constraints) {
         this.constraints = constraints;
     }
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.security.group;
+package com.haulmont.cuba.security.app.group.annotation;
 
-import java.util.stream.Stream;
+import java.lang.annotation.*;
 
-public interface SetOfEntityConstraints {
-    Stream<EntityConstraint> findConstraintsByEntity(String entityName);
-
-    boolean exists();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface SessionAttributeContainer {
+    SessionAttribute[] value();
 }
-

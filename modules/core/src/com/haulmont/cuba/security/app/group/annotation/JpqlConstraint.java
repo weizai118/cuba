@@ -21,17 +21,43 @@ import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines database READ constraint.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;JpqlConstraint(target = User.class, where = "{E}.active = true")
+ *     &#064;Override
+ *     public SetOfAccessConstraints accessConstraints() {
+ *          return super.entityAccess();
+ *     }
+ * </pre>
+ *
+ * @see AccessGroup
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Repeatable(JpqlConstraintContainer.class)
 public @interface JpqlConstraint {
+
+    /**
+     * Constraint entity class.
+     * If target class isn't specified, uses entity class from the in-memory constraint method
+     */
     Class<? extends Entity> target() default Entity.class;
 
     @AliasFor("where")
     String value() default "";
 
+    /**
+     * JPQL where clause
+     */
     @AliasFor("value")
     String where() default "";
 
+    /**
+     * JPQL join clause
+     */
     String join() default "";
 }

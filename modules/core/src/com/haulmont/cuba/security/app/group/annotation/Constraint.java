@@ -16,15 +16,31 @@
 
 package com.haulmont.cuba.security.app.group.annotation;
 
-import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.security.entity.EntityOp;
 
 import java.lang.annotation.*;
 
+/**
+ * Defines in-memory constraint for CRUD operation.
+ * Uses entity class from the in-memory constraint method
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;Constraint(operations = {EntityOp.UPDATE, EntityOp.DELETE})
+ *     public boolean userConstraints(User user) {
+ *          return Boolean.TRUE.equals(user.getActive());
+ *     }
+ * </pre>
+ *
+ * @see AccessGroup
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Repeatable(ConstraintContainer.class)
 public @interface Constraint {
+    /**
+     * CRUD operations for in-memory constraint
+     */
     EntityOp[] operations() default {};
 }
 

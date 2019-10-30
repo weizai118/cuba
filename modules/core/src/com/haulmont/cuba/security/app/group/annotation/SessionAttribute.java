@@ -16,10 +16,41 @@
 
 package com.haulmont.cuba.security.app.group.annotation;
 
+import java.lang.annotation.*;
+
+/**
+ * Defines session attribute for the access group.
+ *
+ * <p>Example:
+ *
+ * <pre>
+ *     &#064;SessionAttribute(name = "key1", value = "value1")
+ *     &#064;Override
+ *     public Map&lt;String, Serializable&gt; sessionAttributes() {
+ *          return super.sessionAttributes();
+ *     }
+ * </pre>
+ *
+ * @see AccessGroup
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Repeatable(SessionAttributeContainer.class)
 public @interface SessionAttribute {
+
+    /**
+     * Attribute name
+     */
     String name();
 
+    /**
+     * Attribute value as string
+     */
     String value();
 
+    /**
+     * Attribute java class.
+     * Java class uses while transformation from string presentation to java class value
+     */
     Class<?> javaClass() default String.class;
 }
