@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
+import static com.haulmont.cuba.gui.app.core.bulk.ColumnsMode.TWO_COLUMN;
 
 public class BulkEditorWindow extends AbstractWindow {
 
@@ -113,7 +114,7 @@ public class BulkEditorWindow extends AbstractWindow {
     @WindowParam
     protected BulkEditors.FieldSorter fieldSorter;
     @WindowParam
-    protected int columns = 2;
+    protected ColumnsMode columnsMode = TWO_COLUMN;
 
     protected Pattern excludeRegex;
 
@@ -208,9 +209,11 @@ public class BulkEditorWindow extends AbstractWindow {
         int toField = 0;
         int addedColumns = 0;
 
-        for (int col = 0; col < columns; col++) {
+        for (int col = 0; col < columnsMode.getColumnsCount(); col++) {
             fromField = toField;
-            toField += getFieldsCountForColumn(editFields.size() - toField, columns - col);
+            toField += getFieldsCountForColumn(
+                    editFields.size() - toField,
+                    columnsMode.getColumnsCount() - col);
 
             DeviceInfo deviceInfo = deviceInfoProvider.getDeviceInfo();
 

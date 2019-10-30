@@ -164,45 +164,4 @@ $c-bulk-editor-field-width: 100% !default;
       }
     }
   }
-
-  .c-bulk-editor-columns-3 {
-    .c-bulk-editor-column {
-      flex: 0 0 33.33%;
-
-      .v-ie11 & {
-        flex: none;
-        min-width: 33.33%;
-      }
-    }
-  }
-
-  .c-bulk-editor-columns-4 {
-    .c-bulk-editor-column {
-      flex: 0 0 25%;
-
-      .v-ie11 & {
-        flex: none;
-        min-width: 25%;
-      }
-    }
-  }
-
-  .c-bulk-editor-columns-5 {
-    .c-bulk-editor-column {
-      flex: 0 0 20%;
-
-      .v-ie11 & {
-        flex: none;
-        min-width: 20%;
-
-        .#{$primary-stylename}-picker-field-wrapper .#{$primary-stylename}-field {
-          display: flex;
-
-          .c-pickerfield-layout {
-            flex-basis: 100%;
-          }
-        }
-      }
-    }
-  }
 }

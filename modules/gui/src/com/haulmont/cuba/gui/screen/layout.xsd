@@ -956,6 +956,13 @@
         </xs:union>
     </xs:simpleType>
 
+    <xs:simpleType name="columnsMode">
+        <xs:restriction>
+            <xs:enumeration value="ONE_COLUMN"/>
+            <xs:enumeration value="TWO_COLUMN"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Interfaces -->
 
     <xs:attributeGroup name="hasId">
@@ -3326,7 +3333,7 @@
                 <xs:attribute name="focusable" type="xs:boolean"/>
                 <xs:attribute name="loadDynamicAttributes" type="xs:boolean"/>
                 <xs:attribute name="useConfirmDialog" type="xs:boolean"/>
-                <xs:attribute name="columns" type="xs:int"/>
+                <xs:attribute name="columnsMode" type="columnsMode"/>
 
                 <xs:attributeGroup ref="hasTabIndex"/>
             </xs:extension>
