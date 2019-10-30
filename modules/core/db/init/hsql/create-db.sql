@@ -257,7 +257,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON boolean,
     --
     primary key (ID),
-    constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, TENANT_ID, DELETE_TS),
+    constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, CUBA_TENANT_ID, DELETE_TS),
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
