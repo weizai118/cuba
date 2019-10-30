@@ -21,7 +21,7 @@ alter table SYS_SENDING_ATTACHMENT add CUBA_TENANT_ID varchar(255)^
 alter table SYS_ENTITY_SNAPSHOT add CUBA_TENANT_ID varchar(255)^
 alter table SEC_SESSION_LOG add CUBA_TENANT_ID varchar(255)^
 
-drop constraint IDX_SEC_USER_UNIQ_LOGIN on SEC_USER
+alter table SEC_USER drop constraint IDX_SEC_USER_UNIQ_LOGIN^
 
 alter table SEC_USER add constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, CUBA_TENANT_ID, DELETE_TS)^
 

@@ -70,7 +70,7 @@ public class TestUserManagementService implements UserManagementService {
     }
 
     @Override
-    public boolean isRememberMeTokenValid(String login, String rememberMeToken, String tenantId) {
+    public boolean isRememberMeTokenValid(String login, String rememberMeToken) {
         return false;
     }
 
