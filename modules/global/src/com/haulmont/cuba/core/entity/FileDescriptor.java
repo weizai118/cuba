@@ -134,10 +134,6 @@ public class FileDescriptor extends StandardEntity implements HasTenant {
         if (parts.length == 4) {
             fd.setSize(Long.parseLong(parts[3]));
         }
-
-        byte[] b = new byte[5];
-
-        int k = b.length;
         return fd;
     }
 }
