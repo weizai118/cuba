@@ -30,6 +30,9 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     @Inject
     protected ScrollBoxLayout localesScrollBox;
 
+//    @Inject
+//    private GridLayout grid;
+
     @Inject
     protected GlobalConfig globalConfig;
 
@@ -43,8 +46,48 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     @Override
     public void init(Map<String, Object> params) {
         Map<String, Locale> map = globalConfig.getAvailableLocales();
+
+        GridLayout grid = uiComponents.create(GridLayout.class);
+        grid.setColumns(3);
+        grid.setRows(map.size() + 1);
+        initGridHeaders(grid);
+        initGridContent(grid, map);
+        localesScrollBox.add(grid);
+    }
+
+    protected void initGridHeaders(GridLayout grid) {
+        Label langLabel = uiComponents.create(Label.of(String.class));
+        Label nameLabel = uiComponents.create(Label.of(String.class));
+        Label descLabel = uiComponents.create(Label.of(String.class));
+        langLabel.setValue("Language");
+        nameLabel.setValue("Name");
+        descLabel.setValue("Description");
+        grid.add(langLabel, 0, 0);
+        grid.add(nameLabel, 1, 0);
+        grid.add(descLabel, 2, 0);
+   //     grid.setColumnExpandRatio(0, 60.0f);
+   //     grid.setColumnExpandRatio(1, 120.0f);
+   //     grid.setColumnExpandRatio(2, 300.0f);
+    }
+
+    protected void initGridContent(GridLayout grid, Map<String, Locale> map) {
+        int rowNumber = 0;
         for (Map.Entry<String, Locale> entry : map.entrySet()) {
-            localesScrollBox.add(createLocaleGroupBox(entry.getKey(), entry.getValue()));
+            rowNumber++;
+            Label langLabel = uiComponents.create(Label.of(String.class));
+            langLabel.setValue(entry.getKey() + "|" + entry.getValue().toString());
+            //langLabel.setWidth("20%");
+            grid.add(langLabel, 0, rowNumber);
+            TextField attrName = (TextField) createTextFieldComponent(entry.getValue(),
+                    messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.name"), namesTextFieldMap);
+            attrName.setCaption("");
+            //attrName.setWidth("30%");
+            grid.add(attrName, 1, rowNumber);
+            TextArea attrDescription = (TextArea) createTextAreaComponent(entry.getValue(),
+                    messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.description"), descriptionsTextFieldMap);
+            attrDescription.setCaption("");
+            //attrDescription.setWidth("50%");
+            grid.add(attrDescription, 2, rowNumber);
         }
     }
 
