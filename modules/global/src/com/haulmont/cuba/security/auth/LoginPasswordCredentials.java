@@ -34,15 +34,11 @@ public class LoginPasswordCredentials extends AbstractClientCredentials {
     }
 
     public LoginPasswordCredentials(String login, String password) {
-        this(login, password, null, null);
+        this(login, password, null);
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale) {
         this(login, password, locale, Collections.emptyMap());
-    }
-
-    public LoginPasswordCredentials(String login, String password, Map<String, Object> params) {
-        this(login, password, null, params);
     }
 
     public LoginPasswordCredentials(String login, String password, Locale locale, Map<String, Object> params) {
