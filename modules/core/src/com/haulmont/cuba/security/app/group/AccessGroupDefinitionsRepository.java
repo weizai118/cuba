@@ -17,17 +17,16 @@
 package com.haulmont.cuba.security.app.group;
 
 import com.haulmont.cuba.security.group.AccessGroupDefinition;
-import com.haulmont.cuba.security.group.GroupIdentifier;
 
 import java.util.Collection;
 
-public interface GroupsRepository {
-    String NAME = "cuba_GroupsRepository";
+public interface AccessGroupDefinitionsRepository {
+    String NAME = "cuba_AccessGroupDefinitionsRepository";
 
     /**
-     * @return group definition by specified group identifier
+     * @return group definition by specified group name
      */
-    AccessGroupDefinition getGroupDefinition(GroupIdentifier groupDefId);
+    AccessGroupDefinition getGroupDefinition(String name);
 
     /**
      * @return all annotation based group definitions

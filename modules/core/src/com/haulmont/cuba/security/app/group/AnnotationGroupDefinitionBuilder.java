@@ -52,6 +52,9 @@ public class AnnotationGroupDefinitionBuilder {
     @Inject
     protected DatatypeRegistry datatypes;
 
+    @Inject
+    protected AccessGroupDefinitionsRepository repository;
+
     protected Map<Class<? extends Annotation>, AnnotationProcessor> processors = new HashMap<>();
 
     protected static final Set<String> FILTERED_METHOD_NAMES = ImmutableSet.of("getName", "sessionAttributes");
@@ -147,7 +150,7 @@ public class AnnotationGroupDefinitionBuilder {
         return getGroupAnnotationNN(group.getClass()).parent();
     }
 
-    public SetOfAccessConstraints buildSetOfEntityConstraints(AccessGroupDefinition group) {
+    public SetOfAccessConstraints buildSetOfAccessConstraints(AccessGroupDefinition group) {
         Class<? extends AccessGroupDefinition> clazz = group.getClass();
 
         AccessConstraintsBuilder constraintsBuilder = AccessConstraintsBuilder.create();

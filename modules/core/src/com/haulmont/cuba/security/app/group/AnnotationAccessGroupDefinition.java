@@ -39,7 +39,7 @@ public abstract class AnnotationAccessGroupDefinition implements AccessGroupDefi
 
     @Override
     public SetOfAccessConstraints accessConstraints() {
-        return annotationGroupDefinitionBuilder.buildSetOfEntityConstraints(this);
+        return annotationGroupDefinitionBuilder.buildSetOfAccessConstraints(this);
     }
 
     @Override

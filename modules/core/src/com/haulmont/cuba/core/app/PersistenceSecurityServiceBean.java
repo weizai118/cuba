@@ -19,6 +19,7 @@ package com.haulmont.cuba.core.app;
 import com.haulmont.cuba.core.PersistenceSecurity;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.security.entity.EntityOp;
+import com.haulmont.cuba.security.group.ConstraintValidationResult;
 import com.haulmont.cuba.security.group.PersistenceSecurityService;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +44,10 @@ public class PersistenceSecurityServiceBean implements PersistenceSecurityServic
     @Override
     public Object evaluateConstraintScript(Entity entity, String groovyScript) {
         return persistenceSecurity.evaluateConstraintScript(entity, groovyScript);
+    }
+
+    @Override
+    public ConstraintValidationResult validateConstraintScript(String entityType, String groovyScript) {
+        return persistenceSecurity.validateConstraintScript(entityType, groovyScript);
     }
 }

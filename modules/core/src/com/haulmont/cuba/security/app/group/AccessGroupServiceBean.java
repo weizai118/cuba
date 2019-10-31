@@ -40,7 +40,7 @@ public class AccessGroupServiceBean implements AccessGroupsService {
     @Inject
     protected DataManager dataManager;
     @Inject
-    protected GroupsRepository groupsRepository;
+    protected AccessGroupDefinitionsRepository groupsRepository;
     @Inject
     protected Metadata metadata;
     @Inject
@@ -92,7 +92,7 @@ public class AccessGroupServiceBean implements AccessGroupsService {
         if (group == null) {
             result = Collections.emptyList();
         } else if (group.isPredefined()) {
-            AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withName(group.getName()));
+            AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(group.getName());
             SetOfAccessConstraints setOfConstraints = groupDefinition.accessConstraints();
             result = setOfConstraints.getEntityTypes().stream()
                     .flatMap(setOfConstraints::findConstraintsByEntity)
@@ -110,7 +110,7 @@ public class AccessGroupServiceBean implements AccessGroupsService {
 
     @Override
     public Group findPredefinedGroupByName(String name) {
-        AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withName(name));
+        AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(name);
         return groupDefinition == null ? null : mapToGroup(groupDefinition);
     }
 
@@ -138,7 +138,7 @@ public class AccessGroupServiceBean implements AccessGroupsService {
         if (group == null) {
             result = Collections.emptyList();
         } else if (group.isPredefined()) {
-            AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withName(group.getName()));
+            AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(group.getName());
             Map<String, Serializable> sessionAttributes = groupDefinition.sessionAttributes();
             if (sessionAttributes != null) {
                 result = sessionAttributes.entrySet().stream()
@@ -175,6 +175,7 @@ public class AccessGroupServiceBean implements AccessGroupsService {
         }
         if (accessConstraint.isCustom()) {
             constraint.setOperationType(ConstraintOperationType.CUSTOM);
+            constraint.setCode(accessConstraint.getCode());
         } else {
             constraint.setOperationType(ConstraintOperationType.fromEntityOp(accessConstraint.getOperation()));
         }

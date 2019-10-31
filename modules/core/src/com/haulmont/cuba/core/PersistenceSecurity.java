@@ -21,6 +21,7 @@ import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.security.group.ConstraintValidationResult;
 
 import java.util.Collection;
 
@@ -141,4 +142,9 @@ public interface PersistenceSecurity extends Security {
      * Check if there are registered memory read constraints for the metaClass or it's original metaClass
      */
     boolean hasInMemoryReadConstraints(MetaClass metaClass);
+
+    /**
+     * Validate groovy access constraint script
+     */
+    ConstraintValidationResult validateConstraintScript(String entityType, String groovyScript);
 }

@@ -19,7 +19,6 @@ package com.haulmont.cuba.gui.app.security.constraint.edit;
 
 import com.google.common.base.Strings;
 import com.haulmont.chile.core.model.MetaClass;
-import com.haulmont.cuba.core.app.ConstraintScriptValidationService;
 import com.haulmont.cuba.core.entity.BaseGenericIdEntity;
 import com.haulmont.cuba.core.entity.annotation.UnavailableInSecurityConstraints;
 import com.haulmont.cuba.core.global.*;
@@ -47,6 +46,8 @@ import com.haulmont.cuba.security.entity.Constraint;
 import com.haulmont.cuba.security.entity.ConstraintCheckType;
 import com.haulmont.cuba.security.entity.ConstraintOperationType;
 import com.haulmont.cuba.security.entity.FilterEntity;
+import com.haulmont.cuba.security.group.ConstraintValidationResult;
+import com.haulmont.cuba.security.group.PersistenceSecurityService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.TextStringBuilder;
@@ -59,8 +60,6 @@ import static com.haulmont.cuba.gui.WindowManager.OpenType;
 import static java.util.Arrays.asList;
 
 public class ConstraintEditor extends AbstractEditor<Constraint> {
-    @Inject
-    private ConstraintScriptValidationService constraintScriptValidationService;
     @Inject
     protected LookupField<String> entityName;
     @Inject
@@ -102,6 +101,8 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
     protected WindowConfig windowConfig;
     @Inject
     protected UserManagementService userManagementService;
+    @Inject
+    protected PersistenceSecurityService persistenceSecurityService;
     @Inject
     protected Security security;
     @Inject
@@ -388,8 +389,7 @@ public class ConstraintEditor extends AbstractEditor<Constraint> {
             }
 
             if (!Strings.isNullOrEmpty(constraint.getGroovyScript())) {
-                ConstraintScriptValidationService.ScriptValidationResult result =
-                        constraintScriptValidationService.evaluateConstraintScript(metadata.create(entityName), constraint.getGroovyScript());
+                ConstraintValidationResult result = persistenceSecurityService.validateConstraintScript(entityName, constraint.getGroovyScript());
                 if (result.isCompilationFailedException()) {
                     showMessageDialog(getMessage("notification.error"),
                             formatMessage("notification.scriptCompilationError", result.getErrorMessage()), MessageType.WARNING_HTML);

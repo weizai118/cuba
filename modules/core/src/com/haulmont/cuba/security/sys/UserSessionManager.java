@@ -27,14 +27,13 @@ import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.core.global.UuidSource;
 import com.haulmont.cuba.core.sys.DefaultPermissionValuesConfig;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
-import com.haulmont.cuba.security.app.group.GroupsRepository;
+import com.haulmont.cuba.security.app.group.AccessGroupDefinitionsComposer;
 import com.haulmont.cuba.security.app.role.RoleDefBuilder;
 import com.haulmont.cuba.security.app.role.RolesRepository;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.global.NoUserSessionException;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.security.group.AccessGroupDefinition;
-import com.haulmont.cuba.security.group.GroupIdentifier;
 import com.haulmont.cuba.security.role.PermissionsUtils;
 import com.haulmont.cuba.security.role.RoleDef;
 import org.slf4j.Logger;
@@ -82,7 +81,7 @@ public class UserSessionManager {
     protected RolesRepository rolesRepository;
 
     @Inject
-    protected GroupsRepository groupsRepository;
+    protected AccessGroupDefinitionsComposer groupsComposer;
 
     /**
      * Create a new session and fill it with security data. Must be called inside a transaction.
@@ -195,9 +194,9 @@ public class UserSessionManager {
     protected AccessGroupDefinition compileGroupDefinition(Group group, String groupName) {
         AccessGroupDefinition groupDefinition;
         if (group != null) {
-            groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withDbId(group.getId()));
+            groupDefinition = groupsComposer.composeGroupDefinitionFromDb(group.getId());
         } else {
-            groupDefinition = groupsRepository.getGroupDefinition(GroupIdentifier.withName(groupName));
+            groupDefinition = groupsComposer.composeGroupDefinition(groupName);
         }
         return groupDefinition;
     }

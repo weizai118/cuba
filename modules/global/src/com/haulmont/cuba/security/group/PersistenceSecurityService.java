@@ -19,6 +19,8 @@ package com.haulmont.cuba.security.group;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.security.entity.EntityOp;
 
+import java.io.Serializable;
+
 public interface PersistenceSecurityService {
 
     String NAME = "cuba_PersistenceSecurityService";
@@ -33,10 +35,14 @@ public interface PersistenceSecurityService {
      */
     boolean isPermitted(Entity entity, String customCode);
 
-
     /**
      * Execute groovy constraint script
      * @return boolean as script result
      */
     Object evaluateConstraintScript(Entity entity, String groovyScript);
+
+    /**
+     * Validate groovy access constraint script
+     */
+    ConstraintValidationResult validateConstraintScript(String entityType, String groovyScript);
 }

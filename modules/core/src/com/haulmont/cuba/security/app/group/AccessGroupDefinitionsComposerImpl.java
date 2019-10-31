@@ -22,25 +22,21 @@ import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.group.AccessGroupDefinition;
-import com.haulmont.cuba.security.group.GroupIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Component(GroupsRepository.NAME)
-public class GroupsRepositoryImpl implements GroupsRepository {
+@Component(AccessGroupDefinitionsComposer.NAME)
+public class AccessGroupDefinitionsComposerImpl implements AccessGroupDefinitionsComposer {
+
     @Inject
     protected Persistence persistence;
 
@@ -54,54 +50,42 @@ public class GroupsRepositoryImpl implements GroupsRepository {
     protected DatatypeRegistry datatypes;
 
     @Inject
-    protected GlobalConfig config;
+    protected AccessGroupDefinitionsRepository groupsRepository;
 
-    @Autowired(required = false)
-    protected List<AccessGroupDefinition> groupDefinitions;
+    private final Logger log = LoggerFactory.getLogger(AccessGroupDefinitionsComposerImpl.class);
 
-    protected Map<String, AccessGroupDefinition> groupDefinitionsByName;
+    @Override
+    public AccessGroupDefinition composeGroupDefinition(String groupName) {
+        AccessGroupDefinition groupDefinition = groupsRepository.getGroupDefinition(groupName);
 
-    private final Logger log = LoggerFactory.getLogger(GroupsRepositoryImpl.class);
+        if (Strings.isNullOrEmpty(groupDefinition.getParent())) {
+            return groupDefinition;
+        }
 
-    @PostConstruct
-    protected void init() {
-        groupDefinitionsByName = new ConcurrentHashMap<>();
-        if (groupDefinitions != null) {
-            for (AccessGroupDefinition groupDefinition : groupDefinitions) {
-                groupDefinitionsByName.put(groupDefinition.getName(), groupDefinition);
+        AccessGroupDefinitionBuilder groupDefinitionBuilder = AccessGroupDefinitionBuilder.create();
+
+        groupDefinitionBuilder.withConstraints(constraintsBuilder -> constraintsBuilder.join(groupDefinition.accessConstraints()))
+                .withSessionAttributes(groupDefinition.sessionAttributes());
+
+        AccessGroupDefinition parentGroupDefinition = groupsRepository.getGroupDefinition(groupDefinition.getParent());
+        while (parentGroupDefinition != null) {
+
+            final AccessGroupDefinition finalParentGroupDefinition = parentGroupDefinition;
+            groupDefinitionBuilder.withConstraints(constraintsBuilder -> constraintsBuilder.join(finalParentGroupDefinition.accessConstraints()))
+                    .withSessionAttributes(finalParentGroupDefinition.sessionAttributes());
+
+            if (!Strings.isNullOrEmpty(parentGroupDefinition.getParent())) {
+                parentGroupDefinition = groupsRepository.getGroupDefinition(parentGroupDefinition.getParent());
+            } else {
+                parentGroupDefinition = null;
             }
         }
+
+        return groupDefinitionBuilder.build();
     }
 
     @Override
-    public AccessGroupDefinition getGroupDefinition(GroupIdentifier identifier) {
-        if (identifier.getDbId() != null) {
-            return getGroupDefinitionFromDB(identifier.getDbId());
-        } else if (identifier.getGroupName() != null) {
-            return getGroupDefinitionFromAnnotations(identifier.getGroupName());
-        }
-        throw new IllegalArgumentException(String.format("%s isn't valid", identifier));
-    }
-
-    @Override
-    public Collection<AccessGroupDefinition> getGroupDefinitions() {
-        return Collections.unmodifiableCollection(groupDefinitionsByName.values());
-    }
-
-    @Override
-    public void registerGroupDefinition(AccessGroupDefinition groupDefinition) {
-        groupDefinitionsByName.put(groupDefinition.getName(), groupDefinition);
-    }
-
-    protected AccessGroupDefinition getGroupDefinitionFromAnnotations(String groupName) {
-        AccessGroupDefinition groupDefinition = groupDefinitionsByName.get(groupName);
-        if (groupDefinition == null) {
-            throw new IllegalStateException(String.format("Unable to find predefined group definition %s", groupName));
-        }
-        return groupDefinition;
-    }
-
-    protected AccessGroupDefinition getGroupDefinitionFromDB(UUID groupId) {
+    public AccessGroupDefinition composeGroupDefinitionFromDb(UUID groupId) {
         return persistence.callInTransaction(em -> {
             AccessGroupDefinitionBuilder groupDefinitionBuilder = AccessGroupDefinitionBuilder.create();
 

@@ -161,6 +161,20 @@ public class AccessGroupDefinitionBuilder {
     }
 
     /**
+     * Adds new session attributes to the group definition
+     *
+     * @param attributes map of session attributes
+     * @return current instance of the builder
+     */
+    public AccessGroupDefinitionBuilder withSessionAttributes(Map<String, Serializable> attributes) {
+        if (sessionAttributes == null) {
+            sessionAttributes = new HashMap<>();
+        }
+        sessionAttributes.putAll(attributes);
+        return this;
+    }
+
+    /**
      * Returns the built access group definition
      */
     public AccessGroupDefinition build() {

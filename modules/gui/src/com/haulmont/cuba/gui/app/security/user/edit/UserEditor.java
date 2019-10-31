@@ -407,6 +407,12 @@ public class UserEditor extends AbstractEditor<User> {
         });
         groupField.addAction(action);
 
+        groupField.setEditable(security.isEntityAttrUpdatePermitted(metadata.getClassNN(User.class), "group") &&
+                security.isEntityAttrUpdatePermitted(metadata.getClassNN(User.class), "groupNames"));
+
+        groupField.setVisible(security.isEntityAttrReadPermitted(metadata.getClassNN(User.class), "group") &&
+                security.isEntityAttrReadPermitted(metadata.getClassNN(User.class), "groupNames"));
+
         groupFc.setComponent(groupField);
     }
 

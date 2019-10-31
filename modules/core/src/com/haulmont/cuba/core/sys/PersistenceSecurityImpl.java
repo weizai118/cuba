@@ -34,9 +34,12 @@ import com.haulmont.cuba.core.sys.jpql.JpqlSyntaxException;
 import com.haulmont.cuba.security.entity.ConstraintOperationType;
 import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.security.group.ConstraintValidationResult;
 import com.haulmont.cuba.security.group.JpqlAccessConstraint;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -393,7 +396,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
     @Override
     public boolean isPermitted(Entity entity, ConstraintOperationType operationType) {
         for (EntityOp entityOp : operationType.toEntityOps()) {
-            if (!isPermitted(entity,entityOp)) {
+            if (!isPermitted(entity, entityOp)) {
                 return false;
             }
         }
@@ -420,12 +423,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         String metaClassName = entity.getMetaClass().getName();
         if (StringUtils.isNotBlank(groovyScript)) {
             try {
-                Map<String, Object> context = new HashMap<>();
-                context.put("__entity__", entity);
-                context.put("parse", new MethodClosure(this, "parseValue"));
-                context.put("userSession", userSessionSource.getUserSession());
-                fillGroovyConstraintsContext(context);
-                Object result = scripting.evaluateGroovy(groovyScript.replace("{E}", "__entity__"), context);
+                Object result = runGroovyScript(entity, groovyScript);
                 if (Boolean.FALSE.equals(result)) {
                     log.trace("Entity does not match security constraint. Entity class [{}]. Entity [{}].",
                             metaClassName, entity.getId());
@@ -440,6 +438,30 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
         return true;
     }
 
+    @Override
+    public ConstraintValidationResult validateConstraintScript(String entityType, String groovyScript) {
+        ConstraintValidationResult result = new ConstraintValidationResult();
+        try {
+            runGroovyScript(metadata.create(entityType), groovyScript);
+        } catch (CompilationFailedException e) {
+            result.setCompilationFailedException(true);
+            result.setStacktrace(ExceptionUtils.getStackTrace(e));
+            result.setErrorMessage(e.getMessage());
+        } catch (Exception e) {
+            // ignore
+        }
+        return result;
+    }
+
+    protected Object runGroovyScript(Entity entity, String groovyScript) {
+        Map<String, Object> context = new HashMap<>();
+        context.put("__entity__", entity);
+        context.put("parse", new MethodClosure(this, "parseValue"));
+        context.put("userSession", userSessionSource.getUserSession());
+        fillGroovyConstraintsContext(context);
+        return scripting.evaluateGroovy(groovyScript.replace("{E}", "__entity__"), context);
+    }
+
     /**
      * Override if you need specific context variables in Groovy constraints.
      *
@@ -452,7 +474,7 @@ public class PersistenceSecurityImpl extends SecurityImpl implements Persistence
     protected Object parseValue(Class<?> clazz, String string) {
         try {
             if (Entity.class.isAssignableFrom(clazz)) {
-                Object entity = metadata.create((Class<Entity>)clazz);
+                Object entity = metadata.create((Class<Entity>) clazz);
                 if (entity instanceof BaseIntegerIdEntity) {
                     ((BaseIntegerIdEntity) entity).setId(Integer.valueOf(string));
                 } else if (entity instanceof BaseLongIdEntity) {
