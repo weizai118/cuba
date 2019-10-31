@@ -22,10 +22,7 @@ import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.MetadataTools;
-import com.haulmont.cuba.security.app.group.annotation.Constraint;
-import com.haulmont.cuba.security.app.group.annotation.AccessGroup;
-import com.haulmont.cuba.security.app.group.annotation.JpqlConstraint;
-import com.haulmont.cuba.security.app.group.annotation.SessionAttribute;
+import com.haulmont.cuba.security.app.group.annotation.*;
 import com.haulmont.cuba.security.entity.EntityOp;
 import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.SetOfAccessConstraints;
@@ -138,6 +135,7 @@ public class AnnotationGroupDefinitionBuilder {
     protected void init() {
         registerAnnotationProcessor(JpqlConstraint.class, new JpqlAnnotationProcessor());
         registerAnnotationProcessor(Constraint.class, new ConstraintAnnotationProcessor());
+        registerAnnotationProcessor(CustomConstraint.class, new CustomConstraintAnnotationProcessor());
         registerAnnotationProcessor(SessionAttribute.class, new SessionAttributesAnnotationProcessor());
     }
 
@@ -245,6 +243,17 @@ public class AnnotationGroupDefinitionBuilder {
                 for (EntityOp operation : constraint.operations()) {
                     context.getConstraintsBuilder().withInMemory(targetClass, operation, createConstraintPredicate(context));
                 }
+            }
+        }
+    }
+
+    protected class CustomConstraintAnnotationProcessor implements AnnotationProcessor<ConstraintsAnnotationContext> {
+        @Override
+        public void processAnnotation(ConstraintsAnnotationContext context) {
+            CustomConstraint constraint = (CustomConstraint) context.getAnnotation();
+            Class<? extends Entity> targetClass = resolveTargetClass(context.getMethod());
+            if (!Entity.class.equals(targetClass)) {
+                context.getConstraintsBuilder().withCustomInMemory(targetClass, constraint.value(), createConstraintPredicate(context));
             }
         }
     }

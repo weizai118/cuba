@@ -503,10 +503,10 @@ public class UserSession implements Serializable {
      * @param name  attribute name
      * @param value attribute value
      * @return the previous value associated with the specified key, or
-     *         {@code null} if there was no mapping for the key.
-     *         (A {@code null} return can also indicate that the map
-     *         previously associated {@code null} with the key,
-     *         if the implementation supports null values.)
+     * {@code null} if there was no mapping for the key.
+     * (A {@code null} return can also indicate that the map
+     * previously associated {@code null} with the key,
+     * if the implementation supports null values.)
      */
     public Object setLocalAttributeIfAbsent(String name, Object value) {
         return localAttributes.putIfAbsent(name, value);
@@ -549,11 +549,21 @@ public class UserSession implements Serializable {
         this.effectiveRole = effectiveRole;
     }
 
+    /**
+     * Returns a set of access constraints.
+     * If you need to modify access constraints, use {@code AccessConstraintsBuilder} to construct a new set of constraints and then
+     * apply it using {@link UserSession#setConstraints(SetOfAccessConstraints)} method.
+     */
     public SetOfAccessConstraints getConstraints() {
         return setOfAccessConstraints;
     }
 
-    public void setSetOfAccessConstraints(SetOfAccessConstraints constraints) {
+    /**
+     * Applies access constraints to the UserSession.
+     * <p>
+     * Use {@code AccessConstraintsBuilder} to construct a new set of constraints.
+     */
+    public void setConstraints(SetOfAccessConstraints constraints) {
         this.setOfAccessConstraints = constraints;
     }
 

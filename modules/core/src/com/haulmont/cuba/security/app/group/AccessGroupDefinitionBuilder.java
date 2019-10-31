@@ -100,6 +100,18 @@ public class AccessGroupDefinitionBuilder {
     }
 
     /**
+     * Adds in-memory custom constraint to the group definition
+     *
+     * @param target         entity class
+     * @param constraintCode custom constraint code
+     * @param predicate      in-memory predicate, returns true if entity is allowed by access constraint
+     * @return current instance of the builder
+     */
+    public AccessGroupDefinitionBuilder withCustomInMemoryConstraint(Class<? extends Entity> target, String constraintCode, Predicate<? extends Entity> predicate) {
+        return withConstraints(builder -> builder.withCustomInMemory(target, constraintCode, predicate));
+    }
+
+    /**
      * Adds in-memory groovy constraint to the group definition
      *
      * @param target       entity class
@@ -109,6 +121,18 @@ public class AccessGroupDefinitionBuilder {
      */
     public AccessGroupDefinitionBuilder withGroovyConstraint(Class<? extends Entity> target, EntityOp operation, String groovyScript) {
         return withConstraints(builder -> builder.withGroovy(target, operation, groovyScript));
+    }
+
+    /**
+     * Adds in-memory groovy custom constraint to the group definition
+     *
+     * @param target         entity class
+     * @param constraintCode custom constraint code
+     * @param groovyScript   groovy script
+     * @return current instance of the builder
+     */
+    public AccessGroupDefinitionBuilder withCustomGroovyConstraint(Class<? extends Entity> target, String constraintCode, String groovyScript) {
+        return withConstraints(builder -> builder.withCustomGroovy(target, constraintCode, groovyScript));
     }
 
     /**
@@ -123,7 +147,8 @@ public class AccessGroupDefinitionBuilder {
 
     /**
      * Adds new session attribute to the group definition
-     * @param key session attribute key
+     *
+     * @param key   session attribute key
      * @param value session attribute value
      * @return current instance of the builder
      */

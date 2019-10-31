@@ -24,10 +24,7 @@ import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.security.entity.Constraint;
-import com.haulmont.cuba.security.entity.EntityOp;
-import com.haulmont.cuba.security.entity.Group;
-import com.haulmont.cuba.security.entity.SessionAttribute;
+import com.haulmont.cuba.security.entity.*;
 import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.GroupIdentifier;
 import org.slf4j.Logger;
@@ -152,16 +149,20 @@ public class GroupsRepositoryImpl implements GroupsRepository {
     protected void processConstraints(Constraint constraint, AccessGroupDefinitionBuilder groupDefinitionBuilder) {
         if (Boolean.TRUE.equals(constraint.getIsActive())) {
             Class<? extends Entity> targetClass = metadata.getClassNN(constraint.getEntityName()).getJavaClass();
-            for (EntityOp operation : constraint.getOperationType().toEntityOps()) {
+            if (constraint.getOperationType() == ConstraintOperationType.CUSTOM) {
+                groupDefinitionBuilder.withCustomGroovyConstraint(targetClass, constraint.getCode(), constraint.getJoinClause());
+            } else {
+                for (EntityOp operation : constraint.getOperationType().toEntityOps()) {
 
-                if (EntityOp.READ == operation && !Strings.isNullOrEmpty(constraint.getWhereClause())) {
-                    groupDefinitionBuilder.withJpqlConstraint(targetClass, constraint.getWhereClause(), constraint.getJoinClause());
+                    if (EntityOp.READ == operation && !Strings.isNullOrEmpty(constraint.getWhereClause())) {
+                        groupDefinitionBuilder.withJpqlConstraint(targetClass, constraint.getWhereClause(), constraint.getJoinClause());
+                    }
+
+                    if (!Strings.isNullOrEmpty(constraint.getGroovyScript())) {
+                        groupDefinitionBuilder.withGroovyConstraint(targetClass, operation, constraint.getGroovyScript());
+                    }
+
                 }
-
-                if (!Strings.isNullOrEmpty(constraint.getGroovyScript())) {
-                    groupDefinitionBuilder.withGroovyConstraint(targetClass, operation, constraint.getGroovyScript());
-                }
-
             }
         }
     }

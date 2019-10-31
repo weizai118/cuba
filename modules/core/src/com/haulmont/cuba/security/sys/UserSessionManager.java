@@ -203,7 +203,7 @@ public class UserSessionManager {
     }
 
     protected void compileConstraints(UserSession session, AccessGroupDefinition groupDefinition) {
-        session.setSetOfAccessConstraints(groupDefinition.accessConstraints());
+        session.setConstraints(groupDefinition.accessConstraints());
     }
 
     protected void compileSessionAttributes(UserSession session, AccessGroupDefinition groupDefinition) {

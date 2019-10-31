@@ -69,8 +69,8 @@ public class AccessConstraintsBuilder {
      * Adds JPQL READ constraint to the constraints set
      *
      * @param target entity class
-     * @param where JPQL where clause
-     * @param join JPQL join clause
+     * @param where  JPQL where clause
+     * @param join   JPQL join clause
      * @return current instance of the builder
      */
     public AccessConstraintsBuilder withJpql(Class<? extends Entity> target, String where, String join) {
@@ -91,7 +91,7 @@ public class AccessConstraintsBuilder {
      * Adds JPQL READ constraint to the constraints set
      *
      * @param target entity class
-     * @param where JPQL where clause
+     * @param where  JPQL where clause
      * @return current instance of the builder
      */
     public AccessConstraintsBuilder withJpql(Class<? extends Entity> target, String where) {
@@ -101,7 +101,7 @@ public class AccessConstraintsBuilder {
     /**
      * Adds in-memory constraint to the constraints set
      *
-     * @param target entity class
+     * @param target    entity class
      * @param operation CRUD operation
      * @param predicate in-memory predicate, returns true if entity is allowed by access constraint
      * @return current instance of the builder
@@ -120,10 +120,31 @@ public class AccessConstraintsBuilder {
     }
 
     /**
+     * Adds in-memory custom constraint to the constraints set
+     *
+     * @param target         entity class
+     * @param constraintCode custom constraint code
+     * @param predicate      in-memory predicate, returns true if entity is allowed by access constraint
+     * @return current instance of the builder
+     */
+    public AccessConstraintsBuilder withCustomInMemory(Class<? extends Entity> target, String constraintCode, Predicate<? extends Entity> predicate) {
+        MetaClass metaClass = metadata.getClassNN(target);
+
+        BasicAccessConstraint constraint = new BasicAccessConstraint();
+        constraint.setEntityType(metaClass.getName());
+        constraint.setCode(constraintCode);
+        constraint.setPredicate(predicate);
+
+        addConstraint(metaClass, constraint);
+
+        return this;
+    }
+
+    /**
      * Adds in-memory groovy constraint to the constraints set
      *
-     * @param target entity class
-     * @param operation CRUD operation
+     * @param target       entity class
+     * @param operation    CRUD operation
      * @param groovyScript groovy script
      * @return current instance of the builder
      */
@@ -133,6 +154,27 @@ public class AccessConstraintsBuilder {
         BasicAccessConstraint constraint = new BasicAccessConstraint();
         constraint.setEntityType(metaClass.getName());
         constraint.setOperation(operation);
+        constraint.setPredicate((Predicate<? extends Entity>) o -> (boolean) security.evaluateConstraintScript(o, groovyScript));
+
+        addConstraint(metaClass, constraint);
+
+        return this;
+    }
+
+    /**
+     * Adds in-memory groovy custom constraint to the constraints set
+     *
+     * @param target         entity class
+     * @param constraintCode custom constraint code
+     * @param groovyScript   groovy script
+     * @return current instance of the builder
+     */
+    public AccessConstraintsBuilder withCustomGroovy(Class<? extends Entity> target, String constraintCode, String groovyScript) {
+        MetaClass metaClass = metadata.getClassNN(target);
+
+        BasicAccessConstraint constraint = new BasicAccessConstraint();
+        constraint.setEntityType(metaClass.getName());
+        constraint.setCode(constraintCode);
         constraint.setPredicate((Predicate<? extends Entity>) o -> (boolean) security.evaluateConstraintScript(o, groovyScript));
 
         addConstraint(metaClass, constraint);
@@ -168,29 +210,33 @@ public class AccessConstraintsBuilder {
     protected void addConstraint(MetaClass metaClass, AccessConstraint constraint) {
         List<AccessConstraint> constraints = builderConstraints.computeIfAbsent(metaClass.getName(), k -> new ArrayList<>());
 
-        AccessConstraint existingConstraint = constraints.stream()
-                .filter(c -> Objects.equals(c.getOperation(), constraint.getOperation()))
-                .findFirst()
-                .orElse(null);
-        if (existingConstraint != null) {
-            if (constraint instanceof JpqlAccessConstraint) {
-                if (existingConstraint instanceof JpqlAccessConstraint) {
-                    constraints.add(constraint);
-                } else {
-                    constraints.remove(existingConstraint);
-                    constraints.add(constraint);
+        if (constraint.isCustom()) {
+            constraints.add(constraint);
+        } else {
+            AccessConstraint existingConstraint = constraints.stream()
+                    .filter(c -> Objects.equals(c.getOperation(), constraint.getOperation()))
+                    .findFirst()
+                    .orElse(null);
+            if (existingConstraint != null) {
+                if (constraint instanceof JpqlAccessConstraint) {
+                    if (existingConstraint instanceof JpqlAccessConstraint) {
+                        constraints.add(constraint);
+                    } else {
+                        constraints.remove(existingConstraint);
+                        constraints.add(constraint);
 
-                    ((BasicJpqlAccessConstraint) constraint).setPredicate(existingConstraint.getPredicate());
+                        ((BasicJpqlAccessConstraint) constraint).setPredicate(existingConstraint.getPredicate());
+                    }
+                } else {
+                    if (existingConstraint instanceof JpqlAccessConstraint && existingConstraint.getPredicate() == null) {
+                        ((BasicJpqlAccessConstraint) existingConstraint).setPredicate(constraint.getPredicate());
+                    } else {
+                        constraints.add(constraint);
+                    }
                 }
             } else {
-                if (existingConstraint instanceof JpqlAccessConstraint && existingConstraint.getPredicate() == null) {
-                    ((BasicJpqlAccessConstraint) existingConstraint).setPredicate(constraint.getPredicate());
-                } else {
-                    constraints.add(constraint);
-                }
+                constraints.add(constraint);
             }
-        } else {
-            constraints.add(constraint);
         }
     }
 }
