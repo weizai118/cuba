@@ -30,15 +30,11 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     @Inject
     protected ScrollBoxLayout localesScrollBox;
 
-//    @Inject
-//    private GridLayout grid;
-
     @Inject
     protected GlobalConfig globalConfig;
 
     @Inject
     protected MessageTools messageTools;
-
 
     protected Map<Locale, TextField> namesTextFieldMap = new HashMap<>();
     protected Map<Locale, TextArea> descriptionsTextFieldMap = new HashMap<>();
@@ -50,6 +46,7 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         GridLayout grid = uiComponents.create(GridLayout.class);
         grid.setColumns(3);
         grid.setRows(map.size() + 1);
+        grid.setWidth("100%");
         initGridHeaders(grid);
         initGridContent(grid, map);
         localesScrollBox.add(grid);
@@ -65,9 +62,10 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         grid.add(langLabel, 0, 0);
         grid.add(nameLabel, 1, 0);
         grid.add(descLabel, 2, 0);
-   //     grid.setColumnExpandRatio(0, 60.0f);
-   //     grid.setColumnExpandRatio(1, 120.0f);
-   //     grid.setColumnExpandRatio(2, 300.0f);
+        grid.setColumnExpandRatio(0,1);
+        grid.setColumnExpandRatio(1,4);
+        grid.setColumnExpandRatio(2,5);
+        grid.setSpacing(true);
     }
 
     protected void initGridContent(GridLayout grid, Map<String, Locale> map) {
@@ -76,29 +74,22 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
             rowNumber++;
             Label langLabel = uiComponents.create(Label.of(String.class));
             langLabel.setValue(entry.getKey() + "|" + entry.getValue().toString());
-            //langLabel.setWidth("20%");
-            grid.add(langLabel, 0, rowNumber);
+            langLabel.setAlignment(Alignment.MIDDLE_LEFT);
+
             TextField attrName = (TextField) createTextFieldComponent(entry.getValue(),
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.name"), namesTextFieldMap);
-            attrName.setCaption("");
-            //attrName.setWidth("30%");
-            grid.add(attrName, 1, rowNumber);
+            attrName.setCaption(null);
+            attrName.setHeight("70px");
+
             TextArea attrDescription = (TextArea) createTextAreaComponent(entry.getValue(),
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.description"), descriptionsTextFieldMap);
-            attrDescription.setCaption("");
-            //attrDescription.setWidth("50%");
+            attrDescription.setCaption(null);
+            attrDescription.setHeight("70px");
+
+            grid.add(langLabel, 0, rowNumber);
+            grid.add(attrName, 1, rowNumber);
             grid.add(attrDescription, 2, rowNumber);
         }
-    }
-
-    protected GroupBoxLayout createLocaleGroupBox(String localeName, Locale locale) {
-        GroupBoxLayout groupBoxLayout = uiComponents.create(GroupBoxLayout.NAME);
-        groupBoxLayout.setCaption(localeName + "|" + locale.toString());
-        groupBoxLayout.add(createTextFieldComponent(locale,
-                messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.name"), namesTextFieldMap));
-        groupBoxLayout.add(createTextAreaComponent(locale,
-                messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.description"), descriptionsTextFieldMap));
-        return groupBoxLayout;
     }
 
     public String getNamesValue() {
