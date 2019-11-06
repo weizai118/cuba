@@ -56,11 +56,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
-import static com.haulmont.cuba.gui.app.core.bulk.ColumnsMode.TWO_COLUMN;
+import static com.haulmont.cuba.gui.app.core.bulk.ColumnsMode.TWO_COLUMNS;
 
 public class BulkEditorWindow extends AbstractWindow {
 
-    public static final String COLUMN_COUNT_STYLE = "c-bulk-editor-columns-";
+    public static final String COLUMN_COUNT_STYLENAME = "c-bulk-editor-columns-";
 
     @Inject
     protected ViewRepository viewRepository;
@@ -114,7 +114,7 @@ public class BulkEditorWindow extends AbstractWindow {
     @WindowParam
     protected BulkEditors.FieldSorter fieldSorter;
     @WindowParam
-    protected ColumnsMode columnsMode = TWO_COLUMN;
+    protected ColumnsMode columnsMode = TWO_COLUMNS;
 
     protected Pattern excludeRegex;
 
@@ -329,7 +329,7 @@ public class BulkEditorWindow extends AbstractWindow {
                 break;
             }
         }
-        fieldsLayout.addStyleName(COLUMN_COUNT_STYLE + addedColumns);
+        fieldsLayout.addStyleName(COLUMN_COUNT_STYLENAME + addedColumns);
         fieldsScrollBox.add(fieldsLayout);
 
         dataFields.values().stream()

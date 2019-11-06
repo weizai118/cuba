@@ -305,7 +305,7 @@ public class BulkEditors {
          * @param columnsMode columns mode
          * @return this builder
          * @see ColumnsMode#ONE_COLUMN
-         * @see ColumnsMode#TWO_COLUMN
+         * @see ColumnsMode#TWO_COLUMNS
          */
         public EditorBuilder<E> withColumnsMode(ColumnsMode columnsMode) {
             this.columnsMode = columnsMode;
@@ -401,7 +401,7 @@ public class BulkEditors {
         /**
          * @return columns mode
          * @see ColumnsMode#ONE_COLUMN
-         * @see ColumnsMode#TWO_COLUMN
+         * @see ColumnsMode#TWO_COLUMNS
          */
         public ColumnsMode getColumnsMode() {
             return columnsMode;

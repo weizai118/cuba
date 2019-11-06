@@ -175,7 +175,7 @@ public class BulkEditorLoader extends AbstractComponentLoader<BulkEditor> {
         String value = element.attributeValue("columnsMode");
         if (StringUtils.isNotEmpty(value)) {
             ColumnsMode columnsMode = ColumnsMode.valueOf(value);
-            component.setColumns(columnsMode);
+            component.setColumnsMode(columnsMode);
         }
     }
 

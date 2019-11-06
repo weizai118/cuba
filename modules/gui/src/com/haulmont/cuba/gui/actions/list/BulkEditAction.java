@@ -77,7 +77,7 @@ public class BulkEditAction extends SecuredListAction {
 
     /**
      * Returns the columns mode which defines the number of columns if it was set by {@link #setColumnsMode(ColumnsMode)}
-     * or in the screen XML. Otherwise returns null.
+     * either in the screen XML. Otherwise returns null.
      */
     @Nullable
     public ColumnsMode getColumnsMode() {
@@ -88,7 +88,7 @@ public class BulkEditAction extends SecuredListAction {
      * Sets the columns mode which defines the number of columns.
      *
      * @see ColumnsMode#ONE_COLUMN
-     * @see ColumnsMode#TWO_COLUMN
+     * @see ColumnsMode#TWO_COLUMNS
      */
     @StudioPropertiesItem
     public void setColumnsMode(ColumnsMode columnsMode) {

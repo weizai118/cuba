@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 public enum ColumnsMode {
 
     ONE_COLUMN(1),
-    TWO_COLUMN(2);
+    TWO_COLUMNS(2);
 
     protected final int columnsCount;
 

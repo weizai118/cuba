@@ -42,7 +42,7 @@ public class WebBulkEditor extends WebButton implements BulkEditor {
     protected ConstraintOperationType constraintOperationType;
     protected boolean loadDynamicAttributes = true;
     protected boolean useConfirmDialog = true;
-    protected ColumnsMode columnsMode = ColumnsMode.TWO_COLUMN;
+    protected ColumnsMode columnsMode = ColumnsMode.TWO_COLUMNS;
 
     @Override
     public OpenType getOpenType() {
@@ -206,12 +206,12 @@ public class WebBulkEditor extends WebButton implements BulkEditor {
     }
 
     @Override
-    public ColumnsMode getColumns() {
+    public ColumnsMode getColumnsMode() {
         return columnsMode;
     }
 
     @Override
-    public void setColumns(ColumnsMode columnsMode) {
+    public void setColumnsMode(ColumnsMode columnsMode) {
         this.columnsMode = columnsMode;
         if (bulkEditAction != null) {
             bulkEditAction.setColumnsMode(columnsMode);

@@ -68,16 +68,16 @@ public interface BulkEditor extends Component, Component.HasCaption, Component.B
     /**
      * @return columns mode which defines the number of editor columns
      */
-    ColumnsMode getColumns();
+    ColumnsMode getColumnsMode();
 
     /**
-     * Sets the column mode which defines the number of editor columns.
+     * Sets the columns mode which defines the number of editor columns.
      *
      * @param columnsMode columns mode
      * @see ColumnsMode#ONE_COLUMN
-     * @see ColumnsMode#TWO_COLUMN
+     * @see ColumnsMode#TWO_COLUMNS
      */
-    void setColumns(ColumnsMode columnsMode);
+    void setColumnsMode(ColumnsMode columnsMode);
 
     /**
      * Sets the given <code>constraintOperationType</code> to the BulkEditAction.
