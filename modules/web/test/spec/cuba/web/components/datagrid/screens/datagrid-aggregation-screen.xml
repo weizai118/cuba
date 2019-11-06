@@ -25,11 +25,13 @@
         <dataGrid id="aggregationTopDataGrid" width="100%" height="100%" aggregatable="true"
                   dataContainer="goodStatisticDc">
             <columns>
-                <column property="name"/>
+                <column property="name">
+                    <aggregation type="COUNT"/>
+                </column>
                 <column property="fromDate"/>
                 <column property="toDate"/>
                 <column property="count">
-                    <aggregation type="SUM"/>
+                    <aggregation type="MIN"/>
                 </column>
                 <column property="price">
                     <aggregation type="AVG"/>
@@ -38,7 +40,7 @@
                     <aggregation type="MAX"/>
                 </column>
                 <column property="usages">
-                    <aggregation type="AVG"/>
+                    <aggregation type="SUM"/>
                 </column>
             </columns>
         </dataGrid>
@@ -46,11 +48,13 @@
                   aggregationPosition="BOTTOM"
                   dataContainer="goodStatisticDc">
             <columns>
-                <column property="name"/>
+                <column property="name">
+                    <aggregation type="COUNT"/>
+                </column>
                 <column property="fromDate"/>
                 <column property="toDate"/>
                 <column property="count">
-                    <aggregation type="SUM"/>
+                    <aggregation type="MIN"/>
                 </column>
                 <column property="price">
                     <aggregation type="AVG"/>
@@ -59,7 +63,7 @@
                     <aggregation type="MAX"/>
                 </column>
                 <column property="usages">
-                    <aggregation type="AVG"/>
+                    <aggregation type="SUM"/>
                 </column>
             </columns>
         </dataGrid>
