@@ -53,7 +53,7 @@ public class FilterEntity extends StandardEntity implements HasTenant {
     @Column(name = "GLOBAL_DEFAULT")
     protected Boolean globalDefault = false;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     @Transient

@@ -45,7 +45,7 @@ public class SessionAttribute extends StandardEntity implements HasTenant {
     @JoinColumn(name = "GROUP_ID")
     private Group group;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     public String getName() {

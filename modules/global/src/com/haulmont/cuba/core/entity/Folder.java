@@ -49,7 +49,7 @@ public class Folder extends StandardEntity implements HasTenant {
     @Column(name = "TAB_NAME")
     protected String tabName;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     public Folder getParent() {

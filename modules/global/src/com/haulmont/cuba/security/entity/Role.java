@@ -56,7 +56,7 @@ public class Role extends StandardEntity implements HasTenant {
     @Column(name = "IS_DEFAULT_ROLE")
     private Boolean defaultRole;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     @OneToMany(mappedBy = "role")

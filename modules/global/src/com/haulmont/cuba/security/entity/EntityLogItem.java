@@ -84,7 +84,7 @@ public class EntityLogItem extends BaseUuidEntity implements Creatable, HasTenan
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     @Column(name = "EVENT_TS")

@@ -54,7 +54,7 @@ public class SendingAttachment extends StandardEntity implements HasTenant {
     @Column(name = "TEXT_ENCODING", length = 50)
     protected String encoding;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     public SendingMessage getMessage() {

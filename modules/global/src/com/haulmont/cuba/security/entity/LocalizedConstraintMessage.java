@@ -50,7 +50,7 @@ public class LocalizedConstraintMessage extends StandardEntity implements HasTen
     @Column(name = "VALUES_")
     protected String values;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     public String getEntityName() {

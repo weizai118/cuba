@@ -128,7 +128,7 @@ create table SYS_ENTITY_SNAPSHOT (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     ENTITY_META_CLASS varchar2(50 char) not null,
     ENTITY_ID varchar2(32),
     STRING_ENTITY_ID varchar2(255 char),
@@ -170,7 +170,7 @@ create table SYS_FILE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     NAME varchar2(500 char) not null,
     EXT varchar2(20 char),
     FILE_SIZE number(19),
@@ -187,7 +187,7 @@ create table SYS_FOLDER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     FOLDER_TYPE char(1),
     PARENT_ID varchar2(32),
     NAME varchar2(100 char),
@@ -271,7 +271,7 @@ create table SYS_SCHEDULED_EXECUTION (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     TASK_ID varchar2(32),
     SERVER varchar2(512 char),
     START_TIME timestamp,
@@ -290,7 +290,7 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     DEFINED_BY varchar2(1),
     CLASS_NAME varchar2(500 char),
     SCRIPT_NAME varchar2(500 char),
@@ -320,7 +320,7 @@ create table SYS_SENDING_ATTACHMENT (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     VERSION integer default 1 not null,
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
@@ -347,7 +347,7 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     ADDRESS_TO clob,
     ADDRESS_CC clob,
     ADDRESS_BCC clob,
@@ -391,7 +391,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     --
     CODE varchar2(255 char),
     CHECK_TYPE varchar2(50 char) default 'db',
@@ -417,7 +417,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     --
     ENTITY_NAME varchar2(255 char) not null,
     OPERATION_TYPE varchar2(50 char) not null,
@@ -427,13 +427,13 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
 )^
 
 create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE
-  on SEC_LOCALIZED_CONSTRAINT_MSG (ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
+  on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
 
 create table SEC_ENTITY_LOG (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     EVENT_TS timestamp,
     USER_ID varchar2(32 char),
     CHANGE_TYPE char(1),
@@ -460,7 +460,7 @@ create table SEC_FILTER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     COMPONENT varchar2(200 char),
     NAME varchar2(255 char),
     CODE varchar2(200 char),
@@ -480,18 +480,18 @@ create table SEC_GROUP (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     NAME varchar2(255 char) not null,
     PARENT_ID varchar2(32),
     primary key(ID)
 )^
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP(NAME, DELETE_TS)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP(SYS_TENANT_ID, NAME, DELETE_TS)^
 
 create table SEC_GROUP_HIERARCHY (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     GROUP_ID varchar2(32),
     PARENT_ID varchar2(32),
     HIERARCHY_LEVEL integer,
@@ -529,14 +529,14 @@ create table SEC_PERMISSION (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     PERMISSION_TYPE integer,
     TARGET varchar2(100 char),
     VALUE_ integer,
     ROLE_ID varchar2(32),
     primary key(ID)
 )^
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION(ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
+create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION(SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
 
 create table SEC_PRESENTATION (
     ID varchar2(32) not null,
@@ -544,7 +544,7 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar2(50 char),
     UPDATE_TS timestamp,
     UPDATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     COMPONENT varchar2(200 char),
     NAME varchar2(255 char),
     XML varchar2(4000),
@@ -563,7 +563,7 @@ create table SEC_ROLE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     NAME varchar2(255 char) not null,
     LOC_NAME varchar2(255 char),
     DESCRIPTION varchar2(1000 char),
@@ -571,13 +571,13 @@ create table SEC_ROLE (
     ROLE_TYPE integer,
     primary key(ID)
 )^
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE(NAME, DELETE_TS)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE(SYS_TENANT_ID, NAME, DELETE_TS)^
 
 create table SEC_SCREEN_HISTORY (
     ID varchar2(32) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     USER_ID varchar2(32),
     CAPTION varchar2(255 char),
     URL clob,
@@ -617,7 +617,7 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     NAME varchar2(50 char),
     STR_VALUE varchar2(1000 char),
     DATATYPE varchar2(20 char),
@@ -635,7 +635,7 @@ create table SEC_USER (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     LOGIN varchar2(50 char) not null,
     LOGIN_LC varchar2(50 char) not null,
     PASSWORD varchar2(255 char),
@@ -655,7 +655,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON char(1),
     primary key(ID)
 )^
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(CUBA_TENANT_ID, LOGIN_LC, DELETE_TS)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(SYS_TENANT_ID, LOGIN_LC, DELETE_TS)^
 
 create table SEC_USER_ROLE (
     ID varchar2(32) not null,
@@ -666,7 +666,7 @@ create table SEC_USER_ROLE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     USER_ID varchar2(32),
     ROLE_ID varchar2(32),
     primary key(ID)
@@ -694,7 +694,7 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     USER_ID varchar2(32) not null,
     SUBSTITUTED_USER_ID varchar2(32) not null,
     START_DATE timestamp,
@@ -726,7 +726,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    CUBA_TENANT_ID varchar2(255 char),
+    SYS_TENANT_ID varchar2(255 char),
     --
     SESSION_ID varchar2(32) not null,
     USER_ID varchar2(32) not null,

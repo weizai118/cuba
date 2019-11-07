@@ -69,7 +69,7 @@ public class SessionLogEntry extends StandardEntity implements HasTenant {
     @Column(name = "SERVER_ID")
     protected String server;
 
-    @Column(name = "CUBA_TENANT_ID")
+    @Column(name = "SYS_TENANT_ID")
     protected String tenantId;
 
     public void setLastAction(SessionAction lastAction) {
