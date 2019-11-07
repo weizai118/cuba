@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.security.auth.providers;
 
+import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class AbstractAuthenticationProvider implements AuthenticationProvider {
 
@@ -50,6 +52,19 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
 
     @Nullable
     protected User loadUser(String login) throws LoginException {
+        return loadUser(login, ParamsMap.empty());
+    }
+
+
+    /**
+     * Hook to be implemented in subclasses. Called by for find a user in the database.
+     *
+     * @param params URI params map.
+     * @param login  user login name.
+     * @return User instance, or null if no such user found
+     **/
+    @Nullable
+    protected User loadUser(String login, Map<String, Object> params) {
         if (login == null) {
             throw new IllegalArgumentException("Login is null");
         }
