@@ -46,8 +46,6 @@ import static com.haulmont.cuba.web.App.*;
 public class LoginCookies {
     public static final String NAME = "cuba_LoginCookies";
 
-    private static final Logger log = LoggerFactory.getLogger(LoginCookies.class);
-
     protected WebConfig webConfig;
 
     protected GlobalConfig globalConfig;
@@ -116,50 +114,5 @@ public class LoginCookies {
         app.removeCookie(COOKIE_REMEMBER_ME);
         app.removeCookie(COOKIE_LOGIN);
         app.removeCookie(COOKIE_PASSWORD);
-    }
-
-    /**
-     * Do login with "remember me" cookies.
-     *
-     * @param isLocalesSelectVisible is locales field visible
-     */
-    public void doRememberMeLogin(boolean isLocalesSelectVisible) {
-        if (!webConfig.getRememberMeEnabled()) {
-            return;
-        }
-
-        String rememberMeCookie = app.getCookieValue(COOKIE_REMEMBER_ME);
-        if (!Boolean.parseBoolean(rememberMeCookie)) {
-            return;
-        }
-
-        String encodedLogin = app.getCookieValue(COOKIE_LOGIN) != null
-                ? app.getCookieValue(COOKIE_LOGIN) : "";
-        String login = URLEncodeUtils.decodeUtf8(encodedLogin);
-
-        String rememberMeToken = app.getCookieValue(COOKIE_PASSWORD) != null
-                ? app.getCookieValue(COOKIE_PASSWORD) : "";
-
-        if (StringUtils.isEmpty(login)
-                || StringUtils.isEmpty(rememberMeToken)) {
-            return;
-        }
-
-        boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken);
-        if (!tokenValid) {
-            resetRememberCookies();
-            return;
-        }
-
-        if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken);
-            credentials.setOverrideLocale(isLocalesSelectVisible);
-            try {
-                connection.login(credentials);
-            } catch (LoginException e) {
-                log.info("Failed to login with remember me token. Reset corresponding cookies.");
-                resetRememberCookies();
-            }
-        }
     }
 }

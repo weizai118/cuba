@@ -256,12 +256,8 @@ public class LoginScreen extends Screen {
         }
     }
 
-    protected void doLogin(Credentials credentials) throws LoginException {
-        authDelegate.doLogin(credentials, localesSelect.isVisibleRecursive());
-    }
-
     protected void doRememberMeLogin() {
-        loginCookies.doRememberMeLogin(localesSelect.isVisibleRecursive());
+        authDelegate.doRememberMeLogin(localesSelect.isVisibleRecursive());
     }
 
     protected void setAuthInfo(LoginScreenAuthDelegate.AuthInfo authInfo) {
