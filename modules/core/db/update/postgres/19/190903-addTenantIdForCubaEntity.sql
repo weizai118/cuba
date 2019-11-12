@@ -23,17 +23,15 @@ alter table SEC_SESSION_LOG add SYS_TENANT_ID varchar(255)^
 
 drop index IDX_SEC_USER_UNIQ_LOGIN^
 create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID, LOGIN_LC) where DELETE_TS is null^
+create unique index IDX_SEC_USER_UNIQ_LOGIN_SYS_TENANT_ID_NN on SEC_USER (SYS_TENANT_ID, LOGIN_LC)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 drop index IDX_SEC_ROLE_UNIQ_NAME^
 create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID, NAME) where DELETE_TS is null^
+create unique index IDX_SEC_ROLE_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_ROLE (SYS_TENANT_ID, NAME)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 drop index IDX_SEC_GROUP_UNIQ_NAME^
 create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID, NAME) where DELETE_TS is null^
-
-drop index IDX_SEC_PERMISSION_UNIQUE^
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET)
-    where DELETE_TS is null^
-
-drop index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE^
-create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE)
-    where DELETE_TS is null^
+create unique index IDX_SEC_GROUP_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_GROUP (SYS_TENANT_ID, NAME)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^

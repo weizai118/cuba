@@ -417,7 +417,6 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    SYS_TENANT_ID varchar2(255 char),
     --
     ENTITY_NAME varchar2(255 char) not null,
     OPERATION_TYPE varchar2(50 char) not null,
@@ -427,7 +426,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
 )^
 
 create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE
-  on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
+  on SEC_LOCALIZED_CONSTRAINT_MSG (ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
 
 create table SEC_ENTITY_LOG (
     ID varchar2(32) not null,
@@ -529,14 +528,13 @@ create table SEC_PERMISSION (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    SYS_TENANT_ID varchar2(255 char),
     PERMISSION_TYPE integer,
     TARGET varchar2(100 char),
     VALUE_ integer,
     ROLE_ID varchar2(32),
     primary key(ID)
 )^
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION(SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
+create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION(ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
 
 create table SEC_PRESENTATION (
     ID varchar2(32) not null,
@@ -666,7 +664,6 @@ create table SEC_USER_ROLE (
     UPDATED_BY varchar2(50 char),
     DELETE_TS timestamp,
     DELETED_BY varchar2(50 char),
-    SYS_TENANT_ID varchar2(255 char),
     USER_ID varchar2(32),
     ROLE_ID varchar2(32),
     primary key(ID)

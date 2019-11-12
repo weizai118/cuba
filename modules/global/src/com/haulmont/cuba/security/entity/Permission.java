@@ -16,7 +16,6 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
@@ -29,7 +28,7 @@ import javax.persistence.*;
 @Entity(name = "sec$Permission")
 @Table(name = "SEC_PERMISSION")
 @SystemLevel
-public class Permission extends StandardEntity implements HasTenant {
+public class Permission extends StandardEntity {
 
     private static final long serialVersionUID = 4188184934170706381L;
 
@@ -53,9 +52,6 @@ public class Permission extends StandardEntity implements HasTenant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_ID")
     private Role role;
-
-    @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
 
     public Role getRole() {
         return role;
@@ -93,15 +89,5 @@ public class Permission extends StandardEntity implements HasTenant {
      */
     public void setValue(Integer value) {
         this.value = value;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 }

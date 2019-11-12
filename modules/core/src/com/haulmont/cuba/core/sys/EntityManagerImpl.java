@@ -83,11 +83,13 @@ public class EntityManagerImpl implements EntityManager {
     protected void init() {
         Map<String, AdditionalCriteriaProvider> additionalCriteriaProviderMap = AppBeans.getAll(AdditionalCriteriaProvider.class);
 
-        additionalCriteriaProviderMap.values().stream()
-                .filter(item -> item.getCriteriaParameters() != null)
-                .forEach(item ->
-                        item.getCriteriaParameters().forEach((propertyName, value) -> this.delegate.setProperty(propertyName, value))
-                );
+        for (AdditionalCriteriaProvider acp : additionalCriteriaProviderMap.values()) {
+            if (acp.getCriteriaParameters() != null) {
+                for (Map.Entry<String, Object> entry : acp.getCriteriaParameters().entrySet()) {
+                    this.delegate.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     @Override

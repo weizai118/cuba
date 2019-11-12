@@ -16,9 +16,7 @@
 
 package com.haulmont.cuba.web.app.loginwindow;
 
-import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.bali.util.URLEncodeUtils;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;

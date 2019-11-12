@@ -159,6 +159,7 @@ create table SEC_ROLE (
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
     SYS_TENANT_ID varchar(255),
+    SYS_TENANT_ID_NN varchar(255),
     --
     NAME varchar(190) not null,
     LOC_NAME varchar(255),
@@ -169,13 +170,21 @@ create table SEC_ROLE (
     primary key (ID)
 )^
 
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
 
-create trigger SEC_ROLE_DELETE_TS_NN_TRIGGER before update on SEC_ROLE
+create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_INSERT_TRIGGER before insert on SEC_ROLE
+for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
+
+create trigger SEC_ROLE_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_ROLE
 for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+        set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
+    end if;
 	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
 		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if^
+	end if;
+end^
 
 /**********************************************************************************************/
 
@@ -190,6 +199,7 @@ create table SEC_GROUP (
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
     SYS_TENANT_ID varchar(255),
+    SYS_TENANT_ID_NN varchar(255),
     --
     NAME varchar(190) not null,
     PARENT_ID varchar(32),
@@ -198,14 +208,21 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
 
-create trigger SEC_GROUP_DELETE_TS_NN_TRIGGER before update on SEC_GROUP
+create trigger SEC_GROUP_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_GROUP
+for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
+
+create trigger SEC_GROUP_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_GROUP
 for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+		set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
+	end if;
 	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
 		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if^
-
+	end if;
+end^
 /**********************************************************************************************/
 
 create table SEC_GROUP_HIERARCHY (
@@ -236,6 +253,7 @@ create table SEC_USER (
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
     SYS_TENANT_ID varchar(255),
+    SYS_TENANT_ID_NN varchar(255),
     --
     LOGIN varchar(50) not null,
     LOGIN_LC varchar(50) not null,
@@ -259,13 +277,21 @@ create table SEC_USER (
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID, LOGIN_LC, DELETE_TS_NN)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID_NN, LOGIN_LC, DELETE_TS_NN)^
 
-create trigger SEC_USER_DELETE_TS_NN_TRIGGER before update on SEC_USER
+create trigger SEC_USER_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_USER
+for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
+
+create trigger SEC_USER_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_USER
 for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+    	set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
+	end if;
 	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
 		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if^
+	end if;
+end^
 
 /**********************************************************************************************/
 
@@ -279,7 +305,6 @@ create table SEC_USER_ROLE (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
-    SYS_TENANT_ID varchar(255),
     --
     USER_ID varchar(32),
     ROLE_ID varchar(32),
@@ -311,7 +336,6 @@ create table SEC_PERMISSION (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
-    SYS_TENANT_ID varchar(255),
     --
     PERMISSION_TYPE integer,
     TARGET varchar(100),
@@ -322,7 +346,7 @@ create table SEC_PERMISSION (
     constraint SEC_PERMISSION_ROLE foreign key (ROLE_ID) references SEC_ROLE(ID)
 )^
 
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS_NN)^
+create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS_NN)^
 
 create trigger SEC_PERMISSION_DELETE_TS_NN_TRIGGER before update on SEC_PERMISSION
 for each row
@@ -371,7 +395,6 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     DELETE_TS datetime(3),
     DELETED_BY varchar(50),
     DELETE_TS_NN datetime(3) not null default '1000-01-01 00:00:00.000',
-    SYS_TENANT_ID varchar(255),
     --
     ENTITY_NAME varchar(150) not null,
     OPERATION_TYPE varchar(40) not null,
@@ -381,7 +404,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
 )^
 
 create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE
-  on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE, DELETE_TS_NN)^
+  on SEC_LOCALIZED_CONSTRAINT_MSG (ENTITY_NAME, OPERATION_TYPE, DELETE_TS_NN)^
 
 create trigger SEC_LOCALIZED_CONSTRAINT_MSG_DELETE_TS_NN_TRIGGER before update on SEC_LOCALIZED_CONSTRAINT_MSG
 for each row

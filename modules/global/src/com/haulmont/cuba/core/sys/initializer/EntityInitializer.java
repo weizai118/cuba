@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.core.app.multitenancy;
+package com.haulmont.cuba.core.sys.initializer;
 
-import org.springframework.stereotype.Component;
+import com.haulmont.cuba.core.entity.Entity;
 
 /**
- * The default implementation {@link TenantProvider}.
+ * Provides initialization of the entity
  */
-@Component(TenantProvider.NAME)
-public class DefaultTenantProvider implements TenantProvider {
+public interface EntityInitializer {
 
-    @Override
-    public String getTenantId() {
-        return NO_TENANT;
-    }
+    /**
+     * Entity initialization
+     *
+     * @param entity entity instance
+     */
+    void init(Entity entity);
 }

@@ -22,16 +22,46 @@ alter table SYS_ENTITY_SNAPSHOT add SYS_TENANT_ID varchar(255)^
 alter table SEC_SESSION_LOG add SYS_TENANT_ID varchar(255)^
 
 drop index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER^
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID, LOGIN_LC, DELETE_TS_NN)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID_NN, LOGIN_LC, DELETE_TS_NN)^
+
+drop trigger SEC_USER_DELETE_TS_NN_TRIGGER on SEC_USER^
+create trigger SEC_USER_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_USER
+for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+        set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID);
+    end if;
+    if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
+        set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
+    end if;
+end^
 
 drop index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE^
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
+
+drop trigger SEC_ROLE_DELETE_TS_NN_TRIGGER on SEC_ROLE^
+create trigger SEC_ROLE_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_ROLE
+for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+		set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID);
+	end if;
+	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
+		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
+	end if;
+end^
 
 drop index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP^
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
 
-drop index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION^
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS_NN)^
-
-drop index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE on SEC_LOCALIZED_CONSTRAINT_MSG^
-create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE, DELETE_TS_NN)^
+drop trigger SEC_GROUP_DELETE_TS_NN_TRIGGER on SEC_GROUP^
+create trigger SEC_GROUP_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_GROUP
+for each row
+begin
+    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
+    		set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID);
+    end if;
+	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
+		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
+	end if;
+end^

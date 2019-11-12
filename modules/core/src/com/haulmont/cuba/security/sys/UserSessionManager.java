@@ -23,7 +23,6 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.TypedQuery;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.DefaultPermissionValuesConfig;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
@@ -70,9 +69,6 @@ public class UserSessionManager {
     protected EntityStates entityStates;
 
     @Inject
-    protected GlobalConfig globalConfig;
-
-    @Inject
     protected Metadata metadata;
 
     @Inject
@@ -110,7 +106,6 @@ public class UserSessionManager {
             throw new IllegalStateException("User is not in a Group");
         compileConstraints(session, user.getGroup());
         compileSessionAttributes(session, user.getGroup());
-        setTenantIdAttribute(session, user);
         return session;
     }
 
@@ -134,7 +129,6 @@ public class UserSessionManager {
             throw new IllegalStateException("User is not in a Group");
         compileConstraints(session, user.getGroup());
         compileSessionAttributes(session, user.getGroup());
-        setTenantIdAttribute(session, user);
         return session;
     }
 
@@ -163,14 +157,6 @@ public class UserSessionManager {
                         convertToExtendedEntityTarget(permission), permission.getValue());
             }
         });
-    }
-
-    protected void setTenantIdAttribute(UserSession session, User user) {
-        if (user.getTenantId() == null) {
-            session.setAttribute(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, TenantProvider.NO_TENANT);
-        } else {
-            session.setAttribute(TenantProvider.TENANT_ID_ATTRIBUTE_NAME, user.getTenantId());
-        }
     }
 
     protected String convertToExtendedEntityTarget(Permission permission) {

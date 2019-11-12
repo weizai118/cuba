@@ -17,7 +17,6 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.bali.util.Preconditions;
-import com.haulmont.cuba.core.entity.HasTenant;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +34,7 @@ import javax.persistence.Table;
 @Entity(name = "sec$LocalizedConstraintMessage")
 @Table(name = "SEC_LOCALIZED_CONSTRAINT_MSG")
 @SystemLevel
-public class LocalizedConstraintMessage extends StandardEntity implements HasTenant {
+public class LocalizedConstraintMessage extends StandardEntity {
 
     protected static final String CAPTION_KEY = "caption";
     protected static final String MESSAGE_KEY = "message";
@@ -49,9 +48,6 @@ public class LocalizedConstraintMessage extends StandardEntity implements HasTen
     @Lob
     @Column(name = "VALUES_")
     protected String values;
-
-    @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
 
     public String getEntityName() {
         return entityName;
@@ -75,16 +71,6 @@ public class LocalizedConstraintMessage extends StandardEntity implements HasTen
 
     public void setValues(String values) {
         this.values = values;
-    }
-
-    @Override
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     @Nullable

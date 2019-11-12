@@ -29,11 +29,11 @@ import com.haulmont.chile.core.model.MetaModel;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.Session;
 import com.haulmont.chile.core.model.impl.SessionImpl;
-import com.haulmont.cuba.core.app.multitenancy.TenantProvider;
 import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.events.AppContextInitializedEvent;
+import com.haulmont.cuba.core.sys.initializer.EntityInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -89,9 +89,6 @@ public class MetadataImpl implements Metadata {
 
     @Inject
     protected GlobalConfig config;
-
-    @Inject
-    protected TenantProvider tenantProvider;
 
     // stores methods in the execution order, all methods are accessible
     protected LoadingCache<Class<?>, List<Method>> postConstructMethodsCache =
@@ -155,12 +152,19 @@ public class MetadataImpl implements Metadata {
             T obj = extClass.newInstance();
             assignIdentifier((Entity) obj);
             assignUuid((Entity) obj);
-            assignTenantId((Entity) obj);
+            entityInit((Entity) obj);
             createEmbedded((Entity) obj);
             invokePostConstructMethods((Entity) obj);
             return obj;
         } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException("Unable to create entity instance", e);
+        }
+    }
+
+    protected void entityInit(Entity entity) {
+        Collection<EntityInitializer> initializers = AppBeans.getAll(EntityInitializer.class).values();
+        for (EntityInitializer initializer : initializers) {
+            initializer.init(entity);
         }
     }
 
@@ -210,13 +214,6 @@ public class MetadataImpl implements Metadata {
     protected void assignUuid(Entity entity) {
         if (entity instanceof HasUuid) {
             ((HasUuid) entity).setUuid(UuidProvider.createUuid());
-        }
-    }
-
-    protected void assignTenantId(Entity entity) {
-        String tenantId = tenantProvider.getTenantId();
-        if (entity instanceof HasTenant && !tenantId.equals(TenantProvider.NO_TENANT)) {
-            ((HasTenant) entity).setTenantId(tenantId);
         }
     }
 

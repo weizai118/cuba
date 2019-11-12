@@ -55,14 +55,6 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
         return loadUser(login, ParamsMap.empty());
     }
 
-
-    /**
-     * Hook to be implemented in subclasses. Called by for find a user in the database.
-     *
-     * @param params URI params map.
-     * @param login  user login name.
-     * @return User instance, or null if no such user found
-     **/
     @Nullable
     protected User loadUser(String login, Map<String, Object> params) {
         if (login == null) {

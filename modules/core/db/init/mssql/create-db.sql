@@ -264,7 +264,6 @@ create table SEC_USER_ROLE (
     UPDATED_BY varchar(50),
     DELETE_TS datetime,
     DELETED_BY varchar(50),
-    SYS_TENANT_ID varchar(255),
     --
     USER_ID uniqueidentifier,
     ROLE_ID uniqueidentifier,
@@ -289,7 +288,6 @@ create table SEC_PERMISSION (
     UPDATED_BY varchar(50),
     DELETE_TS datetime,
     DELETED_BY varchar(50),
-    SYS_TENANT_ID varchar(255),
     --
     PERMISSION_TYPE integer,
     TARGET varchar(100),
@@ -300,7 +298,7 @@ create table SEC_PERMISSION (
     constraint SEC_PERMISSION_ROLE foreign key (ROLE_ID) references SEC_ROLE(ID)
 )^
 
-create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (SYS_TENANT_ID, ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
+create unique index IDX_SEC_PERMISSION_UNIQUE on SEC_PERMISSION (ROLE_ID, PERMISSION_TYPE, TARGET, DELETE_TS)^
 
 create clustered index IDX_SEC_PERMISSION_ROLE on SEC_PERMISSION (ROLE_ID)^
 
@@ -345,7 +343,6 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
     UPDATED_BY varchar(50),
     DELETE_TS datetime,
     DELETED_BY varchar(50),
-    SYS_TENANT_ID varchar(255),
     --
     ENTITY_NAME varchar(255) not null,
     OPERATION_TYPE varchar(50) not null,
@@ -355,7 +352,7 @@ create table SEC_LOCALIZED_CONSTRAINT_MSG (
 )^
 
 create unique index IDX_SEC_LOC_CNSTRNT_MSG_UNIQUE
-  on SEC_LOCALIZED_CONSTRAINT_MSG (SYS_TENANT_ID, ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
+  on SEC_LOCALIZED_CONSTRAINT_MSG (ENTITY_NAME, OPERATION_TYPE, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
