@@ -17,6 +17,8 @@
 package com.haulmont.cuba.gui.builders;
 
 import com.haulmont.cuba.gui.screen.CloseAction;
+import com.haulmont.cuba.gui.screen.FrameOwner;
+import com.haulmont.cuba.gui.screen.LookupScreen;
 import com.haulmont.cuba.gui.screen.Screen;
 
 import java.util.EventObject;
@@ -46,5 +48,17 @@ public class AfterScreenCloseEvent<S extends Screen> extends EventObject {
      */
     public CloseAction getCloseAction() {
         return closeAction;
+    }
+
+    public boolean closedWithCommit() {
+        return closeAction.equals(FrameOwner.WINDOW_COMMIT_AND_CLOSE_ACTION);
+    }
+
+    public boolean closedWithDiscard() {
+        return closeAction.equals(FrameOwner.WINDOW_DISCARD_AND_CLOSE_ACTION);
+    }
+
+    public boolean closedWithSelect() {
+        return closeAction.equals(LookupScreen.LOOKUP_SELECT_CLOSE_ACTION);
     }
 }
