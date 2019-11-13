@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.screen;
 
-public enum CloseResult {
+public enum StandardOutcome {
 
     CLOSED(FrameOwner.WINDOW_CLOSE_ACTION),
 
@@ -28,7 +28,7 @@ public enum CloseResult {
 
     private CloseAction closeAction;
 
-    CloseResult(CloseAction closeAction) {
+    StandardOutcome(CloseAction closeAction) {
         this.closeAction = closeAction;
     }
 
