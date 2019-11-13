@@ -37,7 +37,7 @@ public interface AdditionalCriteriaProvider {
      *
      * @return The string of this additional criteria
      */
-    String getAdditionalCriteria();
+    String getAdditionalCriteria(Class entityClass);
 
     /**
      * Returns parameters of the additional criteria.

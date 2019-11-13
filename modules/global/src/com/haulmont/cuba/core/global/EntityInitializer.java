@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.core.sys.initializer;
+package com.haulmont.cuba.core.global;
 
 import com.haulmont.cuba.core.entity.Entity;
 
 /**
- * Provides initialization of the entity
+ * Provides initialization of the entity at {@link Metadata#create} execution
  */
 public interface EntityInitializer {
 

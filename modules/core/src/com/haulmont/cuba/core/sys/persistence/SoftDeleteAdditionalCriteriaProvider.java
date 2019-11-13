@@ -34,7 +34,7 @@ public class SoftDeleteAdditionalCriteriaProvider implements AdditionalCriteriaP
     }
 
     @Override
-    public String getAdditionalCriteria() {
+    public String getAdditionalCriteria(Class entityClass) {
         return DELETE_TS_IS_NULL;
     }
 

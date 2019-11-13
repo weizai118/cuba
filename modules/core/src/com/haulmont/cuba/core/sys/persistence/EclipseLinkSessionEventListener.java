@@ -174,7 +174,7 @@ public class EclipseLinkSessionEventListener extends SessionEventAdapter {
         additionalCriteriaProviderMap.values().stream()
                 .filter(item -> item.requiresAdditionalCriteria(desc.getJavaClass()))
                 .forEach(additionalCriteriaProvider ->
-                        criteriaBuilder.append(additionalCriteriaProvider.getAdditionalCriteria()).append(" AND")
+                        criteriaBuilder.append(additionalCriteriaProvider.getAdditionalCriteria(desc.getJavaClass())).append(" AND")
                 );
 
         if (criteriaBuilder.length() != 0) {

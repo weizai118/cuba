@@ -33,7 +33,6 @@ import com.haulmont.cuba.core.entity.*;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.sys.events.AppContextInitializedEvent;
-import com.haulmont.cuba.core.sys.initializer.EntityInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
