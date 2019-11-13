@@ -148,11 +148,19 @@ public class MetadataImpl implements Metadata {
             T obj = extClass.getDeclaredConstructor().newInstance();
             assignIdentifier(obj);
             assignUuid(obj);
+            entityInit(obj);
             createEmbedded(obj);
             invokePostConstructMethods(obj);
             return obj;
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException("Unable to create entity instance", e);
+        }
+    }
+
+    protected void entityInit(Entity entity) {
+        Collection<EntityInitializer> initializers = AppBeans.getAll(EntityInitializer.class).values();
+        for (EntityInitializer initializer : initializers) {
+            initializer.init(entity);
         }
     }
 

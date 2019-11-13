@@ -48,6 +48,7 @@ create table SYS_FILE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(500) not null,
     EXT varchar(20),
@@ -99,6 +100,7 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     BEAN_NAME varchar(50),
     METHOD_NAME varchar(50),
@@ -132,6 +134,7 @@ create table SYS_SCHEDULED_EXECUTION (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     TASK_ID varchar(36),
     SERVER varchar(512),
@@ -157,6 +160,7 @@ create table SEC_ROLE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     LOC_NAME varchar(255),
@@ -180,7 +184,7 @@ create table SEC_ROLE (
 --	end if;
 --end;^
 
-alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (NAME, DELETE_TS)^
+alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -193,6 +197,7 @@ create table SEC_GROUP (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     PARENT_ID varchar(36),
@@ -201,7 +206,7 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 
-alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (NAME, DELETE_TS)^
+alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -209,6 +214,7 @@ create table SEC_GROUP_HIERARCHY (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     GROUP_ID varchar(36),
     PARENT_ID varchar(36),
@@ -230,6 +236,7 @@ create table SEC_USER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     LOGIN varchar(50) not null,
     LOGIN_LC varchar(50) not null,
@@ -250,7 +257,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON boolean,
     --
     primary key (ID),
-    constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, DELETE_TS),
+    constraint IDX_SEC_USER_UNIQ_LOGIN unique (SYS_TENANT_ID, LOGIN_LC, DELETE_TS),
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
@@ -309,6 +316,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     CODE varchar(255),
     CHECK_TYPE varchar(50) default 'db',
@@ -358,6 +366,7 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(50),
     STR_VALUE varchar(1000),
@@ -396,6 +405,7 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     USER_ID varchar(36) not null,
     SUBSTITUTED_USER_ID varchar(36) not null,
@@ -444,6 +454,7 @@ create table SEC_ENTITY_LOG (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     EVENT_TS timestamp,
     USER_ID varchar(36),
@@ -471,6 +482,7 @@ create table SEC_FILTER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -494,6 +506,7 @@ create table SYS_FOLDER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     FOLDER_TYPE char(1),
     PARENT_ID varchar(36),
@@ -527,6 +540,7 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar(50),
     UPDATE_TS timestamp,
     UPDATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -586,6 +600,8 @@ create table SEC_SCREEN_HISTORY (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
+    --
     USER_ID varchar(36),
     CAPTION varchar(255),
     URL varchar(4000),
@@ -613,6 +629,7 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     ADDRESS_TO longvarchar,
     ADDRESS_CC longvarchar,
@@ -644,6 +661,7 @@ create table SYS_SENDING_ATTACHMENT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     MESSAGE_ID varchar(36),
     CONTENT longvarbinary,
@@ -669,6 +687,7 @@ create table SYS_ENTITY_SNAPSHOT (
     ID varchar(36) not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     ENTITY_META_CLASS varchar(50),
     ENTITY_ID varchar(36),
@@ -855,6 +874,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     SESSION_ID varchar(36) not null,
     SUBSTITUTED_USER_ID varchar(36),
@@ -876,7 +896,6 @@ create index IDX_SEC_SESSION_LOG_USER on SEC_SESSION_LOG (USER_ID)^
 alter table SEC_SESSION_LOG add constraint FK_SEC_SESSION_LOG_SUBUSER foreign key (SUBSTITUTED_USER_ID) references SEC_USER(ID)^
 create index IDX_SEC_SESSION_LOG_SUBUSER on SEC_SESSION_LOG (SUBSTITUTED_USER_ID)^
 create index IDX_SESSION_LOG_STARTED_TS on SEC_SESSION_LOG (STARTED_TS DESC)^
-
 
 ------------------------------------------------------------------------------------------------------------
 

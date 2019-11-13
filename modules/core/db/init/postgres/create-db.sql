@@ -43,6 +43,7 @@ create table SYS_FILE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(500) not null,
     EXT varchar(20),
@@ -96,6 +97,7 @@ create table SYS_SCHEDULED_TASK (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     DEFINED_BY varchar(1) default 'B',
     CLASS_NAME varchar(500),
@@ -129,6 +131,7 @@ create table SYS_SCHEDULED_EXECUTION (
     ID uuid not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     TASK_ID uuid,
     SERVER varchar(512),
@@ -154,6 +157,7 @@ create table SEC_ROLE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     LOC_NAME varchar(255),
@@ -164,7 +168,9 @@ create table SEC_ROLE (
     primary key (ID)
 )^
 
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME) where DELETE_TS is null^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME) where DELETE_TS is null and SYS_TENANT_ID is null^
+create unique index IDX_SEC_ROLE_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_ROLE (SYS_TENANT_ID, NAME)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -177,6 +183,7 @@ create table SEC_GROUP (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(255) not null,
     PARENT_ID uuid,
@@ -184,7 +191,9 @@ create table SEC_GROUP (
     primary key (ID),
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME) where DELETE_TS is null^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME) where DELETE_TS is null and SYS_TENANT_ID is null^
+create unique index IDX_SEC_GROUP_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_GROUP (SYS_TENANT_ID, NAME)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -192,6 +201,7 @@ create table SEC_GROUP_HIERARCHY (
     ID uuid not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     GROUP_ID uuid,
     PARENT_ID uuid,
@@ -213,6 +223,7 @@ create table SEC_USER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     LOGIN varchar(50) not null,
     LOGIN_LC varchar(50) not null,
@@ -236,7 +247,9 @@ create table SEC_USER (
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC) where DELETE_TS is null^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC) where DELETE_TS is null and SYS_TENANT_ID is null^
+create unique index IDX_SEC_USER_UNIQ_LOGIN_SYS_TENANT_ID_NN on SEC_USER (SYS_TENANT_ID, LOGIN_LC)
+    where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -295,6 +308,7 @@ create table SEC_CONSTRAINT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     CODE varchar(255),
     CHECK_TYPE varchar(50) default 'db',
@@ -347,6 +361,7 @@ create table SEC_SESSION_ATTR (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     NAME varchar(50),
     STR_VALUE varchar(1000),
@@ -387,6 +402,7 @@ create table SEC_USER_SUBSTITUTION (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     USER_ID uuid not null,
     SUBSTITUTED_USER_ID uuid not null,
@@ -438,6 +454,7 @@ create table SEC_ENTITY_LOG (
     ID uuid not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     EVENT_TS timestamp,
     USER_ID uuid,
@@ -470,6 +487,7 @@ create table SEC_FILTER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -495,6 +513,7 @@ create table SYS_FOLDER (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     FOLDER_TYPE char(1),
     PARENT_ID uuid,
@@ -528,6 +547,7 @@ create table SEC_PRESENTATION (
     CREATED_BY varchar(50),
     UPDATE_TS timestamp,
     UPDATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     COMPONENT varchar(200),
     NAME varchar(255),
@@ -590,6 +610,8 @@ create table SEC_SCREEN_HISTORY (
     ID uuid,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
+    --
     USER_ID uuid,
     CAPTION varchar(255),
     URL TEXT,
@@ -623,6 +645,7 @@ create table SYS_SENDING_MESSAGE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     ADDRESS_TO text,
     ADDRESS_CC text,
@@ -661,6 +684,7 @@ create table SYS_SENDING_ATTACHMENT (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     MESSAGE_ID uuid,
     CONTENT bytea,
@@ -683,6 +707,7 @@ create table SYS_ENTITY_SNAPSHOT (
     ID uuid not null,
     CREATE_TS timestamp,
     CREATED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     ENTITY_META_CLASS varchar(50) not null,
     ENTITY_ID uuid,
@@ -893,6 +918,7 @@ create table SEC_SESSION_LOG (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    SYS_TENANT_ID varchar(255),
     --
     SESSION_ID uuid not null,
     USER_ID uuid not null,

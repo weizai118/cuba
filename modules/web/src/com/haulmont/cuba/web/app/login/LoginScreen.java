@@ -22,6 +22,7 @@ import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
@@ -48,7 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.haulmont.cuba.web.App.*;
 
@@ -93,6 +96,8 @@ public class LoginScreen extends Screen {
     protected PasswordField passwordField;
     @Inject
     protected LookupField<Locale> localesSelect;
+    @Inject
+    protected UrlRouting urlRouting;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -254,6 +259,8 @@ public class LoginScreen extends Screen {
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
 
+        Map<String, Object> params = new HashMap<>(urlRouting.getState().getParams());
+
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messages.getMainMessage("loginWindow.emptyLoginOrPassword"))
@@ -265,7 +272,7 @@ public class LoginScreen extends Screen {
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, params));
 
             // locale could be set on the server
             if (connection.getSession() != null) {

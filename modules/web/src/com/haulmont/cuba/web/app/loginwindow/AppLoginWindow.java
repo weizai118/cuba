@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.app.loginwindow;
 
 import com.haulmont.bali.util.URLEncodeUtils;
 import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.gui.UrlRouting;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.security.app.UserManagementService;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -111,6 +113,9 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
 
     @Inject
     protected LookupField<Locale> localesSelect;
+
+    @Inject
+    protected UrlRouting urlRouting;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -277,6 +282,8 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         String login = loginField.getValue();
         String password = passwordField.getValue() != null ? passwordField.getValue() : "";
 
+        Map<String, Object> params = new HashMap<>(urlRouting.getState().getParams());
+
         if (StringUtils.isEmpty(login) || StringUtils.isEmpty(password)) {
             showNotification(messages.getMainMessage("loginWindow.emptyLoginOrPassword"), NotificationType.WARNING);
             return;
@@ -286,7 +293,7 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
             Locale selectedLocale = localesSelect.getValue();
             app.setLocale(selectedLocale);
 
-            doLogin(new LoginPasswordCredentials(login, password, selectedLocale));
+            doLogin(new LoginPasswordCredentials(login, password, selectedLocale, params));
 
             // locale could be set on the server
             if (connection.getSession() != null) {
