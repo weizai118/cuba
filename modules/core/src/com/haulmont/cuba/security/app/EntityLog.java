@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.app;
 
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.chile.core.datatypes.Datatype;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.chile.core.model.*;
 import com.haulmont.cuba.core.*;
 import com.haulmont.cuba.core.app.ServerConfig;
@@ -627,10 +628,17 @@ public class EntityLog implements EntityLogAPI {
             MetaPropertyPath propertyPath = entity.getMetaClass().getPropertyPath(name);
             MetaProperty metaProperty = propertyPath.getMetaProperty();
 
-            String value = stringify(entity.getValueEx(name), metaProperty);
-            attr.setValue(value);
+            String strValue;
+            Object value = entity.getValueEx(name);
+            if (value instanceof EnumClass) {
+                strValue = ((EnumClass) value).getId().toString();
+            } else {
+                strValue = stringify(value, metaProperty);
+            }
+            attr.setValue(strValue);
 
-            Object valueId = getValueId(entity.getValueEx(name));
+            Object valueId = getValueId(value);
+
             if (valueId != null)
                 attr.setValueId(valueId.toString());
 

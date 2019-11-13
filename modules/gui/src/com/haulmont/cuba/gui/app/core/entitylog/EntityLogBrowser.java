@@ -262,6 +262,9 @@ public class EntityLogBrowser extends AbstractWindow {
             }
             return null;
         }, Table.PlainTextCell.class);
+
+        entityLogTable.addGeneratedColumn("entityLocalizedName",
+                entity -> new Table.PlainTextCell(entity.getEntityLocalizedName()), Table.PlainTextCell.class);
     }
 
     public TreeMap<String, String> getEntityMetaClasses() {

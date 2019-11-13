@@ -120,7 +120,7 @@
                                 </column>
                                 <column id="user" caption="msg://user"/>
                                 <column id="type" caption="msg://changeType"/>
-                                <column id="entity" caption="msg://entity"/>
+                                <column id="entityLocalizedName" caption="msg://entity"/>
                                 <column id="entityId" caption="Id"/>
                                 <column id="entityInstanceName"/>
                             </columns>

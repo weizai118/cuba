@@ -78,7 +78,7 @@ public class EntityLogAttr extends BaseUuidEntity {
     }
 
     public String getValue() {
-        return value;
+        return getDisplayValue();
     }
 
     public void setValue(String value) {
@@ -86,7 +86,7 @@ public class EntityLogAttr extends BaseUuidEntity {
     }
 
     public String getOldValue() {
-        return oldValue;
+        return getDisplayOldValue();
     }
 
     public void setOldValue(String oldValue) {
@@ -95,17 +95,44 @@ public class EntityLogAttr extends BaseUuidEntity {
 
     @MetaProperty
     public String getDisplayValue() {
-        return getValue();
+        return getDisplayValue(value);
     }
 
     @MetaProperty
     public String getDisplayOldValue() {
-        return getOldValue();
+        return getDisplayValue(oldValue);
     }
 
-    @Deprecated
     protected String getDisplayValue(String value) {
-        return value;
+        if (StringUtils.isEmpty(value) || getLogItem() == null) {
+            return value;
+        }
+        final String entityName = getLogItem().getEntity();
+        com.haulmont.chile.core.model.MetaClass metaClass = getClassFromEntityName(entityName);
+        if (metaClass != null) {
+            com.haulmont.chile.core.model.MetaProperty property = metaClass.getProperty(getName());
+            if (property != null) {
+                if (property.getRange().isDatatype()) {
+                    return value;
+                } else if (property.getRange().isEnum()) {
+                    Messages messages = AppBeans.get(Messages.NAME);
+                    try {
+                        Enum displayEnum = (Enum) property.getJavaType().getDeclaredMethod("fromId", String.class).invoke(null, value);
+                        return messages.getMessage(displayEnum);
+                    } catch (Exception e) {
+                        String nameKey = property.getRange().asEnumeration().getJavaClass().getSimpleName() + "." + value;
+                        String packageName = property.getRange().asEnumeration().getJavaClass().getPackage().getName();
+                        return messages.getMessage(packageName, nameKey);
+                    }
+                } else {
+                    return value;
+                }
+            } else {
+                return value;
+            }
+        } else {
+            return value;
+        }
     }
 
     public String getValueId() {
