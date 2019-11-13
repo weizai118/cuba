@@ -24,53 +24,8 @@ alter table SEC_SESSION_LOG add SYS_TENANT_ID varchar(255)^
 drop index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER^
 create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID, LOGIN_LC, DELETE_TS)^
 
-create trigger SEC_USER_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_USER
-for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
-
-drop trigger SEC_USER_DELETE_TS_NN_TRIGGER on SEC_USER^
-create trigger SEC_USER_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_USER
-for each row
-begin
-    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
-    	set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
-	end if;
-	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
-		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if;
-end^
-
 drop index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE^
 create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID, NAME, DELETE_TS)^
 
-create trigger SEC_ROLE_INSERT_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_ROLE
-for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
-
-drop trigger SEC_ROLE_DELETE_TS_NN_TRIGGER on SEC_ROLE^
-create trigger SEC_ROLE_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_ROLE
-for each row
-begin
-    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
-        set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
-    end if;
-	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
-		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if;
-end^
-
 drop index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP^
 create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID, NAME, DELETE_TS)^
-
-create trigger SEC_GROUP_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_GROUP
-for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
-
-drop trigger SEC_GROUP_DELETE_TS_NN_TRIGGER on SEC_GROUP^
-create trigger SEC_GROUP_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_GROUP
-for each row
-begin
-    if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
-		set NEW.SYS_TENANT_ID_NN = NEW.SYS_TENANT_ID;
-	end if;
-	if not(NEW.DELETE_TS <=> OLD.DELETE_TS) then
-		set NEW.DELETE_TS_NN = if (NEW.DELETE_TS is null, '1000-01-01 00:00:00.000', NEW.DELETE_TS);
-	end if;
-end^

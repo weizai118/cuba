@@ -42,7 +42,7 @@ end^
 drop index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE^
 create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
 
-create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_INSERT_TRIGGER before insert on SEC_ROLE
+create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_ROLE
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
 
 drop trigger SEC_ROLE_DELETE_TS_NN_TRIGGER on SEC_ROLE^
