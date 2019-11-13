@@ -17,7 +17,7 @@
 package com.haulmont.cuba.web.widgets;
 
 import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CubaFieldGroupLayoutState;
-import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CubaFieldGroupLayoutState.CaptionAlignment;
+import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CaptionAlignment;
 import com.vaadin.ui.GridLayout;
 
 import java.util.HashMap;
@@ -80,7 +80,9 @@ public class CubaFieldGroupLayout extends GridLayout {
                     int index = entry.getKey();
                     CaptionAlignment alignment = entry.getValue();
 
-                    if (index >= 0 && index <= getColumns() && alignment != null) {
+                    if (index >= 0
+                            && index <= getColumns()
+                            && alignment != null) {
                         newColumnCaptionAlignments[index] = alignment;
                     }
                 }

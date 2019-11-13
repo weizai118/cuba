@@ -23,7 +23,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Element;
 import com.haulmont.cuba.web.widgets.CubaFieldGroupLayout;
 import com.haulmont.cuba.web.widgets.client.caption.CubaCaptionWidget;
-import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CubaFieldGroupLayoutState.CaptionAlignment;
 import com.haulmont.cuba.web.widgets.client.gridlayout.CubaGridLayoutConnector;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
