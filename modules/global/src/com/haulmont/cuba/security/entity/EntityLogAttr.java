@@ -26,14 +26,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import javax.el.MethodNotFoundException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Record containing changed entity attribute.
