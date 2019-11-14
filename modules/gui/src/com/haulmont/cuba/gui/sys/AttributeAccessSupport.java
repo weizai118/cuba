@@ -22,17 +22,20 @@ import com.haulmont.cuba.client.AttributeAccessUpdater;
 import com.haulmont.cuba.core.entity.BaseEntityInternalAccess;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.SecurityState;
+import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.core.global.Security;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.Component.Editable;
 import com.haulmont.cuba.gui.components.ComponentContainer;
 import com.haulmont.cuba.gui.components.Field;
-import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.data.BindingState;
 import com.haulmont.cuba.gui.components.data.meta.EntityValueSource;
 import com.haulmont.cuba.gui.components.data.HasValueSource;
 import com.haulmont.cuba.gui.components.data.ValueSource;
+import com.haulmont.cuba.gui.components.data.value.DatasourceValueSource;
+import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.data.EmbeddedDatasource;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
 import org.springframework.stereotype.Component;
@@ -54,15 +57,18 @@ public class AttributeAccessSupport {
     @Inject
     protected Security security;
 
+    @Inject
+    private MetadataTools metadataTools;
+
     /**
      * Apply attribute access rules to a given frame. It means that all components bound to datasources will adjust
      * their visible/read-only/required state according to security state of entity instances contained in the datasources.
      *
      * @param frameOwner frame or screen
-     * @param reset whether to reset the components to the default state specified by role-based security and model
-     *              annotations. If you invoke this method to apply attribute access to already opened screen, set
-     *              the parameter to true, but keep in mind that previous programmatic changes in the components
-     *              visible/read-only/required state will be lost.
+     * @param reset      whether to reset the components to the default state specified by role-based security and model
+     *                   annotations. If you invoke this method to apply attribute access to already opened screen, set
+     *                   the parameter to true, but keep in mind that previous programmatic changes in the components
+     *                   visible/read-only/required state will be lost.
      */
     public void applyAttributeAccess(FrameOwner frameOwner, boolean reset) {
         ComponentContainer componentContainer;
@@ -80,12 +86,12 @@ public class AttributeAccessSupport {
      * bound to datasources will adjust their visible/read-only/required state according to security state of entity
      * instances contained in the datasources.
      *
-     * @param entities list of instances that should recalculate their security state
+     * @param entities   list of instances that should recalculate their security state
      * @param frameOwner frame or screen
-     * @param reset whether to reset the components to the default state specified by role-based security and model
-     *              annotations. If you invoke this method to apply attribute access to already opened screen, set
-     *              the parameter to true, but keep in mind that previous programmatic changes in the components
-     *              visible/read-only/required state will be lost.
+     * @param reset      whether to reset the components to the default state specified by role-based security and model
+     *                   annotations. If you invoke this method to apply attribute access to already opened screen, set
+     *                   the parameter to true, but keep in mind that previous programmatic changes in the components
+     *                   visible/read-only/required state will be lost.
      */
     public void applyAttributeAccess(FrameOwner frameOwner, boolean reset, Entity... entities) {
         for (Entity entity : entities) {
@@ -122,7 +128,19 @@ public class AttributeAccessSupport {
             }
         }
 
-        ComponentState componentState = calculateComponentState(entityValueSource.getItem(), propertyPath);
+        Entity item = entityValueSource.getItem();
+        ComponentState componentState = calculateComponentState(item, propertyPath);
+        if (metadataTools.isEmbeddable(item.getMetaClass())) {
+            if (entityValueSource instanceof DatasourceValueSource) {
+                Datasource ds = ((DatasourceValueSource) entityValueSource).getDatasource();
+                if (ds instanceof EmbeddedDatasource) {
+                    Datasource masterDs = ((EmbeddedDatasource) ds).getMaster();
+                    item = masterDs.getItem();
+                    componentState = calculateComponentState(item,
+                            metadataTools.resolveMetaPropertyPath(masterDs.getMetaClass(), ((EmbeddedDatasource) ds).getProperty().getName() + "." + propertyPath));
+                }
+            }
+        }
         if (componentState.hidden) {
             component.setVisible(false);
         }
@@ -139,11 +157,20 @@ public class AttributeAccessSupport {
     }
 
     protected ComponentState calculateComponentState(Entity entity, MetaPropertyPath propertyPath) {
-        MetaProperty[] metaProperties = propertyPath.getMetaProperties();
         ComponentState componentState = new ComponentState();
+        boolean embeddedFound = false;
+        if (propertyPath == null) {
+            return componentState;
+        }
+        MetaProperty[] metaProperties = propertyPath.getMetaProperties();
         for (int i = 0; i < metaProperties.length; i++) {
             MetaProperty metaProperty = metaProperties[i];
             String name = metaProperty.getName();
+            if (metadataTools.isEmbedded(metaProperty)) {
+                name = getEmbeddedAttrName(metaProperties, i);
+                embeddedFound = true;
+            }
+
             SecurityState securityState = getSecurityState(entity);
             if (securityState != null) {
                 componentState.hidden = test(componentState.hidden, securityState.getHiddenAttributes(), name);
@@ -152,6 +179,9 @@ public class AttributeAccessSupport {
                     componentState.required = test(componentState.required, securityState.getRequiredAttributes(), name);
                 }
             }
+            if (embeddedFound) {
+                break;
+            }
             if (i != metaProperties.length - 1) {
                 entity = entity.getValue(name);
                 if (entity == null) {
@@ -159,7 +189,21 @@ public class AttributeAccessSupport {
                 }
             }
         }
+
         return componentState;
+    }
+
+    protected String getEmbeddedAttrName(MetaProperty[] metaProperties, int startIndex) {
+        String resultName = "";
+        int index = startIndex;
+        while (index < metaProperties.length) {
+            resultName = resultName.concat(metaProperties[index].getName());
+            if (index != metaProperties.length - 1) {
+                resultName = resultName.concat(".");
+            }
+            index++;
+        }
+        return resultName;
     }
 
     protected SecurityState getSecurityState(Entity entity) {
