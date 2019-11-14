@@ -97,12 +97,12 @@ public class EntityLogAttr extends BaseUuidEntity {
 
     @MetaProperty
     public String getDisplayValue() {
-        return getDisplayValue(value);
+        return getDisplayValue(getValue());
     }
 
     @MetaProperty
     public String getDisplayOldValue() {
-        return getDisplayValue(oldValue);
+        return getDisplayValue(getOldValue());
     }
 
     protected String getDisplayValue(String value) {
