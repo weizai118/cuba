@@ -628,17 +628,10 @@ public class EntityLog implements EntityLogAPI {
             MetaPropertyPath propertyPath = entity.getMetaClass().getPropertyPath(name);
             MetaProperty metaProperty = propertyPath.getMetaProperty();
 
-            String strValue;
-            Object value = entity.getValueEx(name);
-            if (value instanceof EnumClass) {
-                strValue = ((EnumClass) value).getId().toString();
-            } else {
-                strValue = stringify(value, metaProperty);
-            }
-            attr.setValue(strValue);
+            String value = stringify(entity.getValueEx(name), metaProperty);
+            attr.setValue(value);
 
-            Object valueId = getValueId(value);
-
+            Object valueId = getValueId(entity.getValueEx(name));
             if (valueId != null)
                 attr.setValueId(valueId.toString());
 
@@ -822,11 +815,11 @@ public class EntityLog implements EntityLogAPI {
                 sb.deleteCharAt(sb.length() - 1);
             sb.append("]");
             return sb.toString();
-        } else if (metaProperty.getRange().isEnum()) {
+        } else if (metaProperty.getRange().isEnum() && EnumClass.class.isAssignableFrom(metaProperty.getJavaType())) {
             Class enumClass = metaProperty.getJavaType();
             try {
                 Enum e = Enum.valueOf(enumClass, String.valueOf(value));
-                return metadataTools.format(e, metaProperty);
+                return ((EnumClass) e).getId().toString();
             } catch (Exception e) {
                 return String.valueOf(value);
             }

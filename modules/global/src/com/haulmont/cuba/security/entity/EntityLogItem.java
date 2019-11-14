@@ -148,17 +148,14 @@ public class EntityLogItem extends BaseUuidEntity implements Creatable {
         this.entity = entity;
     }
 
-    public String getEntityLocalizedName() {
+    @MetaProperty
+    public String getDisplayedEntityName() {
         Metadata metadata = AppBeans.get(Metadata.NAME);
         Messages messages = AppBeans.get(Messages.NAME);
         MetaClass metaClass = metadata.getSession().getClass(entity);
         if (metaClass != null) {
-            try {
-                metaClass = metadata.getExtendedEntities().getEffectiveMetaClass(metaClass);
-                return messages.getTools().getEntityCaption(metaClass);
-            } catch (Exception e) {
-                return entity;
-            }
+            metaClass = metadata.getExtendedEntities().getEffectiveMetaClass(metaClass);
+            return messages.getTools().getEntityCaption(metaClass);
         }
         return entity;
     }

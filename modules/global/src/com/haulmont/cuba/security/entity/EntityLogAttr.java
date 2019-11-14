@@ -19,12 +19,21 @@ package com.haulmont.cuba.security.entity;
 import com.google.common.base.Strings;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.annotations.MetaProperty;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import javax.el.MethodNotFoundException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Record containing changed entity attribute.
@@ -78,7 +87,7 @@ public class EntityLogAttr extends BaseUuidEntity {
     }
 
     public String getValue() {
-        return getDisplayValue();
+        return value;
     }
 
     public void setValue(String value) {
@@ -86,7 +95,7 @@ public class EntityLogAttr extends BaseUuidEntity {
     }
 
     public String getOldValue() {
-        return getDisplayOldValue();
+        return oldValue;
     }
 
     public void setOldValue(String oldValue) {
@@ -104,7 +113,7 @@ public class EntityLogAttr extends BaseUuidEntity {
     }
 
     protected String getDisplayValue(String value) {
-        if (StringUtils.isEmpty(value) || getLogItem() == null) {
+        if (StringUtils.isEmpty(value)) {
             return value;
         }
         final String entityName = getLogItem().getEntity();
@@ -114,12 +123,12 @@ public class EntityLogAttr extends BaseUuidEntity {
             if (property != null) {
                 if (property.getRange().isDatatype()) {
                     return value;
-                } else if (property.getRange().isEnum()) {
+                } else if (property.getRange().isEnum() && EnumClass.class.isAssignableFrom(property.getJavaType())) {
                     Messages messages = AppBeans.get(Messages.NAME);
-                    try {
-                        Enum displayEnum = (Enum) property.getJavaType().getDeclaredMethod("fromId", String.class).invoke(null, value);
-                        return messages.getMessage(displayEnum);
-                    } catch (Exception e) {
+                    Enum en = getEnumById(property.getRange().asEnumeration().getValues(), value);
+                    if (en != null) {
+                        return messages.getMessage(en);
+                    } else  {
                         String nameKey = property.getRange().asEnumeration().getJavaClass().getSimpleName() + "." + value;
                         String packageName = property.getRange().asEnumeration().getJavaClass().getPackage().getName();
                         return messages.getMessage(packageName, nameKey);
@@ -133,6 +142,18 @@ public class EntityLogAttr extends BaseUuidEntity {
         } else {
             return value;
         }
+    }
+
+    protected Enum getEnumById(List<Enum> enums, String id) {
+        for (Enum e : enums) {
+            if (e instanceof EnumClass) {
+                Object enumId = ((EnumClass) e).getId();
+                if (id.equals(String.valueOf(enumId))) {
+                    return e;
+                }
+            }
+        }
+        return null;
     }
 
     public String getValueId() {
