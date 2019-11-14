@@ -22,6 +22,11 @@ import com.haulmont.cuba.gui.screen.StandardOutcome;
 
 import java.util.EventObject;
 
+/**
+ * Event sent to listeners added to the screen using {@code withAfterCloseListener()} method of screen builders.
+ *
+ * @param <S> type of the screen
+ */
 public class AfterScreenCloseEvent<S extends Screen> extends EventObject {
 
     protected final CloseAction closeAction;
