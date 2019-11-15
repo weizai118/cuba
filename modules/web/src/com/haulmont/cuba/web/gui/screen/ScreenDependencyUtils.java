@@ -22,7 +22,7 @@ import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.web.widgets.CubaWindowVerticalLayout;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Dependency;
-import com.vaadin.ui.HasDependencies;
+import com.vaadin.ui.HasDependencies.ClientDependency;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
@@ -36,21 +36,66 @@ import java.util.Optional;
 @ParametersAreNonnullByDefault
 public final class ScreenDependencyUtils {
 
-    public static List<HasDependencies.ClientDependency> getScreenDependencies(FrameOwner frameOwner) {
+    /**
+     * Returns a list of dependencies previously added to the given frame owner.
+     *
+     * @param frameOwner a frame owner from which the dependency list is obtained
+     * @return a list of dependencies
+     */
+    public static List<ClientDependency> getScreenDependencies(FrameOwner frameOwner) {
         Optional<CubaWindowVerticalLayout> layoutOptional = findWindowVerticalLayout(frameOwner);
         return layoutOptional.isPresent() ? layoutOptional.get().getDependencies() : Collections.emptyList();
     }
 
-    public static void setScreenDependencies(FrameOwner frameOwner, List<HasDependencies.ClientDependency> dependencies) {
+    /**
+     * Sets a list of dependencies to the given {@code frameOwner}.
+     * Each dependency represented with a {@link ClientDependency} object which path corresponds to one of the sources:
+     *
+     * <ul>
+     * <li>WebJar resource - starts with {@code webjar://}</li>
+     * <li>VAADIN directory - starts with {@code vaadin://}</li>
+     * <li>Web resource - starts with {@code http://} or {@code https://}</li>
+     * </ul>
+     *
+     * @param frameOwner   a frame owner to which dependencies are added
+     * @param dependencies dependencies to set
+     */
+    public static void setScreenDependencies(FrameOwner frameOwner, List<ClientDependency> dependencies) {
         findWindowVerticalLayout(frameOwner).ifPresent(layout ->
                 layout.setDependencies(dependencies));
     }
 
+    /**
+     * Adds dependency paths to the given {@code frameOwner}.
+     * Each path corresponds to one of the sources:
+     *
+     * <ul>
+     * <li>WebJar resource - starts with {@code webjar://}</li>
+     * <li>VAADIN directory - starts with {@code vaadin://}</li>
+     * <li>Web resource - starts with {@code http://} or {@code https://}</li>
+     * </ul>
+     *
+     * @param frameOwner   a frame owner to which dependencies are added
+     * @param dependencies dependencies to add
+     */
     public static void addScreenDependencies(FrameOwner frameOwner, String... dependencies) {
         findWindowVerticalLayout(frameOwner).ifPresent(layout ->
                 layout.addDependencies(dependencies));
     }
 
+    /**
+     * Adds a dependency to the given {@code frameOwner}. Path corresponds to one of the sources:
+     *
+     * <ul>
+     * <li>WebJar resource - starts with {@code webjar://}</li>
+     * <li>VAADIN directory - starts with {@code vaadin://}</li>
+     * <li>Web resource - starts with {@code http://} or {@code https://}</li>
+     * </ul>
+     *
+     * @param frameOwner a frame owner to which a dependency is added
+     * @param path       a dependency path
+     * @param type       a dependency type
+     */
     public static void addScreenDependency(FrameOwner frameOwner, String path, Dependency.Type type) {
         findWindowVerticalLayout(frameOwner).ifPresent(layout ->
                 layout.addDependency(path, type));
