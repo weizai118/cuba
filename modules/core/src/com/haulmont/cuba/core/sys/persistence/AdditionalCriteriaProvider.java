@@ -20,7 +20,8 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
- * Provides the additional criteria for the query.
+ * An interface to be implemented by beans that provide additional criteria for all queries to specific entities
+ * on the ORM level.
  */
 public interface AdditionalCriteriaProvider {
 
@@ -33,16 +34,12 @@ public interface AdditionalCriteriaProvider {
     boolean requiresAdditionalCriteria(Class entityClass);
 
     /**
-     * Returns the additional criteria.
-     *
-     * @return The string of this additional criteria
+     * Returns additional criteria for the given entity.
      */
     String getAdditionalCriteria(Class entityClass);
 
     /**
      * Returns parameters of the additional criteria.
-     *
-     * @return The map of parameters, entered in the additional criteria.
      */
     @Nullable
     Map<String, Object> getCriteriaParameters();

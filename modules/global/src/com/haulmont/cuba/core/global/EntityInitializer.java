@@ -19,14 +19,12 @@ package com.haulmont.cuba.core.global;
 import com.haulmont.cuba.core.entity.Entity;
 
 /**
- * Provides initialization of the entity at {@link Metadata#create} execution
+ * An interface to be implemented by beans that initialize entities created using {@link Metadata#create}.
  */
 public interface EntityInitializer {
 
     /**
-     * Entity initialization
-     *
-     * @param entity entity instance
+     * Initialize the entity.
      */
     void init(Entity entity);
 }

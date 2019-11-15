@@ -151,7 +151,7 @@ public class MetadataImpl implements Metadata {
             T obj = extClass.newInstance();
             assignIdentifier((Entity) obj);
             assignUuid((Entity) obj);
-            entityInit((Entity) obj);
+            initializeEntity((Entity) obj);
             createEmbedded((Entity) obj);
             invokePostConstructMethods((Entity) obj);
             return obj;
@@ -160,7 +160,7 @@ public class MetadataImpl implements Metadata {
         }
     }
 
-    protected void entityInit(Entity entity) {
+    protected void initializeEntity(Entity entity) {
         Collection<EntityInitializer> initializers = AppBeans.getAll(EntityInitializer.class).values();
         for (EntityInitializer initializer : initializers) {
             initializer.init(entity);
