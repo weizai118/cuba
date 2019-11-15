@@ -20,6 +20,6 @@ import com.haulmont.cuba.web.widgets.CubaWindowVerticalLayout;
 import com.haulmont.cuba.web.widgets.client.verticalactionslayout.CubaVerticalActionsLayoutConnector;
 import com.vaadin.shared.ui.Connect;
 
-@Connect(value = CubaWindowVerticalLayout.class, loadStyle = Connect.LoadStyle.EAGER)
+@Connect(value = CubaWindowVerticalLayout.class)
 public class CubaWindowVerticalLayoutConnector extends CubaVerticalActionsLayoutConnector {
 }
