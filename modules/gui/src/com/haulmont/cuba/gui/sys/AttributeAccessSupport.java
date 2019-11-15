@@ -18,6 +18,7 @@ package com.haulmont.cuba.gui.sys;
 
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.chile.core.model.MetadataObject;
 import com.haulmont.cuba.client.AttributeAccessUpdater;
 import com.haulmont.cuba.core.entity.BaseEntityInternalAccess;
 import com.haulmont.cuba.core.entity.Entity;
@@ -41,7 +42,10 @@ import com.haulmont.cuba.gui.screen.Screen;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Bean of the GUI layer that applies attribute access rules to a frame or screen.
@@ -175,7 +179,7 @@ public class AttributeAccessSupport {
             if (securityState != null) {
                 componentState.hidden = test(componentState.hidden, securityState.getHiddenAttributes(), name);
                 componentState.readOnly = test(componentState.readOnly, securityState.getReadonlyAttributes(), name);
-                if (i == metaProperties.length - 1) {
+                if (embeddedFound || i == metaProperties.length - 1) {
                     componentState.required = test(componentState.required, securityState.getRequiredAttributes(), name);
                 }
             }
@@ -194,16 +198,11 @@ public class AttributeAccessSupport {
     }
 
     protected String getEmbeddedAttrName(MetaProperty[] metaProperties, int startIndex) {
-        String resultName = "";
-        int index = startIndex;
-        while (index < metaProperties.length) {
-            resultName = resultName.concat(metaProperties[index].getName());
-            if (index != metaProperties.length - 1) {
-                resultName = resultName.concat(".");
-            }
-            index++;
-        }
-        return resultName;
+        List<String> embeddedAttrPath = Arrays.stream(metaProperties)
+                .map(MetadataObject::getName)
+                .collect(Collectors.toList())
+                .subList(startIndex, metaProperties.length);
+        return String.join(".", embeddedAttrPath);
     }
 
     protected SecurityState getSecurityState(Entity entity) {
