@@ -110,7 +110,7 @@ public interface EmailerConfig extends Config {
     void setSmtpSslEnabled(boolean smtpSslEnabled);
 
     /**
-     * If set to true, utf8 can be used in addresses and headers
+     * If set to "true", UTF-8 strings are allowed in message headers, e.g., in addresses
      *
      */
     @Property("cuba.email.allowutf8")
