@@ -44,6 +44,8 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         Map<String, Locale> map = globalConfig.getAvailableLocales();
 
         GridLayout grid = uiComponents.create(GridLayout.class);
+        grid.setSpacing(false);
+        grid.setStyleName("v-gridlayout-localization");
         grid.setColumns(3);
         grid.setRows(map.size() + 1);
         grid.setWidth("100%");
@@ -56,6 +58,12 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         Label langLabel = uiComponents.create(Label.of(String.class));
         Label nameLabel = uiComponents.create(Label.of(String.class));
         Label descLabel = uiComponents.create(Label.of(String.class));
+        langLabel.setSizeFull();
+        nameLabel.setSizeFull();
+        descLabel.setSizeFull();
+        langLabel.setStyleName("v-label-localization-header");
+        nameLabel.setStyleName("v-label-localization-header");
+        descLabel.setStyleName("v-label-localization-header");
         langLabel.setValue("Language");
         nameLabel.setValue("Name");
         descLabel.setValue("Description");
@@ -65,7 +73,6 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         grid.setColumnExpandRatio(0,1);
         grid.setColumnExpandRatio(1,4);
         grid.setColumnExpandRatio(2,5);
-        grid.setSpacing(true);
     }
 
     protected void initGridContent(GridLayout grid, Map<String, Locale> map) {
@@ -73,18 +80,23 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         for (Map.Entry<String, Locale> entry : map.entrySet()) {
             rowNumber++;
             Label langLabel = uiComponents.create(Label.of(String.class));
+            langLabel.setStyleName("v-label-localization-locale");
             langLabel.setValue(entry.getKey() + "|" + entry.getValue().toString());
             langLabel.setAlignment(Alignment.MIDDLE_LEFT);
 
             TextField attrName = (TextField) createTextFieldComponent(entry.getValue(),
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.name"), namesTextFieldMap);
+            attrName.setStyleName("v-textfield-padding");
             attrName.setCaption(null);
-            attrName.setHeight("70px");
+            attrName.setHeight("60px");
+            attrName.setWidth("92%");
 
             TextArea attrDescription = (TextArea) createTextAreaComponent(entry.getValue(),
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.description"), descriptionsTextFieldMap);
+            attrDescription.setStyleName("v-textarea-padding");
             attrDescription.setCaption(null);
-            attrDescription.setHeight("70px");
+            attrDescription.setHeight("60px");
+            attrDescription.setWidth("92%");
 
             grid.add(langLabel, 0, rowNumber);
             grid.add(attrName, 1, rowNumber);

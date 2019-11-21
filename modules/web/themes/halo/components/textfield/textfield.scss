@@ -19,4 +19,10 @@
   .#{$primary-stylename}.c-disabled-or-readonly.c-empty-value {
     color: transparent;
   }
+
+   .#{$primary-stylename}-padding {
+       padding-top: 10px;
+       padding-bottom: 10px;
+       padding-left: 10px;
+   }
 }

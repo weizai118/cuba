@@ -102,4 +102,15 @@
       margin-right: 0;
     }
   }
+
+   .#{$primary-stylename}-localization-header {
+       background-color: #f2f1f0;
+       padding-left: 10px;
+       padding-top: 5px;
+       padding-bottom: 5px;
+   }
+
+   .#{$primary-stylename}-localization-locale {
+       padding-left: 10px;
+   }
 }
