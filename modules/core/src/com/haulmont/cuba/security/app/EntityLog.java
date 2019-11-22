@@ -820,7 +820,7 @@ public class EntityLog implements EntityLogAPI {
             try {
                 Enum e = Enum.valueOf(enumClass, String.valueOf(value));
                 return ((EnumClass) e).getId().toString();
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
                 return String.valueOf(value);
             }
         } else {
