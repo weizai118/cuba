@@ -408,12 +408,12 @@ public class DynamicAttributesManager implements DynamicAttributesManagerAPI {
 
             TypedQuery<CategoryAttributeValue> query;
             if (HasUuid.class.isAssignableFrom(metaClass.getJavaClass())) {
-                query = em.createQuery(format("select cav from sys$CategoryAttributeValue cav where cav.entity.%s in :ids and cav.parent is null",
+                query = em.createQuery(format("select cav from sys$CategoryAttributeValue cav where cav.entity.%s in :ids and cav.parent is null and cav.deletedBy is null",
                         referenceToEntitySupport.getReferenceIdPropertyName(metaClass)),
                         CategoryAttributeValue.class);
             } else {
                 query = em.createQuery(format("select cav from sys$CategoryAttributeValue cav where cav.entity.%s in :ids " +
-                                "and cav.categoryAttribute.categoryEntityType = :entityType and cav.parent is null",
+                                "and cav.categoryAttribute.categoryEntityType = :entityType and cav.parent is null and cav.deletedBy is null",
                         referenceToEntitySupport.getReferenceIdPropertyName(metaClass)),
                         CategoryAttributeValue.class);
                 query.setParameter("entityType", metaClass.getName());
@@ -463,6 +463,7 @@ public class DynamicAttributesManager implements DynamicAttributesManagerAPI {
 
             tx.commit();
         }
+//        attributeValues = attributeValues.stream().filter(attr -> attr.getDeleteTs() == null).collect(Collectors.toList());
         return attributeValues;
     }
 
