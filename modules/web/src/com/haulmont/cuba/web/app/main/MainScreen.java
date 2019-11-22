@@ -115,6 +115,16 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
         if (menu != null) {
             ((Component.Focusable) menu).focus();
         }
+
+        initCollapseMenuButton();
+    }
+
+    protected void initCollapseMenuButton() {
+        Button collapseMenuButton = getMenuCollapseButton();
+        if (collapseMenuButton != null) {
+            collapseMenuButton.addClickListener(event ->
+                    setSideMenuCollapsed(!isMenuCollapsed()));
+        }
     }
 
     protected void initTitleBar() {
@@ -151,11 +161,6 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
                 .getScreens();
         getBeanLocator().get(ScreenTools.class)
                 .openDefaultScreen(screens);
-    }
-
-    @Subscribe("collapseMenuButton")
-    protected void onCollapseMenuButtonClick(Button.ClickEvent event) {
-        setSideMenuCollapsed(!isMenuCollapsed());
     }
 
     protected void setSideMenuCollapsed(boolean collapsed) {
