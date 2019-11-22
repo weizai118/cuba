@@ -88,14 +88,14 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.name"), namesTextFieldMap);
             attrName.setStyleName("v-textfield-padding");
             attrName.setCaption(null);
-            attrName.setHeight("60px");
+            attrName.setHeight("50px");
             attrName.setWidth("92%");
 
             TextArea attrDescription = (TextArea) createTextAreaComponent(entry.getValue(),
                     messageTools.loadString(MESSAGE_PACK + "CategoryAttribute.description"), descriptionsTextFieldMap);
             attrDescription.setStyleName("v-textarea-padding");
             attrDescription.setCaption(null);
-            attrDescription.setHeight("60px");
+            attrDescription.setHeight("50px");
             attrDescription.setWidth("92%");
 
             grid.add(langLabel, 0, rowNumber);
