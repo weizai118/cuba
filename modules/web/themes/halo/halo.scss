@@ -99,6 +99,7 @@
 @import "app/table-showlink";
 @import "app/table-empty-state";
 @import "app/datagrid-empty-state";
+@import "app/datagrid-localization";
 @import "app/app-menu";
 @import "app/app-window";
 @import "app/app-scrollbar";
@@ -204,6 +205,7 @@
   @include cuba-bulk-editor;
   @include cuba-generic-filter;
   @include cuba-datagrid-empty-state;
+  @include cuba-datagrid-localization-tab;
   @include cuba-table-presentations;
   @include halo-cuba-table-paging;
   @include cuba-table-empty-state;

@@ -16,78 +16,110 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
+import com.haulmont.cuba.core.entity.AttrLocalizationNameDescr;
 import com.haulmont.cuba.core.entity.LocaleHelper;
+import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.actions.list.EditAction;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.DataGridItems;
+import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
+import com.haulmont.cuba.gui.model.impl.CollectionContainerImpl;
 
 import javax.inject.Inject;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
     @Inject
+    protected GlobalConfig globalConfig;
+    @Inject
+    protected ScrollBoxLayout localesScrollBox;
+    @Inject
     protected UiComponents uiComponents;
+    @Inject
+    private Actions actions;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    protected Metadata metadata;
 
-    protected Component createTextFieldComponent(Locale locale, String caption, Map<Locale, TextField> textFieldMap) {
-        TextField valueField = uiComponents.create(TextField.TYPE_STRING);
-        valueField.setWidth("100%");
-        valueField.setCaption(caption);
+    protected static String LANGUAGE = "language";
+    protected static String NAME = "name";
+    protected static String DESCRIPTION = "description";
+    protected static String DATAGRID_LOCALIZATION_HEADER_STYLENAME = "datagrid-localization-header";
 
-        textFieldMap.put(locale, valueField);
+    protected List<AttrLocalizationNameDescr> attrLocalizationNameDescrList = new ArrayList<>();
+    DataGrid<AttrLocalizationNameDescr> dataGrid;
 
-        return valueField;
+    @Override
+    public void init(Map<String, Object> params) {
+        Map<String, Locale> map = globalConfig.getAvailableLocales();
+
+        dataGrid = uiComponents.create(DataGrid.NAME);
+        initEditAction(dataGrid);
+        dataGrid.setWidth("100%");
+
+        dataGrid.setItems(getDataGridItems(map));
+        dataGrid.setSortable(false);
+        dataGrid.setColumnReorderingAllowed(false);
+
+        configureColumns(dataGrid);
+
+        dataGrid.getDefaultHeaderRow().setStyleName(DATAGRID_LOCALIZATION_HEADER_STYLENAME);
+        localesScrollBox.add(dataGrid);
     }
 
-    protected Component createTextAreaComponent(Locale locale, String caption, Map<Locale, TextArea> textFieldMap) {
-        TextArea<String> valueField = uiComponents.create(TextArea.TYPE_STRING);
-        valueField.setWidth("100%");
-        valueField.setRows(3);
-        valueField.setCaption(caption);
-
-        textFieldMap.put(locale, valueField);
-
-        return valueField;
+    protected DataGridItems<AttrLocalizationNameDescr> getDataGridItems(Map<String, Locale> map) {
+        CollectionContainerImpl<AttrLocalizationNameDescr> collectionContainer =
+                new CollectionContainerImpl<>(metadata.getClass(AttrLocalizationNameDescr.class));
+        for (Map.Entry<String, Locale> entry : map.entrySet()) {
+            AttrLocalizationNameDescr attrLocalizationNameDescr = metadata.create(AttrLocalizationNameDescr.class);
+            attrLocalizationNameDescr.setLanguage(entry.getKey());
+            attrLocalizationNameDescr.setLocale(entry.getValue());
+            attrLocalizationNameDescrList.add(attrLocalizationNameDescr);
+        }
+        collectionContainer.setItems(attrLocalizationNameDescrList);
+        return new ContainerDataGridItems<>(collectionContainer);
     }
 
-    protected Component createLabelComponent(String labelText) {
-        Label<String> label = uiComponents.create(Label.TYPE_STRING);
-        label.setValue(labelText);
-        label.setWidth("100%");
-        return label;
+    protected void initEditAction(DataGrid<AttrLocalizationNameDescr> dataGrid) {
+        dataGrid.setEditorEnabled(true);
+        EditAction editAction = (EditAction) actions.create(EditAction.ID);
+        editAction.withHandler(actionPerformedEvent -> {
+            AttrLocalizationNameDescr selected = dataGrid.getSingleSelected();
+            if (selected != null) {
+                dataGrid.edit(selected);
+            } else {
+                notifications.create()
+                        .withCaption("Item is not selected")
+                        .show();
+            }
+        });
+        dataGrid.addAction(editAction);
     }
 
-    protected String getValue(Map<Locale, ? extends TextInputField> textFieldMap) {
+    protected void setValues(String localeBundle, BiConsumer<AttrLocalizationNameDescr, String> reference) {
+        Map<String, String> localizedNamesMap = LocaleHelper.getLocalizedValuesMap(localeBundle);
+        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
+            reference.accept(attrLocalizationNameDescr,
+                    localizedNamesMap.get(attrLocalizationNameDescr.getLocale().toString()));
+        }
+    }
+
+    protected String getValues(Function<AttrLocalizationNameDescr, String> reference) {
         Properties properties = new Properties();
-        for (Map.Entry<Locale, ? extends TextInputField> entry : textFieldMap.entrySet()) {
-            if (!getTextInputFieldRawValue(entry.getValue()).isEmpty()) {
-                properties.setProperty(entry.getKey().toString(), getTextInputFieldRawValue(entry.getValue()));
+        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
+            if (attrLocalizationNameDescr.getName() != null) {
+                properties.put(attrLocalizationNameDescr.getLocale().toString(), reference.apply(attrLocalizationNameDescr));
             }
         }
-
         return LocaleHelper.convertPropertiesToString(properties);
     }
 
-    protected String getTextInputFieldRawValue(TextInputField textInputField) {
-        if (textInputField instanceof TextField) {
-            return ((TextField) textInputField).getRawValue();
-        }
-        if (textInputField instanceof TextArea) {
-            return ((TextArea) textInputField).getRawValue();
-        }
-        return "";
-    }
-
-    protected void setValue(String localeBundle, Map<Locale, ? extends TextInputField> textFieldMap) {
-        if (localeBundle == null || textFieldMap == null) {
-            return;
-        }
-
-        Map<String, String> localizedNamesMap = LocaleHelper.getLocalizedValuesMap(localeBundle);
-        for (Map.Entry<Locale, ? extends TextInputField> textFieldEntry : textFieldMap.entrySet()) {
-            String keyLocale = textFieldEntry.getKey().toString();
-            textFieldEntry.getValue().setValue(localizedNamesMap.get(keyLocale));
-        }
-    }
+    protected abstract void configureColumns(DataGrid<AttrLocalizationNameDescr> dataGrid);
 }

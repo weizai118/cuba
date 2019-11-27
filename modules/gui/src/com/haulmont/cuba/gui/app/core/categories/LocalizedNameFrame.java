@@ -16,8 +16,13 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
+import com.haulmont.cuba.core.entity.AttrLocalizationNameDescr;
 import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.DataGridItems;
+import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
+import com.haulmont.cuba.gui.model.impl.CollectionContainerImpl;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -26,38 +31,54 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
 
     @Inject
     protected ScrollBoxLayout localesScrollBox;
-
     @Inject
     protected GlobalConfig globalConfig;
 
-    protected Map<Locale, TextField> textFieldMap = new HashMap<>();
-
     @Override
     public void init(Map<String, Object> params) {
-        Map<String, Locale> map = globalConfig.getAvailableLocales();
-        for (Map.Entry<String, Locale> entry : map.entrySet()) {
-            localesScrollBox.add(createTextFieldComponent(entry.getValue(),
-                    entry.getKey() + "|" + entry.getValue(), textFieldMap));
-        }
+        super.init(params);
+        dataGrid.setBodyRowHeight(40f);
+    }
+
+    @Override
+    protected void configureColumns(DataGrid<AttrLocalizationNameDescr> dataGrid) {
+        DataGrid.Column<AttrLocalizationNameDescr> langColumn = dataGrid.getColumnNN(LANGUAGE);
+        DataGrid.Column<AttrLocalizationNameDescr> nameColumn = dataGrid.getColumnNN(NAME);
+
+        dataGrid.removeColumn(LANGUAGE);
+        dataGrid.removeColumn(NAME);
+        dataGrid.removeColumn(DESCRIPTION);
+
+        langColumn.setResizable(false);
+        nameColumn.setResizable(false);
+
+        langColumn.setExpandRatio(1);
+        nameColumn.setExpandRatio(3);
+
+        langColumn.setEditable(false);
+        nameColumn.setEditable(true);
+
+        dataGrid.addColumn(langColumn, 0);
+        dataGrid.addColumn(nameColumn, 1);
     }
 
     public String getValue() {
-        return getValue(textFieldMap);
+        return getValues(AttrLocalizationNameDescr::getName);
     }
 
     public void setValue(String localeBundle) {
-        setValue(localeBundle, textFieldMap);
+        setValues(localeBundle, AttrLocalizationNameDescr::setName);
     }
 
     public void clearFields() {
-        for (TextField textField : textFieldMap.values()) {
-            textField.setValue("");
+        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
+            attrLocalizationNameDescr.setName("");
         }
     }
 
     public void setEditableFields(boolean editable) {
-        for (TextField textField : textFieldMap.values()) {
-            textField.setEditable(editable);
+        for (DataGrid.Column column : dataGrid.getColumns()) {
+            column.setEditable(editable);
         }
     }
 }
