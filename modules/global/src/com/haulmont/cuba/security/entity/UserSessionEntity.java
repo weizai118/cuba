@@ -20,7 +20,7 @@ package com.haulmont.cuba.security.entity;
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import java.util.Date;
@@ -30,7 +30,7 @@ import java.util.Date;
  */
 @MetaClass(name = "sec$UserSessionEntity")
 @SystemLevel
-public class UserSessionEntity extends BaseUuidEntity implements HasTenant {
+public class UserSessionEntity extends BaseUuidEntity implements TenantEntity {
 
     private static final long serialVersionUID = 7730031482721158275L;
 
@@ -49,7 +49,7 @@ public class UserSessionEntity extends BaseUuidEntity implements HasTenant {
     @MetaProperty
     private Boolean system;
     @MetaProperty
-    private String tenantId;
+    private String sysTenantId;
 
     public String getLogin() {
         return login;
@@ -107,12 +107,12 @@ public class UserSessionEntity extends BaseUuidEntity implements HasTenant {
         this.system = system;
     }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
     @Override

@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.TrackEditScreenHistory;
@@ -34,7 +34,7 @@ import java.util.Set;
 @Table(name = "SEC_ROLE")
 @NamePattern("%s [%s]|locName,name")
 @TrackEditScreenHistory
-public class Role extends StandardEntity implements HasTenant {
+public class Role extends StandardEntity implements TenantEntity {
 
     private static final long serialVersionUID = -4889116218059626402L;
 
@@ -54,7 +54,7 @@ public class Role extends StandardEntity implements HasTenant {
     private Boolean defaultRole;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     @OneToMany(mappedBy = "role")
     @OnDelete(DeletePolicy.CASCADE)
@@ -120,13 +120,11 @@ public class Role extends StandardEntity implements HasTenant {
         isPredefined = predefined;
     }
 
-    @Override
     public String getTenantId() {
-        return tenantId;
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 }

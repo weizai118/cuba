@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.AbstractSearchFolder;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
@@ -31,7 +31,7 @@ import javax.persistence.*;
 @Table(name = "SEC_FILTER")
 @NamePattern("%s|name")
 @SystemLevel
-public class FilterEntity extends StandardEntity implements HasTenant {
+public class FilterEntity extends StandardEntity implements TenantEntity {
 
     @Column(name = "COMPONENT")
     protected String componentId;
@@ -54,7 +54,7 @@ public class FilterEntity extends StandardEntity implements HasTenant {
     protected Boolean globalDefault = false;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     @Transient
     protected Boolean isDefault = false;
@@ -148,13 +148,11 @@ public class FilterEntity extends StandardEntity implements HasTenant {
         this.globalDefault = globalDefault;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 }

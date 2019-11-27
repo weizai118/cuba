@@ -18,7 +18,7 @@ package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Listeners;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
@@ -40,7 +40,7 @@ import java.util.List;
 @Listeners("cuba_UserEntityListener")
 @NamePattern("#getCaption|login,name")
 @TrackEditScreenHistory
-public class User extends StandardEntity implements HasTenant {
+public class User extends StandardEntity implements TenantEntity {
 
     private static final long serialVersionUID = 5007187642916030394L;
 
@@ -111,7 +111,7 @@ public class User extends StandardEntity implements HasTenant {
     protected String ipMask;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     @Transient
     protected boolean disabledDefaultRoles;
@@ -268,14 +268,12 @@ public class User extends StandardEntity implements HasTenant {
         this.ipMask = ipMask;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 
     public String getCaption() {

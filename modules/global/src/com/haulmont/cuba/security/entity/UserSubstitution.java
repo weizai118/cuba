@@ -16,7 +16,7 @@
  */
 package com.haulmont.cuba.security.entity;
 
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
@@ -31,7 +31,7 @@ import java.util.Date;
 @Entity(name = "sec$UserSubstitution")
 @Table(name = "SEC_USER_SUBSTITUTION")
 @SystemLevel
-public class UserSubstitution extends StandardEntity implements HasTenant {
+public class UserSubstitution extends StandardEntity implements TenantEntity {
 
     private static final long serialVersionUID = -1260499554824220311L;
 
@@ -53,7 +53,7 @@ public class UserSubstitution extends StandardEntity implements HasTenant {
     protected Date endDate;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     public User getUser() {
         return user;
@@ -87,13 +87,11 @@ public class UserSubstitution extends StandardEntity implements HasTenant {
         this.endDate = endDate;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 }

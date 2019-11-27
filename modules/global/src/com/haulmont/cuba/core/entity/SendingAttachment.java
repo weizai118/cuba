@@ -25,7 +25,7 @@ import javax.persistence.Entity;
 @Entity(name = "sys$SendingAttachment")
 @Table(name = "SYS_SENDING_ATTACHMENT")
 @SystemLevel
-public class SendingAttachment extends StandardEntity implements HasTenant {
+public class SendingAttachment extends StandardEntity implements TenantEntity {
     private static final long serialVersionUID = -8253918579521701435L;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,7 +55,7 @@ public class SendingAttachment extends StandardEntity implements HasTenant {
     protected String encoding;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     public SendingMessage getMessage() {
         return message;
@@ -105,14 +105,12 @@ public class SendingAttachment extends StandardEntity implements HasTenant {
         this.encoding = encoding;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 
     public FileDescriptor getContentFile() {

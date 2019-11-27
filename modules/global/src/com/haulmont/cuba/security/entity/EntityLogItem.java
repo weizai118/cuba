@@ -21,7 +21,7 @@ import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.cuba.core.entity.BaseDbGeneratedIdEntity;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.Creatable;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.ReferenceToEntity;
 import com.haulmont.cuba.core.entity.annotation.EmbeddedParameters;
 import com.haulmont.cuba.core.entity.annotation.Listeners;
@@ -43,7 +43,7 @@ import java.util.Set;
 @Table(name = "SEC_ENTITY_LOG")
 @Listeners("cuba_EntityLogItemDetachListener")
 @SystemLevel
-public class EntityLogItem extends BaseUuidEntity implements Creatable, HasTenant {
+public class EntityLogItem extends BaseUuidEntity implements Creatable, TenantEntity {
 
     private static final long serialVersionUID = 5859030306889056606L;
 
@@ -85,7 +85,7 @@ public class EntityLogItem extends BaseUuidEntity implements Creatable, HasTenan
     private String createdBy;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     @Column(name = "EVENT_TS")
     private Date eventTs;
@@ -143,14 +143,12 @@ public class EntityLogItem extends BaseUuidEntity implements Creatable, HasTenan
         this.createdBy = createdBy;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 
     public String getEntity() {

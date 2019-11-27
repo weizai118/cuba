@@ -5,10 +5,7 @@ alter table SEC_ROLE add SYS_TENANT_ID varchar2(255)^
 alter table SEC_GROUP add SYS_TENANT_ID varchar2(255)^
 alter table SEC_GROUP_HIERARCHY add SYS_TENANT_ID varchar2(255)^
 alter table SEC_USER add SYS_TENANT_ID varchar2(255)^
-alter table SEC_USER_ROLE add SYS_TENANT_ID varchar2(255)^
-alter table SEC_PERMISSION add SYS_TENANT_ID varchar2(255)^
 alter table SEC_CONSTRAINT add SYS_TENANT_ID varchar2(255)^
-alter table SEC_LOCALIZED_CONSTRAINT_MSG add SYS_TENANT_ID varchar2(255)^
 alter table SEC_SESSION_ATTR add SYS_TENANT_ID varchar2(255)^
 alter table SEC_USER_SUBSTITUTION add SYS_TENANT_ID varchar2(255)^
 alter table SEC_ENTITY_LOG add SYS_TENANT_ID varchar2(255)^

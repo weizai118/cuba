@@ -29,7 +29,7 @@ import javax.persistence.Entity;
 @DiscriminatorValue("F")
 @SystemLevel
 @EnableRestore(false)
-public class Folder extends StandardEntity implements HasTenant {
+public class Folder extends StandardEntity implements TenantEntity {
 
     private static final long serialVersionUID = -2038652558181851215L;
 
@@ -50,7 +50,7 @@ public class Folder extends StandardEntity implements HasTenant {
     protected String tabName;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     public Folder getParent() {
         return parent;
@@ -96,13 +96,11 @@ public class Folder extends StandardEntity implements HasTenant {
         this.tabName = tabName;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 }

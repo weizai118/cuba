@@ -17,7 +17,7 @@
 package com.haulmont.cuba.security.entity;
 
 import com.haulmont.chile.core.annotations.MetaProperty;
-import com.haulmont.cuba.core.entity.HasTenant;
+import com.haulmont.cuba.core.entity.TenantEntity;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -28,7 +28,7 @@ import javax.persistence.*;
 @Entity(name = "sec$SessionAttribute")
 @Table(name = "SEC_SESSION_ATTR")
 @SystemLevel
-public class SessionAttribute extends StandardEntity implements HasTenant {
+public class SessionAttribute extends StandardEntity implements TenantEntity {
 
     private static final long serialVersionUID = 4886168889020578592L;
 
@@ -46,7 +46,7 @@ public class SessionAttribute extends StandardEntity implements HasTenant {
     private Group group;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     public String getName() {
         return name;
@@ -86,13 +86,11 @@ public class SessionAttribute extends StandardEntity implements HasTenant {
         return messages.getMainMessage("Datatype." + datatype);
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 }

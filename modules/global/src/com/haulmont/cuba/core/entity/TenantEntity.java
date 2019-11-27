@@ -19,9 +19,5 @@ package com.haulmont.cuba.core.entity;
 /**
  * Interface to be implemented by entities that have to be tenant-specific
  */
-public interface HasTenant {
-
-    String getTenantId();
-
-    void setTenantId(String tenantId);
+public interface TenantEntity {
 }

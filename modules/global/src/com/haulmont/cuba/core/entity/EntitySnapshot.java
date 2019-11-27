@@ -39,7 +39,7 @@ import java.util.Date;
 @Entity(name = "sys$EntitySnapshot")
 @Table(name = "SYS_ENTITY_SNAPSHOT")
 @SystemLevel
-public class EntitySnapshot extends BaseUuidEntity implements Creatable, HasTenant {
+public class EntitySnapshot extends BaseUuidEntity implements Creatable, TenantEntity {
 
     private static final long serialVersionUID = 4835363127711391591L;
 
@@ -50,7 +50,7 @@ public class EntitySnapshot extends BaseUuidEntity implements Creatable, HasTena
     protected String createdBy;
 
     @Column(name = "SYS_TENANT_ID")
-    protected String tenantId;
+    protected String sysTenantId;
 
     @Column(name = "VIEW_XML")
     private String viewXml;
@@ -98,14 +98,12 @@ public class EntitySnapshot extends BaseUuidEntity implements Creatable, HasTena
         this.createdBy = createdBy;
     }
 
-    @Override
-    public String getTenantId() {
-        return tenantId;
+    public String getSysTenantId() {
+        return sysTenantId;
     }
 
-    @Override
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    public void setSysTenantId(String sysTenantId) {
+        this.sysTenantId = sysTenantId;
     }
 
     public String getViewXml() {
