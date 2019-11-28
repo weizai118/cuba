@@ -19,10 +19,7 @@ package com.haulmont.cuba.core;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.haulmont.bali.db.QueryRunner;
-import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesCacheService;
-import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesManagerAPI;
-import com.haulmont.cuba.core.app.dynamicattributes.DynamicAttributesRecalculationTools;
-import com.haulmont.cuba.core.app.dynamicattributes.PropertyType;
+import com.haulmont.cuba.core.app.dynamicattributes.*;
 import com.haulmont.cuba.core.entity.Category;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
 import com.haulmont.cuba.core.entity.CategoryAttributeConfiguration;
@@ -321,6 +318,37 @@ public class DynamicAttributesTest {
     }
 
     @Test
+    public void testAttributeValueLoadingWithoutSoftDeletion() {
+        LoadContext<User> loadContext = LoadContext.create(User.class)
+                .setId(user.getId())
+                .setLoadDynamicAttributes(true);
+
+        user = dataManager.load(loadContext);
+        user.setValue("+userAttribute", null);
+        dataManager.commit(user);
+
+        user = dataManager.load(loadContext);
+        user.setValue("+userAttribute", "userName1");
+        dataManager.commit(user);
+
+        user = dataManager.load(loadContext);
+        user.setValue("+userAttribute", null);
+        dataManager.commit(user);
+
+        user = dataManager.load(loadContext);
+        user.setValue("+userAttribute", "userName2");
+        dataManager.commit(user);
+
+        User loadedUser = dataManager.load(loadContext);
+
+        loadContext.setSoftDeletion(true);
+        User anotherLoadedUser = dataManager.load(loadContext);
+
+        assertEquals(loadedUser.getDynamicAttributes().get("userAttribute").getId(),
+                anotherLoadedUser.getDynamicAttributes().get("userAttribute").getId());
+    }
+
+    @Test
     public void testDynamicAttributes() {
         User loadedUser = dataManager.load(LoadContext.create(User.class).setId(user.getId()).setLoadDynamicAttributes(true));
         assertEquals("userName", loadedUser.getValue("+userAttribute"));
@@ -395,7 +423,7 @@ public class DynamicAttributesTest {
         loadedUser = dataManager.load(loadContext);
         intCollection = loadedUser.getValue("+userIntCollectionAttribute");
         assertEquals(1, intCollection.size());
-        assertEquals(1, (int)intCollection.get(0));
+        assertEquals(1, (int) intCollection.get(0));
 
         loadedUser.setValue("+userIntCollectionAttribute", Lists.newArrayList(1, 3));
         dataManager.commit(loadedUser);

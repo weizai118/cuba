@@ -262,12 +262,12 @@ public class DynamicAttributesManager implements DynamicAttributesManagerAPI {
                     categoryAttributeValue.setCategoryAttribute(attribute);
                 }
 
+                CategoryAttributeValue mergedCategoryAttributeValue = em.merge(categoryAttributeValue);;
                 //remove deleted and empty attributes
                 if (categoryAttributeValue.getDeleteTs() == null && categoryAttributeValue.getValue() != null) {
                     if (entity instanceof BaseDbGeneratedIdEntity && categoryAttributeValue.getObjectEntityId() == null) {
                         categoryAttributeValue.setObjectEntityId(referenceToEntitySupport.getReferenceId(entity));
                     }
-                    CategoryAttributeValue mergedCategoryAttributeValue = em.merge(categoryAttributeValue);
                     mergedCategoryAttributeValue.setCategoryAttribute(categoryAttributeValue.getCategoryAttribute());
 
                     //copy transient fields (for nested CAVs as well)
@@ -463,7 +463,9 @@ public class DynamicAttributesManager implements DynamicAttributesManagerAPI {
 
             tx.commit();
         }
-        attributeValues = attributeValues.stream().filter(attr -> attr.getDeleteTs() == null).collect(Collectors.toList());
+        attributeValues = attributeValues.stream()
+                .filter(attr -> attr.getDeleteTs() == null)
+                .collect(Collectors.toList());
         return attributeValues;
     }
 
