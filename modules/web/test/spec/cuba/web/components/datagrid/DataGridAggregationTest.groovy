@@ -16,6 +16,7 @@
 
 package spec.cuba.web.components.datagrid
 
+import com.haulmont.cuba.gui.components.AggregationInfo
 import com.haulmont.cuba.gui.components.DataGrid
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems
 import com.haulmont.cuba.gui.model.CollectionContainer
@@ -93,22 +94,24 @@ class DataGridAggregationTest extends UiScreenSpec {
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
         then: """aggregation row must be added and public API getHeaderRowCount() must return a value without
                  regard to the aggregation row, even though it physically stores it"""
-        dataGrid.headerRows.size() == 2   // internal headers
-        dataGrid.getHeaderRowCount() == 1 // public headers
+        def internalHeaders = dataGrid.headerRows.size()
+        def publicHeaders = dataGrid.getHeaderRowCount()
+        internalHeaders == 2
+        publicHeaders == 1
 
         when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
         then: """aggregation row must be added and public API getHeaderRowCount() must return a value without
                  regard to the aggregation row, even though it physically stores it"""
-        dataGrid.headerRows.size() == 2   // internal headers
-        dataGrid.getHeaderRowCount() == 1 // public headers
+        dataGrid.headerRows.size() == internalHeaders
+        dataGrid.getHeaderRowCount() == publicHeaders
 
         when: "disabling aggregation in a DataGrid"
         dataGrid.setAggregatable(false)
         then: """aggregation row is removed and public API getHeaderRowCount() must return the same value when the
                  aggregation was enabled"""
-        dataGrid.headerRows.size() == 1   // internal headers
-        dataGrid.getHeaderRowCount() == 1 // public headers
+        dataGrid.headerRows.size() == 1               // internal headers
+        dataGrid.getHeaderRowCount() == publicHeaders // public headers
     }
 
     def "add footer row at index"() {
@@ -170,22 +173,24 @@ class DataGridAggregationTest extends UiScreenSpec {
         def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationBottomDataGrid")
         then: """aggregation row must be added and public API getFooterRowCount() must return a value without regard to
                  the aggregation row, even though it physically stores it"""
-        dataGrid.footerRows.size() == 1   // internal footers
-        dataGrid.getFooterRowCount() == 0 // public footers
+        def internalFooters = dataGrid.footerRows.size()
+        def publicFooters = dataGrid.getFooterRowCount()
+        internalFooters == 1
+        publicFooters == 0
 
         when: "data items are added to a DataGrid with aggregation enabled"
         setDataGridItems(dataGrid)
         then: """aggregation row must be added and public API getFooterRowCount() must return a value without
                  regard to the aggregation row, even though it physically stores it"""
-        dataGrid.footerRows.size() == 1   // internal footers
-        dataGrid.getFooterRowCount() == 0 // public footers
+        dataGrid.footerRows.size() == internalFooters // internal footers
+        dataGrid.getFooterRowCount() == publicFooters // public footers
 
         when: "disabling aggregation in a DataGrid"
         dataGrid.setAggregatable(false)
         then: """aggregation row must be removed and public API getFooterRowCount() must return the same value
                  when the aggregation was enabled"""
-        dataGrid.footerRows.size() == 0   // internal footers
-        dataGrid.getFooterRowCount() == 0 // public footers
+        dataGrid.footerRows.size() == 0               // internal footers
+        dataGrid.getFooterRowCount() == publicFooters // public footers
     }
 
     def "aggregate values"() {
@@ -211,15 +216,11 @@ class DataGridAggregationTest extends UiScreenSpec {
     }
 
     def "update aggregated values"() {
-        def screens = vaadinUi.screens
-
-        def mainWindow = screens.create("mainWindow", OpenMode.ROOT)
-        screens.show(mainWindow)
-
-        def dataGridScreen = screens.create(DataGridAggregationScreen)
-        dataGridScreen.show()
-
-        def dataGrid = (WebDataGrid) dataGridScreen.getWindow().getComponent("aggregationTopDataGrid")
+        def dataGrid = uiComponents.create(DataGrid)
+        addAggregatedColumn(dataGrid, "count", AggregationInfo.Type.MIN)
+        addAggregatedColumn(dataGrid, "price", AggregationInfo.Type.AVG)
+        addAggregatedColumn(dataGrid, "sales", AggregationInfo.Type.MAX)
+        addAggregatedColumn(dataGrid, "usages", AggregationInfo.Type.SUM)
         setDataGridItems(dataGrid)
 
         when: "updating values in container"
@@ -259,5 +260,19 @@ class DataGridAggregationTest extends UiScreenSpec {
         statistic2.price = 90.5
         statistic2.usages = 50.5
         return new ArrayList<GoodStatistic>(Arrays.asList(statistic1, statistic2))
+    }
+
+    protected void addAggregatedColumn(DataGrid dataGrid, String id, AggregationInfo.Type type) {
+        def metaClass = metadata.getClass(GoodStatistic)
+
+        def mmp = metaClass.getPropertyPath(id)
+        dataGrid.addColumn(id, mmp)
+
+        def aggregationInfo = new AggregationInfo()
+        aggregationInfo.setPropertyPath(mmp)
+        aggregationInfo.setType(type)
+
+        def column = dataGrid.getColumn(id)
+        column.setAggregation(aggregationInfo)
     }
 }
