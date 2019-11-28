@@ -29,11 +29,6 @@ import java.util.*;
 
 public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
 
-    @Inject
-    protected ScrollBoxLayout localesScrollBox;
-    @Inject
-    protected GlobalConfig globalConfig;
-
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
