@@ -23,8 +23,10 @@ import com.haulmont.cuba.security.auth.AbstractClientCredentials;
 import com.haulmont.cuba.security.auth.Credentials;
 import com.haulmont.cuba.security.auth.LoginPasswordCredentials;
 import com.haulmont.cuba.security.auth.RememberMeCredentials;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.InternalAuthenticationException;
 import com.haulmont.cuba.security.global.LoginException;
+import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.App;
 import com.haulmont.cuba.web.Connection;
 import com.haulmont.cuba.web.WebConfig;
@@ -32,6 +34,7 @@ import com.haulmont.cuba.web.app.login.LoginScreen;
 import com.haulmont.cuba.web.app.loginwindow.AppLoginWindow;
 import com.haulmont.cuba.web.sys.VaadinSessionScope;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -59,8 +62,6 @@ public class LoginScreenAuthDelegate {
     protected GlobalConfig globalConfig;
     protected WebConfig webConfig;
 
-    protected LoginCookies loginCookies;
-
     protected UserManagementService userManagementService;
 
     @Inject
@@ -76,11 +77,6 @@ public class LoginScreenAuthDelegate {
     @Inject
     protected void setGlobalConfig(GlobalConfig globalConfig) {
         this.globalConfig = globalConfig;
-    }
-
-    @Inject
-    protected void setLoginCookies(LoginCookies loginCookies) {
-        this.loginCookies = loginCookies;
     }
 
     @Inject
@@ -164,7 +160,7 @@ public class LoginScreenAuthDelegate {
 
         boolean tokenValid = userManagementService.isRememberMeTokenValid(login, rememberMeToken);
         if (!tokenValid) {
-            loginCookies.resetRememberCookies();
+            resetRememberCookies();
             return;
         }
 
@@ -175,9 +171,44 @@ public class LoginScreenAuthDelegate {
                 connection.login(credentials);
             } catch (LoginException e) {
                 log.info("Failed to login with remember me token. Reset corresponding cookies.");
-                loginCookies.resetRememberCookies();
+                resetRememberCookies();
             }
         }
+    }
+
+    /**
+     * Sets "remember me" cookies.
+     *
+     * @param login login to save.
+     */
+    public void setRememberMeCookies(String login) {
+        if (connection.isAuthenticated() && webConfig.getRememberMeEnabled()) {
+            int rememberMeExpiration = globalConfig.getRememberMeExpirationTimeoutSec();
+
+            app.addCookie(COOKIE_REMEMBER_ME, Boolean.TRUE.toString(), rememberMeExpiration);
+
+            String encodedLogin = URLEncodeUtils.encodeUtf8(login);
+            app.addCookie(COOKIE_LOGIN, StringEscapeUtils.escapeJava(encodedLogin), rememberMeExpiration);
+
+            UserSession session = connection.getSession();
+            if (session == null) {
+                throw new IllegalStateException("Unable to get session after login");
+            }
+            User user = session.getUser();
+            String rememberMeToken = userManagementService.generateRememberMeToken(user.getId());
+            app.addCookie(COOKIE_PASSWORD, rememberMeToken, rememberMeExpiration);
+        } else {
+            resetRememberCookies();
+        }
+    }
+
+    /**
+     * Clears cookies.
+     */
+    public void resetRememberCookies() {
+        app.removeCookie(COOKIE_REMEMBER_ME);
+        app.removeCookie(COOKIE_LOGIN);
+        app.removeCookie(COOKIE_PASSWORD);
     }
 
     /**
