@@ -120,11 +120,11 @@ public class Role extends StandardEntity implements TenantEntity {
         isPredefined = predefined;
     }
 
-    public String getTenantId() {
+    public String getSysTenantId() {
         return sysTenantId;
     }
 
-    public void setTenantId(String sysTenantId) {
+    public void setSysTenantId(String sysTenantId) {
         this.sysTenantId = sysTenantId;
     }
 }

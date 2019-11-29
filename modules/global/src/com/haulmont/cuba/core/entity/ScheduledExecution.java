@@ -79,11 +79,11 @@ public class ScheduledExecution extends BaseUuidEntity implements Creatable, Ten
         this.createdBy = createdBy;
     }
 
-    public String getTenantId() {
+    public String getSysTenantId() {
         return sysTenantId;
     }
 
-    public void setTenantId(String sysTenantId) {
+    public void setSysTenantId(String sysTenantId) {
         this.sysTenantId = sysTenantId;
     }
 
