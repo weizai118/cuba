@@ -130,6 +130,13 @@
         </xs:union>
     </xs:simpleType>
 
+    <xs:simpleType name="timeModeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="H_12"/>
+            <xs:enumeration value="H_24"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:simpleType name="fileStoragePutMode">
         <xs:restriction base="xs:string">
             <xs:enumeration value="MANUAL"/>
@@ -344,6 +351,13 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="formChildrenCaptionAlignment">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="LEFT"/>
+            <xs:enumeration value="RIGHT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:simpleType name="maskedFieldValueMode">
         <xs:restriction base="xs:string">
             <xs:enumeration value="masked"/>
@@ -471,6 +485,13 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="TEXT"/>
             <xs:enumeration value="PREFORMATTED"/>
+            <xs:enumeration value="HTML"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="notificationContentMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="TEXT"/>
             <xs:enumeration value="HTML"/>
         </xs:restriction>
     </xs:simpleType>
@@ -954,6 +975,13 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:union>
+    </xs:simpleType>
+
+    <xs:simpleType name="columnsMode">
+        <xs:restriction>
+            <xs:enumeration value="ONE_COLUMN"/>
+            <xs:enumeration value="TWO_COLUMN"/>
+        </xs:restriction>
     </xs:simpleType>
 
     <!-- Interfaces -->
@@ -1680,6 +1708,8 @@
                 <xs:attribute name="datasource" type="xs:string"/>
                 <xs:attribute name="dataContainer" type="xs:string"/>
 
+                <xs:attribute name="datatype" type="dateTimeDatatypeEnum"/>
+
                 <xs:attribute name="startDate" type="xs:string"/>
                 <xs:attribute name="endDate" type="xs:string"/>
                 <xs:attribute name="timeFormat" type="calendarTimeFormat"/>
@@ -1850,6 +1880,7 @@
                 <xs:attribute name="resolution" type="dateFieldResolution"/>
                 <xs:attribute name="dateFormat" type="xs:string"/>
                 <xs:attribute name="datatype" type="dateTimeDatatypeEnum"/>
+                <xs:attribute name="timeMode" type="timeModeEnum"/>
 
                 <xs:attribute name="autofill" type="xs:boolean"/>
 
@@ -1904,6 +1935,7 @@
                 <xs:attribute name="timeFormat" type="xs:string"/>
                 <xs:attribute name="resolution" type="timeFieldResolution"/>
                 <xs:attribute name="datatype" type="timeDatatypeEnum"/>
+                <xs:attribute name="timeMode" type="timeModeEnum"/>
 
                 <xs:attributeGroup ref="hasBuffered"/>
                 <xs:attributeGroup ref="hasTabIndex"/>
@@ -2723,6 +2755,8 @@
                 </xs:attribute>
                 <xs:attribute name="modeSwitchVisible" type="xs:boolean"/>
                 <xs:attribute name="borderVisible" type="xs:boolean"/>
+                <xs:attribute name="controlsLayoutTemplate" type="xs:string"/>
+                <xs:attribute name="windowCaptionUpdateEnabled" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -2834,6 +2868,7 @@
 
                             <xs:attribute name="id" type="xs:string"/>
                             <xs:attribute name="width" type="xs:string"/>
+                            <xs:attribute name="childrenCaptionAlignment" type="formChildrenCaptionAlignment"/>
                             <xs:attribute name="childrenCaptionWidth" type="xs:string"/>
 
                             <xs:anyAttribute namespace="##other" processContents="lax"/>
@@ -2846,6 +2881,7 @@
 
                 <xs:attribute name="dataContainer" type="xs:string"/>
                 <xs:attribute name="captionPosition" type="formCaptionPosition"/>
+                <xs:attribute name="childrenCaptionAlignment" type="formChildrenCaptionAlignment"/>
                 <xs:attribute name="childrenCaptionWidth" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
@@ -3230,7 +3266,7 @@
         <xs:complexContent>
             <xs:extension base="baseComponent">
                 <xs:all>
-                    <xs:element name="properties" type="fragmentProperties" minOccurs="0"/>
+                    <xs:element name="properties" type="screenProperties" minOccurs="0"/>
                 </xs:all>
 
                 <xs:attribute name="screen" type="xs:string"/>
@@ -3238,13 +3274,13 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="fragmentProperties">
+    <xs:complexType name="screenProperties">
         <xs:sequence>
-            <xs:element name="property" type="fragmentProperty" minOccurs="0"/>
+            <xs:element name="property" type="screenProperty" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="fragmentProperty">
+    <xs:complexType name="screenProperty">
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="value" type="xs:string"/>
         <xs:attribute name="ref" type="xs:string"/>
@@ -3326,7 +3362,7 @@
                 <xs:attribute name="focusable" type="xs:boolean"/>
                 <xs:attribute name="loadDynamicAttributes" type="xs:boolean"/>
                 <xs:attribute name="useConfirmDialog" type="xs:boolean"/>
-                <xs:attribute name="columns" type="xs:int"/>
+                <xs:attribute name="columnsMode" type="columnsMode"/>
 
                 <xs:attributeGroup ref="hasTabIndex"/>
             </xs:extension>
@@ -3421,12 +3457,245 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <!-- Notification Facet -->
+    <xs:complexType name="notificationType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+
+        <xs:attribute name="caption" type="resourceString"/>
+        <xs:attribute name="description" type="resourceString"/>
+        <xs:attribute name="type" type="notificationTypeEnum"/>
+        <xs:attribute name="delay" type="xs:int"/>
+
+        <xs:attribute name="contentMode" type="notificationContentMode"/>
+        <xs:attribute name="styleName" type="xs:string"/>
+        <xs:attribute name="position" type="align"/>
+
+        <xs:attributeGroup ref="facetTriggerType"/>
+    </xs:complexType>
+
+    <xs:simpleType name="notificationTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="TRAY"/>
+            <xs:enumeration value="HUMANIZED"/>
+            <xs:enumeration value="WARNING"/>
+            <xs:enumeration value="ERROR"/>
+            <xs:enumeration value="SYSTEM"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Dialog Facets Base -->
+
+    <xs:complexType name="dialogType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="caption" type="resourceString"/>
+        <xs:attribute name="message" type="resourceString"/>
+        <xs:attribute name="type" type="dialogMessageType"/>
+
+        <xs:attribute name="contentMode" type="contentMode"/>
+        <xs:attribute name="maximized" type="xs:boolean"/>
+        <xs:attribute name="modal" type="xs:boolean"/>
+        <xs:attribute name="styleName" type="xs:string"/>
+
+        <xs:attributeGroup ref="hasSize"/>
+        <xs:attributeGroup ref="facetTriggerType"/>
+    </xs:complexType>
+
+    <!-- MessageDialog Facet -->
+    <xs:complexType name="messageDialogType">
+        <xs:complexContent>
+            <xs:extension base="dialogType">
+                <xs:attribute name="closeOnClickOutside" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- OptionDialog Facet -->
+    <xs:complexType name="optionDialogType">
+        <xs:complexContent>
+            <xs:extension base="dialogType">
+                <xs:sequence>
+                    <xs:element name="actions" type="dialogActionsType" minOccurs="0"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- InputDialog Facet -->
+    <xs:complexType name="inputDialogType">
+        <xs:complexContent>
+            <xs:extension base="dialogType">
+                <xs:sequence>
+                    <xs:element name="parameters" type="inputDialogParamsType"/>
+                    <xs:element name="actions" type="dialogActionsType" minOccurs="0"/>
+                </xs:sequence>
+
+                <xs:attribute name="defaultActions" type="inputDialogActionsType"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="inputDialogActionsType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="OK"/>
+            <xs:enumeration value="OK_CANCEL"/>
+            <xs:enumeration value="YES_NO"/>
+            <xs:enumeration value="YES_NO_CANCEL"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="dialogMessageType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CONFIRMATION"/>
+            <xs:enumeration value="WARNING"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="dialogActionsType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="action" type="dialogActionType"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="inputDialogParamsType">
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="stringParameter" type="inputDialogPrimitiveParam"/>
+
+                <xs:element name="booleanParameter" type="inputDialogPrimitiveParam"/>
+                <xs:element name="intParameter" type="inputDialogPrimitiveParam"/>
+                <xs:element name="doubleParameter" type="inputDialogPrimitiveParam"/>
+                <xs:element name="longParameter" type="inputDialogPrimitiveParam"/>
+                <xs:element name="bigDecimalParameter" type="inputDialogPrimitiveParam"/>
+
+                <xs:element name="dateParameter" type="inputDialogParameter"/>
+                <xs:element name="timeParameter" type="inputDialogParameter"/>
+                <xs:element name="dateTimeParameter" type="inputDialogParameter"/>
+
+                <xs:element name="entityParameter" type="inputDialogEntityParameter"/>
+                <xs:element name="enumParameter" type="inputDialogEnumParameter"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="inputDialogParameter">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="caption" type="resourceString"/>
+        <xs:attribute name="required" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="inputDialogPrimitiveParam">
+        <xs:complexContent>
+            <xs:extension base="inputDialogParameter">
+                <xs:attribute name="defaultValue"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="inputDialogEntityParameter">
+        <xs:complexContent>
+            <xs:extension base="inputDialogParameter">
+                <xs:attribute name="entityClass" use="required" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="inputDialogEnumParameter">
+        <xs:complexContent>
+            <xs:extension base="inputDialogParameter">
+                <xs:attribute name="enumClass" use="required" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="dialogActionType">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="caption" type="resourceString"/>
+        <xs:attribute name="description" type="resourceString"/>
+        <xs:attribute name="icon" type="xs:string"/>
+        <xs:attribute name="primary" type="xs:boolean"/>
+    </xs:complexType>
+
+    <!-- Screen Facet -->
+    <xs:complexType name="screenType">
+        <xs:all>
+            <xs:element name="properties" type="screenProperties" minOccurs="0"/>
+        </xs:all>
+
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="screenId" type="xs:string"/>
+        <xs:attribute name="screenClass" type="xs:string"/>
+        <xs:attribute name="openMode" type="screenOpenModeType"/>
+
+        <xs:attributeGroup ref="facetTriggerType"/>
+    </xs:complexType>
+
+    <xs:simpleType name="screenOpenModeType">
+        <xs:restriction>
+            <xs:enumeration value="NEW_TAB"/>
+            <xs:enumeration value="THIS_TAB"/>
+            <xs:enumeration value="DIALOG"/>
+            <xs:enumeration value="NEW_WINDOW"/>
+            <xs:enumeration value="ROOT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- EditorScreen Facet -->
+    <xs:complexType name="editorScreenType">
+        <xs:complexContent>
+            <xs:extension base="screenType">
+                <xs:attribute name="editMode" type="editorScreenFacetEditMode"/>
+                <xs:attribute name="addFirst" type="xs:boolean"/>
+
+                <xs:attribute name="entityClass" type="xs:string"/>
+                <xs:attribute name="field" type="xs:string"/>
+                <xs:attribute name="listComponent" type="xs:string"/>
+                <xs:attribute name="container" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- LookupScreen Facet -->
+    <xs:complexType name="lookupScreenType">
+        <xs:complexContent>
+            <xs:extension base="screenType">
+                <xs:attribute name="entityClass" type="xs:string"/>
+                <xs:attribute name="field" type="xs:string"/>
+                <xs:attribute name="listComponent" type="xs:string"/>
+                <xs:attribute name="container" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="editorScreenFacetEditMode">
+        <xs:restriction>
+            <xs:enumeration value="CREATE"/>
+            <xs:enumeration value="EDIT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:attributeGroup name="facetTriggerType">
+        <xs:attribute name="onAction" type="xs:string"/>
+        <xs:attribute name="onButton" type="xs:string"/>
+    </xs:attributeGroup>
+
     <xs:complexType name="facets">
         <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="timer" type="timerType" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="clipboardTrigger" type="clipboardTriggerType" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="dataLoadCoordinator" type="dataLoadCoordinatorType" minOccurs="0"/>
+
+                <xs:element name="notification" type="notificationType" minOccurs="0"/>
+
+                <xs:element name="messageDialog" type="messageDialogType" minOccurs="0"/>
+                <xs:element name="optionDialog" type="optionDialogType" minOccurs="0"/>
+                <xs:element name="inputDialog" type="inputDialogType" minOccurs="0"/>
+
+                <xs:element name="screen" type="screenType" minOccurs="0"/>
+                <xs:element name="editorScreen" type="editorScreenType" minOccurs="0"/>
+                <xs:element name="lookupScreen" type="lookupScreenType" minOccurs="0"/>
 
                 <!-- allow custom facets from any namespace -->
                 <xs:any/>

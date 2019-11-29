@@ -25,7 +25,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.compatibility.ComponentExpandCollapseListenerWrapper;
 import com.haulmont.cuba.gui.components.filter.FilterDelegate;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.BaseCollectionLoader;
 import com.haulmont.cuba.security.entity.FilterEntity;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
@@ -72,6 +72,11 @@ public class DesktopFilter extends DesktopAbstractComponent<JPanel> implements F
 
         delegate.setExpandedStateChangeListener(e -> fireExpandStateChange(e.isExpanded()));
         delegate.setCaptionChangedListener(this::updateCaption);
+    }
+
+    @Override
+    public void createLayout() {
+        delegate.createLayout();
     }
 
     @Override
@@ -339,6 +344,7 @@ public class DesktopFilter extends DesktopAbstractComponent<JPanel> implements F
     @Override
     public void addExpandedStateChangeListener(ExpandedStateChangeListener listener) {
         if (expandedStateChangeListeners == null) {
+
             expandedStateChangeListeners = new ArrayList<>();
         }
         if (!expandedStateChangeListeners.contains(listener)) {
@@ -394,12 +400,12 @@ public class DesktopFilter extends DesktopAbstractComponent<JPanel> implements F
     }
 
     @Override
-    public CollectionLoader getDataLoader() {
+    public BaseCollectionLoader getDataLoader() {
         return delegate.getDataLoader();
     }
 
     @Override
-    public void setDataLoader(CollectionLoader loader) {
+    public void setDataLoader(BaseCollectionLoader loader) {
         delegate.setDataLoader(loader);
     }
 
@@ -442,5 +448,15 @@ public class DesktopFilter extends DesktopAbstractComponent<JPanel> implements F
     @Override
     public void setWindowCaptionUpdateEnabled(boolean windowCaptionUpdateEnabled) {
         delegate.setWindowCaptionUpdateEnabled(windowCaptionUpdateEnabled);
+    }
+
+    @Override
+    public String getControlsLayoutTemplate() {
+        return delegate.getControlsLayoutTemplate();
+    }
+
+    @Override
+    public void setControlsLayoutTemplate(String controlsLayoutTemplate) {
+        delegate.setControlsLayoutTemplate(controlsLayoutTemplate);
     }
 }

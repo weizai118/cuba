@@ -41,7 +41,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.haulmont.gradle', name: 'cuba-plugin', version: cubaVersion
-        classpath group: 'gradle.plugin.com.github.spotbugs', name: 'spotbugs-gradle-plugin', version: '1.6.8'
+        classpath group: 'com.github.spotbugs', name: 'spotbugs-gradle-plugin', version: '2.0.1'
 
         if (rootProject.hasProperty('dependencyUpdates')) {
             classpath "com.github.ben-manes:gradle-versions-plugin:0.25.0"
@@ -106,6 +106,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.'''
+    }
+    tomcat {
+        dir = "$project.rootDir/deploy/tomcat"
     }
 }
 
@@ -182,6 +185,7 @@ configure([sharedLibModule, globalModule, coreModule, clientModule, guiModule,
         environment('TEST_ENV_PROP_1', 'envValue1')
         environment('TEST_ENV_PROP_2', 'envValue2')
         environment('TEST_ENV_PROP_3', 'envValue3')
+        environment('TEST_SOMEPROP4', 'envValue4')
         systemProperty('TEST_ENV_PROP_2', 'systemValue2')
     }
 
@@ -436,8 +440,6 @@ configure(coreModule) {
         testCompile(bom['org.hsqldb:hsqldb'])
 
         testCompile(bom['org.codehaus.groovy:groovy-json'])
-
-        compile(bom['software.amazon.awssdk:s3'])
 
         compile(bom['com.zaxxer:HikariCP'])
     }

@@ -24,9 +24,7 @@ import com.haulmont.cuba.gui.components.FilterImplementation;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.filter.FilterDelegate;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.DataLoader;
-import com.haulmont.cuba.gui.model.ScreenData;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -72,6 +70,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
         loadCollapsible(resultComponent, element, true);
         loadSettingsEnabled(resultComponent, element);
         loadBorderVisible(resultComponent, element);
+        loadWindowCaptionUpdateEnabled(resultComponent, element);
 
         String useMaxResults = element.attributeValue("useMaxResults");
         resultComponent.setUseMaxResults(useMaxResults == null || Boolean.parseBoolean(useMaxResults));
@@ -100,10 +99,10 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
             FrameOwner frameOwner = getComponentContext().getFrame().getFrameOwner();
             ScreenData screenData = UiControllerUtils.getScreenData(frameOwner);
             DataLoader dataLoader = screenData.getLoader(dataLoaderId);
-            if (!(dataLoader instanceof CollectionLoader)) {
-                throw new IllegalStateException(String.format("Filter cannot work with %s because it is not a CollectionLoader", dataLoaderId));
+            if (!(dataLoader instanceof CollectionLoader) && !(dataLoader instanceof KeyValueCollectionLoader)) {
+                throw new IllegalStateException(String.format("Filter cannot work with %s because it is not a CollectionLoader or a KeyValueCollectionLoader", dataLoaderId));
             }
-            resultComponent.setDataLoader((CollectionLoader) dataLoader);
+            resultComponent.setDataLoader((BaseCollectionLoader) dataLoader);
 
         } else {
             String datasource = element.attributeValue("datasource");
@@ -148,13 +147,26 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
             if (FTS_MODE_VALUE.equals(defaultMode)) {
                 resultComponent.switchFilterMode(FilterDelegate.FilterMode.FTS_MODE);
             }
+
+            String controlsLayoutTemplate = element.attributeValue("controlsLayoutTemplate");
+            if (!Strings.isNullOrEmpty(controlsLayoutTemplate)) {
+                resultComponent.setControlsLayoutTemplate(controlsLayoutTemplate);
+                resultComponent.createLayout();
+            }
         });
+    }
+
+    protected void loadWindowCaptionUpdateEnabled(Filter resultComponent, Element element) {
+        String windowCaptionUpdateEnabled = element.attributeValue("windowCaptionUpdateEnabled");
+        if (!Strings.isNullOrEmpty(windowCaptionUpdateEnabled)) {
+            resultComponent.setWindowCaptionUpdateEnabled(Boolean.parseBoolean(windowCaptionUpdateEnabled));
+        }
     }
 
     protected void loadBorderVisible(Filter resultComponent, Element element) {
         String borderVisible = element.attributeValue("borderVisible");
         if (StringUtils.isNotEmpty(borderVisible)) {
-            resultComponent.setBorderVisible(Boolean.valueOf(borderVisible));
+            resultComponent.setBorderVisible(Boolean.parseBoolean(borderVisible));
         }
     }
 }

@@ -20,7 +20,7 @@ package com.haulmont.cuba.gui.components.filter;
 import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.BaseCollectionLoader;
 import com.haulmont.cuba.security.entity.FilterEntity;
 import org.dom4j.Element;
 
@@ -44,6 +44,10 @@ public interface FilterDelegate {
 
     void setAfterFilterAppliedHandler(Filter.AfterFilterAppliedHandler afterFilterAppliedHandler);
 
+    String getControlsLayoutTemplate();
+
+    void setControlsLayoutTemplate(String controlsLayoutTemplate);
+
     enum FilterMode {
         GENERIC_MODE,
         FTS_MODE
@@ -65,9 +69,9 @@ public interface FilterDelegate {
 
     void setDatasource(CollectionDatasource datasource);
 
-    CollectionLoader getDataLoader();
+    BaseCollectionLoader getDataLoader();
 
-    void setDataLoader(CollectionLoader loader);
+    void setDataLoader(BaseCollectionLoader loader);
 
     CollectionDatasource getDatasource();
 
@@ -142,6 +146,8 @@ public interface FilterDelegate {
     void setCollapsable(boolean collapsable);
 
     void setModeSwitchVisible(boolean modeSwitchVisible);
+
+    void createLayout();
 
     void switchFilterMode(FilterMode filterMode);
 

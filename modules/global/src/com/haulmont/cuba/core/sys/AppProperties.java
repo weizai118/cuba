@@ -70,7 +70,6 @@ public class AppProperties {
 
     public synchronized void initSystemProperties() {
         systemProperties.clear();
-        systemProperties.putAll(System.getenv());
         for (String name : System.getProperties().stringPropertyNames()) {
             systemProperties.put(name, System.getProperty(name));
         }
@@ -131,10 +130,8 @@ public class AppProperties {
 
     @Nullable
     private String getSystemOrAppProperty(String key) {
-        String systemValue = systemProperties.get(key);
-
-        String value = systemValue;
-        if (StringUtils.isEmpty(systemValue)) {
+        String value = getSystemValue(key);
+        if (StringUtils.isEmpty(value)) {
             value = properties.get(key);
         }
 
@@ -174,6 +171,20 @@ public class AppProperties {
             }
             return handleInterpolation(Joiner.on(" ").join(values));
         }
+    }
+
+    private String getSystemValue(String key) {
+        String value = systemProperties.get(key);
+
+        if (StringUtils.isEmpty(value)) {
+            value = System.getenv(key);
+            if (StringUtils.isEmpty(value)
+                    && !Boolean.parseBoolean(properties.get("cuba.disableUppercaseEnvironmentProperties"))) {
+                value = System.getenv(key.replace('.', '_').toUpperCase());
+            }
+        }
+
+        return value;
     }
 
     private String handleInterpolation(String value) {

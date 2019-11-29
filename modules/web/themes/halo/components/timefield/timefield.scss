@@ -19,6 +19,10 @@ $c-timefield-minute-width: 58px;
 $c-timefield-second-width: 84px;
 
 @mixin halo-cuba-timefield($primary-stylename: c-timefield) {
+  .#{$primary-stylename}-layout {
+    white-space: nowrap;
+  }
+
   .#{$primary-stylename} {
     @include box-defaults;
     @include valo-textfield-style;
@@ -51,5 +55,10 @@ $c-timefield-second-width: 84px;
 
   .c-focus-move::-moz-selection {
     background: transparent;
+  }
+
+  .#{$primary-stylename}-ampm {
+    width: 70px;
+    margin-left: $v-layout-spacing-horizontal/2;
   }
 }

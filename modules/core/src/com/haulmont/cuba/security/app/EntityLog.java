@@ -18,6 +18,7 @@ package com.haulmont.cuba.security.app;
 
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.chile.core.datatypes.Datatype;
+import com.haulmont.chile.core.datatypes.impl.EnumClass;
 import com.haulmont.chile.core.model.*;
 import com.haulmont.cuba.core.*;
 import com.haulmont.cuba.core.app.ServerConfig;
@@ -111,6 +112,7 @@ public class EntityLog implements EntityLogAPI {
         if (items == null || items.isEmpty())
             return;
 
+        Set<EntityLogItem> saved = new LinkedHashSet<>();
         for (EntityLogItem item : items) {
             List<EntityLogItem> sameEntityList = items.stream()
                     .filter(entityLogItem -> entityLogItem.getDbGeneratedIdEntity() != null ?
@@ -118,8 +120,11 @@ public class EntityLog implements EntityLogAPI {
                             entityLogItem.getObjectEntityId().equals(item.getObjectEntityId()))
                     .collect(Collectors.toList());
             EntityLogItem itemToSave = sameEntityList.get(0);
-            computeChanges(itemToSave, sameEntityList);
-            saveItem(itemToSave);
+            if (!saved.contains(itemToSave)) {
+                computeChanges(itemToSave, sameEntityList);
+                saved.add(itemToSave);
+                saveItem(itemToSave);
+            }
         }
     }
 
@@ -814,6 +819,14 @@ public class EntityLog implements EntityLogAPI {
                 sb.deleteCharAt(sb.length() - 1);
             sb.append("]");
             return sb.toString();
+        } else if (metaProperty.getRange().isEnum() && EnumClass.class.isAssignableFrom(metaProperty.getJavaType())) {
+            Class enumClass = metaProperty.getJavaType();
+            try {
+                Enum e = Enum.valueOf(enumClass, String.valueOf(value));
+                return ((EnumClass) e).getId().toString();
+            } catch (IllegalArgumentException e) {
+                return String.valueOf(value);
+            }
         } else {
             return String.valueOf(value);
         }

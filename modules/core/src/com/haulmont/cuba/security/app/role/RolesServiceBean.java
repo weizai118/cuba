@@ -17,13 +17,16 @@
 package com.haulmont.cuba.security.app.role;
 
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.security.role.RolesService;
-import com.haulmont.cuba.security.role.RoleDef;
 import com.haulmont.cuba.security.entity.Permission;
 import com.haulmont.cuba.security.entity.PermissionType;
 import com.haulmont.cuba.security.entity.Role;
+import com.haulmont.cuba.security.entity.UserRole;
+import com.haulmont.cuba.security.role.RoleDefinition;
+import com.haulmont.cuba.security.role.RolesService;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.*;
 
@@ -36,12 +39,15 @@ public class RolesServiceBean implements RolesService {
     @Inject
     protected RolesRepository rolesRepository;
 
+    @Inject
+    protected Logger log;
+
     @Override
     public Collection<Role> getAllRoles() {
         Map<String, Role> rolesForGui = new HashMap<>();
 
         if (isPredefinedRolesModeAvailable()) {
-            for (Map.Entry<String, RoleDef> entry : rolesRepository.getNameToPredefinedRoleMapping().entrySet()) {
+            for (Map.Entry<String, RoleDefinition> entry : rolesRepository.getNameToPredefinedRoleMapping().entrySet()) {
                 rolesForGui.put(entry.getKey(), rolesRepository.getRoleWithoutPermissions(entry.getValue()));
             }
         }
@@ -52,6 +58,14 @@ public class RolesServiceBean implements RolesService {
                     .list();
 
             for (Role role : roles) {
+                if (isPredefinedRolesModeAvailable()
+                        && rolesForGui.containsKey(role.getName())
+                        && !AdministratorsRoleDefinition.ROLE_NAME.equals(role.getName())
+                        && !AnonymousRoleDefinition.ROLE_NAME.equals(role.getName())) {
+                    log.warn("Role name '{}' is used for some predefined role. " +
+                            "Also there is the persisted Role object with the same name.", role.getName());
+                    continue;
+                }
                 rolesForGui.put(role.getName(), role);
             }
         }
@@ -61,7 +75,7 @@ public class RolesServiceBean implements RolesService {
 
     @Override
     public Role getRoleByName(String predefinedRoleName) {
-        return rolesRepository.getRoleWithoutPermissions(rolesRepository.getRoleDefByName(predefinedRoleName));
+        return rolesRepository.getRoleWithoutPermissions(rolesRepository.getRoleDefinitionByName(predefinedRoleName));
     }
 
     @Override
@@ -82,5 +96,21 @@ public class RolesServiceBean implements RolesService {
     @Override
     public Map<String, Role> getDefaultRoles() {
         return rolesRepository.getDefaultRoles();
+    }
+
+    @Override
+    public boolean applicationHasPredefinedRoles() {
+        // application always contains 2 predefined system roles
+        return rolesRepository.getNameToPredefinedRoleMapping().keySet().size() > 2;
+    }
+
+    @Override
+    public Collection<RoleDefinition> getRoleDefinitions(@Nullable Collection<UserRole> userRoles) {
+        return rolesRepository.getRoleDefinitions(userRoles);
+    }
+
+    @Override
+    public RoleDefinition getRoleDefinitionByName(String predefinedRoleName) {
+        return rolesRepository.getRoleDefinitionByName(predefinedRoleName);
     }
 }

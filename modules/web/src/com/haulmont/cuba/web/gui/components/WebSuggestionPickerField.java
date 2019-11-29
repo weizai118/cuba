@@ -25,16 +25,21 @@ import com.haulmont.cuba.gui.executors.BackgroundTask;
 import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
 import com.haulmont.cuba.gui.executors.BackgroundWorker;
 import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.screen.FrameOwner;
+import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.web.widgets.CubaPickerField;
 import com.haulmont.cuba.web.widgets.CubaSuggestionPickerField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -188,7 +193,7 @@ public class WebSuggestionPickerField<V extends Entity> extends WebPickerField<V
     }
 
     protected void handleSearchResult(List<V> results) {
-        showSuggestions(results, false);
+        showSuggestions(results, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -274,11 +279,24 @@ public class WebSuggestionPickerField<V extends Entity> extends WebPickerField<V
 
     @Override
     public void showSuggestions(List<V> suggestions) {
-        showSuggestions(suggestions, true);
+        showSuggestions(suggestions, false);
     }
 
-    protected void showSuggestions(List<V> suggestions, boolean ignoreFocus) {
-        getComponent().showSuggestions(suggestions, ignoreFocus);
+    protected void showSuggestions(List<V> suggestions, boolean userOriginated) {
+        FrameOwner frameOwner = getFrame().getFrameOwner();
+        Collection<Screen> dialogScreens = UiControllerUtils.getScreenContext(frameOwner)
+                .getScreens()
+                .getOpenedScreens()
+                .getDialogScreens();
+
+        Screen lastDialog = null;
+        for (Screen dialogScreen : dialogScreens) {
+            lastDialog = dialogScreen;
+        }
+
+        if (lastDialog == null || Objects.equals(frameOwner, lastDialog)) {
+            getComponent().showSuggestions(suggestions, userOriginated);
+        }
     }
 
     @Override

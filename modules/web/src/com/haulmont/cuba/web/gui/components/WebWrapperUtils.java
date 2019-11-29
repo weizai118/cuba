@@ -16,27 +16,15 @@
 
 package com.haulmont.cuba.web.gui.components;
 
-import com.haulmont.cuba.gui.components.AggregationInfo;
-import com.haulmont.cuba.gui.components.CaptionMode;
-import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Component.Alignment;
-import com.haulmont.cuba.gui.components.ContentMode;
-import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.DataGrid.DataGridStaticCellType;
-import com.haulmont.cuba.gui.components.DateField;
-import com.haulmont.cuba.gui.components.DatePicker;
-import com.haulmont.cuba.gui.components.HasOrientation;
 import com.haulmont.cuba.gui.components.LookupField.FilterMode;
-import com.haulmont.cuba.gui.components.MouseEventDetails;
-import com.haulmont.cuba.gui.components.PopupButton;
-import com.haulmont.cuba.gui.components.PopupView;
-import com.haulmont.cuba.gui.components.ResizableTextArea;
-import com.haulmont.cuba.gui.components.SizeUnit;
-import com.haulmont.cuba.gui.components.TextInputField;
-import com.haulmont.cuba.gui.components.TimeField;
 import com.haulmont.cuba.web.gui.components.JavaScriptComponent.DependencyType;
+import com.haulmont.cuba.web.widgets.client.fieldgrouplayout.CaptionAlignment;
 import com.haulmont.cuba.web.widgets.client.popupview.PopupPosition;
 import com.haulmont.cuba.web.widgets.client.resizabletextarea.ResizeDirection;
+import com.haulmont.cuba.web.widgets.client.timefield.TimeMode;
 import com.haulmont.cuba.web.widgets.client.timefield.TimeResolution;
 import com.haulmont.cuba.web.widgets.data.AggregationContainer;
 import com.vaadin.event.MouseEvents;
@@ -497,7 +485,7 @@ public final class WebWrapperUtils {
         }
     }
 
-    public static TimeResolution convertTimeResolution(TimeField.Resolution resolution) {
+    public static TimeResolution toVaadinTimeResolution(TimeField.Resolution resolution) {
         switch (resolution) {
             case SEC:
                 return TimeResolution.SECOND;
@@ -509,7 +497,7 @@ public final class WebWrapperUtils {
         }
     }
 
-    public static TimeResolution convertTimeResolution(DateField.Resolution resolution) {
+    public static TimeResolution toVaadinTimeResolution(DateField.Resolution resolution) {
         switch (resolution) {
             case HOUR:
                 return TimeResolution.HOUR;
@@ -519,6 +507,19 @@ public final class WebWrapperUtils {
                 return TimeResolution.SECOND;
             default:
                 throw new IllegalArgumentException("Can't be converted to TimeResolution: " + resolution);
+        }
+    }
+
+    public static TimeField.Resolution fromVaadinTimeResolution(TimeResolution timeResolution) {
+        switch (timeResolution) {
+            case HOUR:
+                return TimeField.Resolution.HOUR;
+            case MINUTE:
+                return TimeField.Resolution.MIN;
+            case SECOND:
+                return TimeField.Resolution.SEC;
+            default:
+                throw new IllegalArgumentException("Can't be converted to TimeField.Resolution: " + timeResolution);
         }
     }
 
@@ -643,6 +644,32 @@ public final class WebWrapperUtils {
         }
     }
 
+    public static CaptionAlignment toVaadinFieldGroupCaptionAlignment(Form.CaptionAlignment alignment) {
+        checkNotNullArgument(alignment);
+
+        switch (alignment) {
+            case LEFT:
+                return CaptionAlignment.LEFT;
+            case RIGHT:
+                return CaptionAlignment.RIGHT;
+            default:
+                throw new IllegalArgumentException("Can't be converted to CaptionAlignment " + alignment);
+        }
+    }
+
+    public static Form.CaptionAlignment fromVaadinFieldGroupCaptionAlignment(CaptionAlignment alignment) {
+        checkNotNullArgument(alignment);
+
+        switch (alignment) {
+            case LEFT:
+                return Form.CaptionAlignment.LEFT;
+            case RIGHT:
+                return Form.CaptionAlignment.RIGHT;
+            default:
+                throw new IllegalArgumentException("Can't be converted to CaptionAlignment " + alignment);
+        }
+    }
+
     @Nullable
     public static DependencyType toDependencyType(Dependency.Type type) {
         if (type == null) {
@@ -710,6 +737,26 @@ public final class WebWrapperUtils {
         for (PopupView.PopupPosition position : PopupView.PopupPosition.values()) {
             if (position.name().equals(popupPosition.name())) {
                 return position;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static TimeMode toVaadinTimeMode(TimeField.TimeMode timeMode) {
+        for (TimeMode mode : TimeMode.values()) {
+            if (mode.name().equals(timeMode.name())) {
+                return mode;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static TimeField.TimeMode fromVaadinTimeMode(TimeMode timeMode) {
+        for (TimeField.TimeMode mode : TimeField.TimeMode.values()) {
+            if (mode.name().equals(timeMode.name())) {
+                return mode;
             }
         }
         return null;

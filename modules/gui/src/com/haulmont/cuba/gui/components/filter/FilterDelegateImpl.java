@@ -57,8 +57,8 @@ import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.config.WindowInfo;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
+import com.haulmont.cuba.gui.model.BaseCollectionLoader;
 import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.LoaderSupportsApplyToSelected;
 import com.haulmont.cuba.gui.presentations.Presentations;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
@@ -149,7 +149,7 @@ public class FilterDelegateImpl implements FilterDelegate {
     protected FilterEntity filterEntity;
     protected FilterEntity initialFilterEntity;
     protected CollectionDatasource datasource;
-    protected CollectionLoader dataLoader;
+    protected BaseCollectionLoader dataLoader;
     protected Adapter adapter;
     protected QueryFilter dsQueryFilter;
     protected List<FilterEntity> filterEntities = new ArrayList<>();
@@ -226,6 +226,7 @@ public class FilterDelegateImpl implements FilterDelegate {
     protected Map<AbstractCondition, AbstractCondition.Listener> conditionListeners;
     protected Map<AbstractCondition, ParamEditor> paramEditors;
     protected Boolean applyImmediately;
+    protected String controlsLayoutTemplate;
 
     protected enum ConditionsFocusType {
         NONE,
@@ -252,7 +253,8 @@ public class FilterDelegateImpl implements FilterDelegate {
         createLayout();
     }
 
-    protected void createLayout() {
+    @Override
+    public void createLayout() {
         if (layout == null) {
             groupBoxLayout = uiComponents.create(GroupBoxLayout.class);
             groupBoxLayout.addExpandedStateChangeListener(e -> fireExpandStateChange(e.isUserOriginated()));
@@ -358,7 +360,9 @@ public class FilterDelegateImpl implements FilterDelegate {
             filterHelper.setInternalDebugId(ftsSwitch, "ftsSwitch");
         }
 
-        String layoutDescription = clientConfig.getGenericFilterControlsLayout();
+        String layoutDescription = !Strings.isNullOrEmpty(controlsLayoutTemplate) ?
+                controlsLayoutTemplate :
+                clientConfig.getGenericFilterControlsLayout();
         ControlsLayoutBuilder controlsLayoutBuilder = createControlsLayoutBuilder(layoutDescription);
         controlsLayoutBuilder.build();
         if (isMaxResultsLayoutVisible()) {
@@ -1507,12 +1511,12 @@ public class FilterDelegateImpl implements FilterDelegate {
     }
 
     @Override
-    public CollectionLoader getDataLoader() {
+    public BaseCollectionLoader getDataLoader() {
         return dataLoader;
     }
 
     @Override
-    public void setDataLoader(CollectionLoader dataLoader) {
+    public void setDataLoader(BaseCollectionLoader dataLoader) {
         this.dataLoader = dataLoader;
         this.adapter = new LoaderAdapter(dataLoader, filter);
         this.adapter.setDataLoaderCondition(dataLoader.getCondition());
@@ -1693,8 +1697,13 @@ public class FilterDelegateImpl implements FilterDelegate {
         Map<String, Object> parameters = prepareDatasourceCustomParams();
         refreshDatasource(parameters);
 
-        if (clientConfig.getGenericFilterFtsTableTooltipsEnabled() && (applyTo != null) && (Table.class.isAssignableFrom(applyTo.getClass()))) {
-            filterHelper.removeTableFtsTooltips((Table) applyTo);
+        if ((applyTo != null) && (ListComponent.class.isAssignableFrom(applyTo.getClass()))) {
+            if (clientConfig.getGenericFilterFtsTableTooltipsEnabled()) {
+                filterHelper.removeTableFtsTooltips((ListComponent) applyTo);
+            }
+            if (clientConfig.getGenericFilterFtsDetailsActionEnabled()) {
+                ((ListComponent) applyTo).removeAction(FtsFilterHelper.FTS_DETAILS_ACTION_ID);
+            }
         }
 
         if (afterFilterAppliedHandler != null) {
@@ -1773,13 +1782,21 @@ public class FilterDelegateImpl implements FilterDelegate {
             CustomCondition ftsCondition = ftsFilterHelper.createFtsCondition(adapter.getMetaClass().getName());
             conditions.getRootNodes().add(new Node<>(ftsCondition));
 
-            if (clientConfig.getGenericFilterFtsTableTooltipsEnabled() && (applyTo != null)
-                    && ListComponent.class.isAssignableFrom(applyTo.getClass())) {
-                filterHelper.initTableFtsTooltips((ListComponent) applyTo, adapter.getMetaClass(), searchTerm);
+            if ((applyTo != null) && ListComponent.class.isAssignableFrom(applyTo.getClass())) {
+                if (clientConfig.getGenericFilterFtsTableTooltipsEnabled()) {
+                    filterHelper.initTableFtsTooltips((ListComponent) applyTo, adapter.getMetaClass(), searchTerm);
+                }
+                if (clientConfig.getGenericFilterFtsDetailsActionEnabled()) {
+                    initFtsDetailsAction((ListComponent) applyTo, searchTerm);
+                }
             }
-        } else if (clientConfig.getGenericFilterFtsTableTooltipsEnabled() && (applyTo != null)
-                && ListComponent.class.isAssignableFrom(applyTo.getClass())) {
-            filterHelper.removeTableFtsTooltips((ListComponent) applyTo);
+        } else if ((applyTo != null) && ListComponent.class.isAssignableFrom(applyTo.getClass())) {
+            if (clientConfig.getGenericFilterFtsTableTooltipsEnabled()) {
+                filterHelper.removeTableFtsTooltips((ListComponent) applyTo);
+            }
+            if (clientConfig.getGenericFilterFtsDetailsActionEnabled()) {
+                ((ListComponent) applyTo).removeAction(FtsFilterHelper.FTS_DETAILS_ACTION_ID);
+            }
         }
 
         applyDatasourceFilter();
@@ -1789,6 +1806,10 @@ public class FilterDelegateImpl implements FilterDelegate {
         if (afterFilterAppliedHandler != null) {
             afterFilterAppliedHandler.afterFilterApplied();
         }
+    }
+
+    protected void initFtsDetailsAction(ListComponent listComponent, String searchTerm) {
+        listComponent.addAction(ftsFilterHelper.createFtsDetailsAction(searchTerm));
     }
 
     /**
@@ -2453,6 +2474,16 @@ public class FilterDelegateImpl implements FilterDelegate {
     @Override
     public boolean isApplyImmediately() {
         return applyImmediately;
+    }
+
+    @Override
+    public String getControlsLayoutTemplate() {
+        return controlsLayoutTemplate;
+    }
+
+    @Override
+    public void setControlsLayoutTemplate(String controlsLayoutTemplate) {
+        this.controlsLayoutTemplate = controlsLayoutTemplate;
     }
 
     protected void clearParamValueChangeSubscriptions() {
@@ -3212,7 +3243,7 @@ public class FilterDelegateImpl implements FilterDelegate {
 
     protected static class LoaderAdapter implements Adapter {
 
-        protected CollectionLoader loader;
+        protected BaseCollectionLoader loader;
         protected Filter filter;
         protected QueryFilter queryFilter;
         protected boolean preventDataLoading;
@@ -3232,7 +3263,7 @@ public class FilterDelegateImpl implements FilterDelegate {
         protected static final Pattern CUSTOM_PARAM_PATTERN = Pattern.compile("(:)custom\\$([\\w.]+)");
         protected static final Pattern SESSION_PARAM_PATTERN = Pattern.compile("(:)session\\$([\\w.]+)");
 
-        public LoaderAdapter(CollectionLoader loader, Filter filter) {
+        public LoaderAdapter(BaseCollectionLoader loader, Filter filter) {
             this.filter = filter;
             if (loader.getContainer() == null) {
                 throw new IllegalStateException("DataLoader must be connected to a Container");

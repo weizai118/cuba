@@ -22,6 +22,7 @@ import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.client.sys.PersistenceManagerClient;
+import com.haulmont.cuba.core.app.keyvalue.KeyValueMetaClass;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.core.global.filter.ConditionType;
@@ -33,6 +34,7 @@ import com.haulmont.cuba.gui.components.filter.descriptor.AbstractConditionDescr
 import com.haulmont.cuba.gui.components.filter.operationedit.AbstractOperationEditor;
 import com.haulmont.cuba.gui.components.filter.operationedit.PropertyOperationEditor;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.dom4j.Element;
 
 import java.util.Objects;
@@ -47,15 +49,21 @@ public class PropertyCondition extends AbstractCondition {
     private static Pattern PATTERN_NOT_IN = Pattern.compile("\\s*[(]\\s*[(]\\s*(\\S+)\\s+((:not\\s+)*\\S+)\\s+(\\S+)[\\S\\s]*");
     private static Pattern PATTERN_NULL = Pattern.compile("\\s*(\\S+)\\s+(is\\s+(?:not\\s+)?null)\\s*");
 
+    protected String propertiesPath;
+
+    protected String join;
+
     public PropertyCondition(PropertyCondition condition) {
         super(condition);
         this.operator = condition.operator;
+        this.join = condition.join;
     }
 
     public PropertyCondition(Element element, String messagesPack, String filterComponentName, com.haulmont.chile.core.model.MetaClass metaClass) {
         super(element, messagesPack, filterComponentName, metaClass);
 
         String text = element.getText();
+        this.propertiesPath = element.attributeValue("propertiesPath");
         if (operator != Op.DATE_INTERVAL) {
             Matcher matcher = PATTERN_NULL.matcher(text);
             if (!matcher.matches()) {
@@ -73,16 +81,30 @@ public class PropertyCondition extends AbstractCondition {
             }
 
             String prop = matcher.group(1);
-            entityAlias = prop.substring(0, prop.indexOf('.'));
+
+            //if it hasn't been read in a superclass constructor from the XML attribute
+            if (Strings.isNullOrEmpty(entityAlias)) {
+                entityAlias = prop.substring(0, prop.indexOf('.'));
+            }
         } else {
             entityAlias = "{E}";
             param.setDateInterval(true);
         }
+
+        Element joinElement = element.element("join");
+        if (joinElement != null) {
+            this.join = joinElement.getText();
+        }
     }
 
     public PropertyCondition(AbstractConditionDescriptor descriptor, String entityAlias) {
+        this(descriptor, entityAlias, null);
+    }
+
+    public PropertyCondition(AbstractConditionDescriptor descriptor, String entityAlias, String propertiesPath) {
         super(descriptor);
         this.entityAlias = entityAlias;
+        this.propertiesPath = propertiesPath;
     }
 
     @Override
@@ -90,7 +112,7 @@ public class PropertyCondition extends AbstractCondition {
         Metadata metadata = AppBeans.get(Metadata.class);
         MetadataTools metadataTools = metadata.getTools();
 
-        String nameToUse = name;
+        String nameToUse = !Strings.isNullOrEmpty(propertiesPath) ? propertiesPath : name;
         boolean useCrossDataStoreRefId = false;
         boolean stringType = false;
         String thisStore = metadataTools.getStoreName(metaClass);
@@ -116,15 +138,28 @@ public class PropertyCondition extends AbstractCondition {
         }
 
         StringBuilder sb = new StringBuilder();
+        StringBuilder sbJoin = new StringBuilder();
         if (operator == Op.NOT_IN) {
             sb.append("((");
         }
-        sb.append(entityAlias).append(".").append(nameToUse);
+
+        String path = (metaClass instanceof KeyValueMetaClass && Strings.isNullOrEmpty(propertiesPath)) ?
+            entityAlias :
+            entityAlias + "." + nameToUse;
+
+        String joinAlias = nameToUse.replace(".", "_")
+                + RandomStringUtils.randomAlphabetic(5);
 
         if (Param.Type.ENTITY == param.getType() && !useCrossDataStoreRefId) {
-            com.haulmont.chile.core.model.MetaClass metaClass = metadata.getClassNN(param.getJavaClass());
-            String primaryKeyName = metadataTools.getPrimaryKeyName(metaClass);
-            sb.append(".").append(primaryKeyName);
+            String primaryKeyName = metadataTools.getPrimaryKeyName(metadata.getClassNN(param.getJavaClass()));
+            if (operator == Op.NOT_IN) {
+                sbJoin.append("left join ").append(path).append(" ").append(joinAlias);
+                sb.append(joinAlias).append(".").append(primaryKeyName);
+            } else {
+                sb.append(path).append(".").append(primaryKeyName);
+            }
+        } else {
+            sb.append(path);
         }
 
         if (operator != Op.NOT_EMPTY) {
@@ -150,7 +185,12 @@ public class PropertyCondition extends AbstractCondition {
             }
 
             if (operator == Op.NOT_IN) {
-                sb.append(") or (").append(entityAlias).append(".").append(nameToUse).append(" is null)) ");
+                if (Param.Type.ENTITY == param.getType() && !useCrossDataStoreRefId) {
+                    String primaryKeyName = metadataTools.getPrimaryKeyName(metadata.getClassNN(param.getJavaClass()));
+                    sb.append(") or (").append(joinAlias).append(".").append(primaryKeyName).append(" is null)) ");
+                } else {
+                    sb.append(") or (").append(path).append(" is null)) ");
+                }
             }
         }
 
@@ -159,11 +199,12 @@ public class PropertyCondition extends AbstractCondition {
         }
 
         text = sb.toString();
+        join = sbJoin.toString();
     }
 
     protected String dateIntervalConditionToJpql(String propertyName) {
         if (param.getValue() == null) return null;
-        DateIntervalValue filterDateIntervalValue = AppBeans.getPrototype(DateIntervalValue.NAME, (String) param.getValue());
+        DateIntervalValue filterDateIntervalValue = AppBeans.getPrototype(DateIntervalValue.NAME, param.getValue());
         return filterDateIntervalValue.toJPQL(propertyName);
     }
 
@@ -176,6 +217,16 @@ public class PropertyCondition extends AbstractCondition {
         super.toXml(element, valueProperty);
         element.addAttribute("type", ConditionType.PROPERTY.name());
         element.addAttribute("operatorType", getOperatorType());
+
+        if (metaClass instanceof KeyValueMetaClass){
+            element.addAttribute("entityAlias", entityAlias);
+            element.addAttribute("propertiesPath", propertiesPath);
+        }
+
+        if (!Strings.isNullOrEmpty(join)) {
+            Element joinElement = element.addElement("join");
+            joinElement.addCDATA(join);
+        }
     }
 
     @Override

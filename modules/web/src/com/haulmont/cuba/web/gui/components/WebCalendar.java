@@ -18,12 +18,21 @@ package com.haulmont.cuba.web.gui.components;
 
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.bali.util.Preconditions;
+import com.haulmont.chile.core.datatypes.Datatype;
+import com.haulmont.chile.core.datatypes.DatatypeRegistry;
+import com.haulmont.chile.core.datatypes.impl.AbstractTemporalDatatype;
+import com.haulmont.chile.core.datatypes.impl.DateDatatype;
+import com.haulmont.chile.core.datatypes.impl.DateTimeDatatype;
+import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.global.DateTimeTransformations;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.components.Calendar;
 import com.haulmont.cuba.gui.components.calendar.CalendarEvent;
 import com.haulmont.cuba.gui.components.calendar.CalendarEventProvider;
+import com.haulmont.cuba.gui.components.calendar.ContainerCalendarEventProvider;
 import com.haulmont.cuba.gui.components.calendar.EntityCalendarEvent;
 import com.haulmont.cuba.gui.components.calendar.ListCalendarEventProvider;
 import com.haulmont.cuba.gui.components.data.calendar.EntityCalendarEventProvider;
@@ -37,20 +46,27 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class WebCalendar extends WebAbstractComponent<CubaCalendar>
-        implements Calendar, InitializingBean {
+@SuppressWarnings("unchecked")
+public class WebCalendar<V> extends WebAbstractComponent<CubaCalendar>
+        implements Calendar<V>, InitializingBean {
 
     protected final String TIME_FORMAT_12H = "12H";
     protected final String TIME_FORMAT_24H = "24H";
 
     protected CalendarEventProvider calendarEventProvider;
     protected boolean navigationButtonsVisible = false;
+
+    protected DateTimeTransformations dateTimeTransformations;
+    protected DatatypeRegistry datatypeRegistry;
+
+    protected Datatype<V> datatype;
 
     public WebCalendar() {
         component = createComponent();
@@ -114,27 +130,118 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     protected void initDefaultEventProvider(CubaCalendar component) {
         calendarEventProvider = new ListCalendarEventProvider();
 
-        component.setEventProvider(new CalendarEventProviderWrapper(calendarEventProvider));
+        component.setEventProvider(new CalendarEventProviderWrapper<>(calendarEventProvider, this::convertToPresentation));
+    }
+
+    @Inject
+    public void setDateTimeTransformations(DateTimeTransformations dateTimeTransformations) {
+        this.dateTimeTransformations = dateTimeTransformations;
+    }
+
+    @Inject
+    public void setDatatypeRegistry(DatatypeRegistry datatypeRegistry) {
+        this.datatypeRegistry = datatypeRegistry;
     }
 
     @Override
-    public void setStartDate(Date date) {
-        component.setStartDate(date);
+    public void setDatatype(Datatype<V> datatype) {
+        checkDatatypeMismatch(datatype);
+
+        if (!(datatype instanceof DateDatatype)
+                && !(datatype instanceof DateTimeDatatype)
+                && !(datatype instanceof AbstractTemporalDatatype)) {
+            throw new IllegalArgumentException("Calendar supports only temporal datatype");
+        }
+        this.datatype = datatype;
     }
 
     @Override
-    public Date getStartDate() {
-        return component.getStartDate();
+    public Datatype<V> getDatatype() {
+        if (datatype == null) {
+            datatype = getDefaultDatatype();
+        }
+        return datatype;
+    }
+
+    protected Datatype<V> getDefaultDatatype() {
+        MetaProperty metaProperty = getMetaProperty();
+        Class datatypeClass = metaProperty != null
+                ? metaProperty.getJavaType()
+                : Date.class;
+        return (Datatype<V>) datatypeRegistry.get(datatypeClass);
+    }
+
+    @Nullable
+    protected MetaProperty getMetaProperty() {
+        if (getEventProvider() instanceof EntityCalendarEventProvider) {
+            EntityCalendarEventProvider eventProvider = (EntityCalendarEventProvider) getEventProvider();
+            String property = eventProvider.getStartDateProperty().isEmpty()
+                    ? eventProvider.getEndDateProperty()
+                    : eventProvider.getStartDateProperty();
+
+            if (!property.isEmpty()) {
+                CollectionDatasource datasource = getDatasource();
+                MetaClass metaClass = datasource != null
+                        ? datasource.getMetaClass()
+                        : ((ContainerCalendarEventProvider) eventProvider).getContainer().getEntityMetaClass();
+
+                return metaClass.getProperty(property);
+            }
+        }
+        return null;
+    }
+
+    protected void checkDatatypeMismatch(Datatype datatype) {
+        MetaProperty metaProperty = getMetaProperty();
+        if (datatype != null
+                && metaProperty != null
+                && !metaProperty.getJavaType().equals(datatype.getJavaClass())) {
+            throw new IllegalArgumentException(String.format("Property '%s' and passed Datatype have different types. " +
+                    "Property: '%s'; Datatype: '%s'", metaProperty.getName(), metaProperty.getJavaType(), datatype.getJavaClass()));
+        }
     }
 
     @Override
-    public void setEndDate(Date date) {
-        component.setEndDate(date);
+    public void setStartDate(V date) {
+        component.setStartDate(convertToPresentation(date));
     }
 
     @Override
-    public Date getEndDate() {
-        return component.getEndDate();
+    public V getStartDate() {
+        return convertToModel(component.getStartDate());
+    }
+
+    @Override
+    public void setEndDate(V date) {
+        component.setEndDate(convertToPresentation(date));
+    }
+
+    @Override
+    public V getEndDate() {
+        return convertToModel(component.getEndDate());
+    }
+
+    protected Date convertToPresentation(V date) {
+        if (date == null) {
+            return null;
+        }
+
+        Class datatypeClass = getDatatype().getJavaClass();
+
+        return (Date) (Date.class == datatypeClass
+                ? date
+                : dateTimeTransformations.transformToType(date, Date.class, null));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected V convertToModel(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        Class datatypeClass = getDatatype().getJavaClass();
+
+        return (V) dateTimeTransformations.transformToType(date, datatypeClass, null);
     }
 
     @Override
@@ -242,33 +349,34 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     @Override
     public void setEventProvider(CalendarEventProvider calendarEventProvider) {
         if (this.calendarEventProvider instanceof EntityCalendarEventProvider) {
-            ((EntityCalendarEventProvider ) this.calendarEventProvider).unbind();
+            ((EntityCalendarEventProvider) this.calendarEventProvider).unbind();
         }
 
         this.calendarEventProvider = calendarEventProvider;
         if (calendarEventProvider != null) {
-            component.setEventProvider(new CalendarEventProviderWrapper(calendarEventProvider));
+            component.setEventProvider(new CalendarEventProviderWrapper<>(calendarEventProvider, this::convertToPresentation));
         } else {
-            component.setEventProvider(new CalendarEventProviderWrapper(new ListCalendarEventProvider()));
+            component.setEventProvider(new CalendarEventProviderWrapper<>(new ListCalendarEventProvider(), this::convertToPresentation));
         }
     }
 
     @Override
-    public Subscription addDateClickListener(Consumer<CalendarDateClickEvent> listener) {
+    public Subscription addDateClickListener(Consumer<CalendarDateClickEvent<V>> listener) {
         component.setHandler(this::onDateClick);
 
-        return getEventHub().subscribe(CalendarDateClickEvent.class, listener);
+        return getEventHub().subscribe(CalendarDateClickEvent.class, (Consumer) listener);
     }
 
     protected void onDateClick(CalendarComponentEvents.DateClickEvent event) {
-        CalendarDateClickEvent calendarDateClickEvent =
-                new CalendarDateClickEvent(WebCalendar.this, event.getDate());
+        CalendarDateClickEvent<V> calendarDateClickEvent = new CalendarDateClickEvent<>(
+                WebCalendar.this,
+                convertToModel(event.getDate()));
         publish(CalendarDateClickEvent.class, calendarDateClickEvent);
     }
 
     @Override
-    public void removeDateClickListener(Consumer<CalendarDateClickEvent> listener) {
-        unsubscribe(CalendarDateClickEvent.class, listener);
+    public void removeDateClickListener(Consumer<CalendarDateClickEvent<V>> listener) {
+        unsubscribe(CalendarDateClickEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarDateClickEvent.class)) {
             component.setHandler((CalendarComponentEvents.DateClickHandler) null);
@@ -276,10 +384,10 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addEventClickListener(Consumer<CalendarEventClickEvent> listener) {
+    public Subscription addEventClickListener(Consumer<CalendarEventClickEvent<V>> listener) {
         component.setHandler(this::onEventClick);
 
-        return getEventHub().subscribe(CalendarEventClickEvent.class, listener);
+        return getEventHub().subscribe(CalendarEventClickEvent.class, (Consumer) listener);
     }
 
     protected void onEventClick(CalendarComponentEvents.EventClick event) {
@@ -291,7 +399,7 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
                 entity = ((EntityCalendarEvent) calendarEventWrapper).getEntity();
             }
 
-            CalendarEventClickEvent calendarEventClickEvent = new CalendarEventClickEvent(
+            CalendarEventClickEvent<V> calendarEventClickEvent = new CalendarEventClickEvent<>(
                     WebCalendar.this,
                     calendarEventWrapper,
                     entity);
@@ -300,8 +408,8 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public void removeEventClickListener(Consumer<CalendarEventClickEvent> listener) {
-        unsubscribe(CalendarEventClickEvent.class, listener);
+    public void removeEventClickListener(Consumer<CalendarEventClickEvent<V>> listener) {
+        unsubscribe(CalendarEventClickEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarEventClickEvent.class)) {
             component.setHandler((CalendarComponentEvents.EventClickHandler) null);
@@ -309,10 +417,10 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addEventResizeListener(Consumer<CalendarEventResizeEvent> listener) {
+    public Subscription addEventResizeListener(Consumer<CalendarEventResizeEvent<V>> listener) {
         component.setHandler(this::onEventResize);
 
-        return getEventHub().subscribe(CalendarEventResizeEvent.class, listener);
+        return getEventHub().subscribe(CalendarEventResizeEvent.class, (Consumer) listener);
     }
 
     protected void onEventResize(CalendarComponentEvents.EventResize event) {
@@ -324,19 +432,19 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
                 entity = ((EntityCalendarEvent) calendarEventWrapper).getEntity();
             }
 
-            CalendarEventResizeEvent calendarEventResizeEvent = new CalendarEventResizeEvent(
+            CalendarEventResizeEvent<V> calendarEventResizeEvent = new CalendarEventResizeEvent<>(
                     WebCalendar.this,
                     ((CalendarEventWrapper) calendarEvent).getCalendarEvent(),
-                    event.getNewStart(),
-                    event.getNewEnd(),
+                    convertToModel(event.getNewStart()),
+                    convertToModel(event.getNewEnd()),
                     entity);
             publish(CalendarEventResizeEvent.class, calendarEventResizeEvent);
         }
     }
 
     @Override
-    public void removeEventResizeListener(Consumer<CalendarEventResizeEvent> listener) {
-        unsubscribe(CalendarEventResizeEvent.class, listener);
+    public void removeEventResizeListener(Consumer<CalendarEventResizeEvent<V>> listener) {
+        unsubscribe(CalendarEventResizeEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarEventResizeEvent.class)) {
             component.setHandler((CalendarComponentEvents.EventResizeHandler) null);
@@ -344,10 +452,10 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addEventMoveListener(Consumer<CalendarEventMoveEvent> listener) {
+    public Subscription addEventMoveListener(Consumer<CalendarEventMoveEvent<V>> listener) {
         component.setHandler(this::onEventMove);
 
-        return getEventHub().subscribe(CalendarEventMoveEvent.class, listener);
+        return getEventHub().subscribe(CalendarEventMoveEvent.class, (Consumer) listener);
     }
 
     protected void onEventMove(CalendarComponentEvents.MoveEvent event) {
@@ -359,17 +467,31 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
             entity = ((EntityCalendarEvent) calendarEventWrapper).getEntity();
         }
 
-        CalendarEventMoveEvent calendarEventMoveEvent = new CalendarEventMoveEvent(
+        CalendarEventMoveEvent<V> calendarEventMoveEvent = new CalendarEventMoveEvent<>(
                 WebCalendar.this,
                 calendarEventWrapper,
-                event.getNewStart(),
+                convertToModel(event.getNewStart()),
+                convertToModel(calculateNewEnd(calendarEvent, event.getNewStart())),
                 entity);
         publish(CalendarEventMoveEvent.class, calendarEventMoveEvent);
     }
 
+    @Nullable
+    protected Date calculateNewEnd(com.vaadin.v7.ui.components.calendar.event.CalendarEvent calendarEvent, Date newStart) {
+        Date start = calendarEvent.getStart();
+        Date end = calendarEvent.getEnd();
+        if (start != null
+                && end != null
+                && newStart != null) {
+            long duration = calendarEvent.getEnd().getTime() - calendarEvent.getStart().getTime();
+            return new Date(newStart.getTime() + duration);
+        }
+        return null;
+    }
+
     @Override
-    public void removeEventMoveListener(Consumer<CalendarEventMoveEvent> listener) {
-        unsubscribe(CalendarEventMoveEvent.class, listener);
+    public void removeEventMoveListener(Consumer<CalendarEventMoveEvent<V>> listener) {
+        unsubscribe(CalendarEventMoveEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarEventMoveEvent.class)) {
             component.setHandler((CalendarComponentEvents.EventMoveHandler) null);
@@ -377,14 +499,14 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addWeekClickListener(Consumer<CalendarWeekClickEvent> listener) {
+    public Subscription addWeekClickListener(Consumer<CalendarWeekClickEvent<V>> listener) {
         component.setHandler(this::onWeekClick);
 
-        return getEventHub().subscribe(CalendarWeekClickEvent.class, listener);
+        return getEventHub().subscribe(CalendarWeekClickEvent.class, (Consumer) listener);
     }
 
     protected void onWeekClick(CalendarComponentEvents.WeekClick event) {
-        CalendarWeekClickEvent calendarWeekClickEvent = new CalendarWeekClickEvent(
+        CalendarWeekClickEvent<V> calendarWeekClickEvent = new CalendarWeekClickEvent<>(
                 WebCalendar.this,
                 event.getWeek(),
                 event.getYear());
@@ -392,8 +514,8 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public void removeWeekClickListener(Consumer<CalendarWeekClickEvent> listener) {
-        unsubscribe(CalendarWeekClickEvent.class, listener);
+    public void removeWeekClickListener(Consumer<CalendarWeekClickEvent<V>> listener) {
+        unsubscribe(CalendarWeekClickEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarWeekClickEvent.class)) {
             component.setHandler((CalendarComponentEvents.WeekClickHandler) null);
@@ -401,21 +523,21 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addForwardClickListener(Consumer<CalendarForwardClickEvent> listener) {
+    public Subscription addForwardClickListener(Consumer<CalendarForwardClickEvent<V>> listener) {
         component.setHandler(this::onForward);
 
-        return getEventHub().subscribe(CalendarForwardClickEvent.class, listener);
+        return getEventHub().subscribe(CalendarForwardClickEvent.class, (Consumer) listener);
     }
 
     protected void onForward(CalendarComponentEvents.ForwardEvent event) {
-        CalendarForwardClickEvent calendarForwardClickEvent =
-                new CalendarForwardClickEvent(WebCalendar.this);
+        CalendarForwardClickEvent<V> calendarForwardClickEvent =
+                new CalendarForwardClickEvent<>(WebCalendar.this);
         publish(CalendarForwardClickEvent.class, calendarForwardClickEvent);
     }
 
     @Override
-    public void removeForwardClickListener(Consumer<CalendarForwardClickEvent> listener) {
-        unsubscribe(CalendarForwardClickEvent.class, listener);
+    public void removeForwardClickListener(Consumer<CalendarForwardClickEvent<V>> listener) {
+        unsubscribe(CalendarForwardClickEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarForwardClickEvent.class)) {
             component.setHandler((CalendarComponentEvents.ForwardHandler) null);
@@ -423,20 +545,20 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addBackwardClickListener(Consumer<CalendarBackwardClickEvent> listener) {
+    public Subscription addBackwardClickListener(Consumer<CalendarBackwardClickEvent<V>> listener) {
         component.setHandler(this::onBackward);
 
-        return getEventHub().subscribe(CalendarBackwardClickEvent.class, listener);
+        return getEventHub().subscribe(CalendarBackwardClickEvent.class, (Consumer) listener);
     }
 
     protected void onBackward(CalendarComponentEvents.BackwardEvent event) {
-        CalendarBackwardClickEvent calendarBackwardClickEvent = new CalendarBackwardClickEvent(this);
+        CalendarBackwardClickEvent<V> calendarBackwardClickEvent = new CalendarBackwardClickEvent<>(this);
         publish(CalendarBackwardClickEvent.class, calendarBackwardClickEvent);
     }
 
     @Override
-    public void removeBackwardClickListener(Consumer<CalendarBackwardClickEvent> listener) {
-        unsubscribe(CalendarBackwardClickEvent.class, listener);
+    public void removeBackwardClickListener(Consumer<CalendarBackwardClickEvent<V>> listener) {
+        unsubscribe(CalendarBackwardClickEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarBackwardClickEvent.class)) {
             component.setHandler((CalendarComponentEvents.BackwardHandler) null);
@@ -444,23 +566,23 @@ public class WebCalendar extends WebAbstractComponent<CubaCalendar>
     }
 
     @Override
-    public Subscription addRangeSelectListener(Consumer<CalendarRangeSelectEvent> listener) {
+    public Subscription addRangeSelectListener(Consumer<CalendarRangeSelectEvent<V>> listener) {
         component.setHandler(this::onRangeSelect);
 
-        return getEventHub().subscribe(CalendarRangeSelectEvent.class, listener);
+        return getEventHub().subscribe(CalendarRangeSelectEvent.class, (Consumer) listener);
     }
 
     protected void onRangeSelect(CalendarComponentEvents.RangeSelectEvent event) {
-        CalendarRangeSelectEvent calendarRangeSelectEvent = new CalendarRangeSelectEvent(
+        CalendarRangeSelectEvent<V> calendarRangeSelectEvent = new CalendarRangeSelectEvent<>(
                 this,
-                event.getStart(),
-                event.getEnd());
+                convertToModel(event.getStart()),
+                convertToModel(event.getEnd()));
         publish(CalendarRangeSelectEvent.class, calendarRangeSelectEvent);
     }
 
     @Override
-    public void removeRangeSelectListener(Consumer<CalendarRangeSelectEvent> listener) {
-        unsubscribe(CalendarRangeSelectEvent.class, listener);
+    public void removeRangeSelectListener(Consumer<CalendarRangeSelectEvent<V>> listener) {
+        unsubscribe(CalendarRangeSelectEvent.class, (Consumer) listener);
 
         if (!hasSubscriptions(CalendarRangeSelectEvent.class)) {
             component.setHandler((CalendarComponentEvents.RangeSelectHandler) null);
