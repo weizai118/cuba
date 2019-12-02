@@ -23,6 +23,7 @@ import com.haulmont.cuba.core.app.dynamicattributes.*;
 import com.haulmont.cuba.core.entity.Category;
 import com.haulmont.cuba.core.entity.CategoryAttribute;
 import com.haulmont.cuba.core.entity.CategoryAttributeConfiguration;
+import com.haulmont.cuba.core.entity.CategoryAttributeValue;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.entity.Group;
 import com.haulmont.cuba.security.entity.Role;
@@ -339,6 +340,20 @@ public class DynamicAttributesTest {
         user.setValue("+userAttribute", "userName2");
         dataManager.commit(user);
 
+        try (Transaction tx = cont.persistence().getTransaction()) {
+            EntityManager em = cont.persistence().getEntityManager();
+            em.setSoftDeletion(false);
+            TypedQuery<CategoryAttributeValue> query =
+                    em.createQuery("select cav from sys$CategoryAttributeValue cav where cav.entity.entityId = :id and cav.code = 'userAttribute'",
+                            CategoryAttributeValue.class);
+
+            query.setParameter("id", user.getId());
+            List<CategoryAttributeValue> resultList = query.getResultList();
+            assertEquals(3, resultList.size());
+            tx.commit();
+        }
+
+        loadContext.setSoftDeletion(false);
         User loadedUser = dataManager.load(loadContext);
 
         loadContext.setSoftDeletion(true);
