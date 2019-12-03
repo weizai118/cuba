@@ -18,6 +18,7 @@ package com.haulmont.cuba.web.security;
 
 import com.haulmont.bali.util.URLEncodeUtils;
 import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.app.UserManagementService;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
 import com.haulmont.cuba.security.auth.Credentials;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.haulmont.cuba.web.App.*;
 import static com.haulmont.cuba.web.App.COOKIE_PASSWORD;
@@ -63,6 +65,7 @@ public class LoginScreenAuthDelegate {
     protected WebConfig webConfig;
 
     protected UserManagementService userManagementService;
+    protected Messages messages;
 
     @Inject
     protected void setApp(App app) {
@@ -164,8 +167,21 @@ public class LoginScreenAuthDelegate {
             return;
         }
 
+        Locale locale = messages.getTools().getDefaultLocale();
+
+        String lastLocale = app.getCookieValue(COOKIE_LOCALE);
+        if (lastLocale != null
+                && !lastLocale.isEmpty()) {
+            Map<String, Locale> availableLocales = globalConfig.getAvailableLocales();
+            for (Locale availableLocale : availableLocales.values()) {
+                if (availableLocale.toLanguageTag().equals(lastLocale)) {
+                    locale = availableLocale;
+                }
+            }
+        }
+
         if (StringUtils.isNotEmpty(rememberMeToken)) {
-            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken);
+            RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, locale);
             credentials.setOverrideLocale(isLocalesSelectVisible);
             try {
                 connection.login(credentials);
