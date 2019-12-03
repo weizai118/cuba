@@ -318,9 +318,9 @@ $cuba-sidemenu-userindicator-font-weight: $v-font-weight !default;
   .#{$primary-stylename}-item {
     @include valo-menu-item-style($bg);
 
-    .v-ch & span.v-icon {
+    span.v-icon {
       -webkit-mask-image: none;
-      color: valo-font-color($bg, 0.7);
+      mask-image: none;
     }
 
     .#{$primary-stylename}-item-caption {
@@ -346,11 +346,11 @@ $cuba-sidemenu-userindicator-font-weight: $v-font-weight !default;
   .#{$primary-stylename}-item-thumbnail-icon {
     display: none;
     vertical-align: middle;
-    font-size: 1.2em;
   }
 
   .#{$primary-stylename}-item-thumbnail-icon {
     font-family: FontAwesome;
+    font-size: 1.2em;
   }
 
   .#{$primary-stylename}-item-header {
@@ -646,9 +646,9 @@ $cuba-sidemenu-userindicator-font-weight: $v-font-weight !default;
     .#{$primary-stylename}-item {
       @include valo-menu-item-style;
 
-      .v-ch & span.v-icon {
+      span.v-icon {
+        mask-image: none;
         -webkit-mask-image: none;
-        color: valo-font-color($bg, 0.5);
       }
 
       font-weight: $cuba-sidemenu-item-font-weight;

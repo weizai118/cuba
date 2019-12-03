@@ -19,7 +19,7 @@
 
     <layout>
         <cssLayout id="horizontalWrap"
-                   stylename="c-sidemenu-layout collapsible"
+                   stylename="c-sidemenu-layout"
                    height="100%"
                    width="100%">
             <cssLayout id="sideMenuContainer"
