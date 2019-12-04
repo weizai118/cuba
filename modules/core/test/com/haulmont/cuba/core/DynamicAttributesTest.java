@@ -350,6 +350,7 @@ public class DynamicAttributesTest {
             query.setParameter("id", user.getId());
             List<CategoryAttributeValue> resultList = query.getResultList();
             assertEquals(3, resultList.size());
+
             tx.commit();
         }
 
