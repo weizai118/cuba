@@ -216,12 +216,8 @@ public class AppLoginWindow extends AbstractWindow implements Window.TopLevelWin
         if (Boolean.TRUE.equals(rememberMeCheckBox.getValue())) {
             authDelegate.setRememberMeCookies(loginField.getValue());
         } else {
-            resetRememberCookies();
+            authDelegate.resetRememberCookies();
         }
-    }
-
-    protected void resetRememberCookies() {
-        authDelegate.resetRememberCookies();
     }
 
     protected void doLogin() {

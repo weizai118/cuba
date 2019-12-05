@@ -217,12 +217,8 @@ public class LoginScreen extends Screen {
         if (Boolean.TRUE.equals(rememberMeCheckBox.getValue())) {
             authDelegate.setRememberMeCookies(loginField.getValue());
         } else {
-            resetRememberCookies();
+            authDelegate.resetRememberCookies();
         }
-    }
-
-    protected void resetRememberCookies() {
-        authDelegate.resetRememberCookies();
     }
 
     protected void doLogin() {

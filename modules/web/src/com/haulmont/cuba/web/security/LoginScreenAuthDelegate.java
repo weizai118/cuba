@@ -92,6 +92,11 @@ public class LoginScreenAuthDelegate {
         this.userManagementService = userManagementService;
     }
 
+    @Inject
+    protected void setMessages(Messages messages) {
+        this.messages = messages;
+    }
+
     /**
      * Performs log in.
      *
@@ -100,7 +105,7 @@ public class LoginScreenAuthDelegate {
      * @param selectedLocale         selected locale
      * @param isLocalesSelectVisible is locales select visible
      * @throws InternalAuthenticationException if authentication mechanisms cannot process an authentication request
-     * @throws LoginException if authentication fails
+     * @throws LoginException                  if authentication fails
      */
     public void doLogin(String login, String password, Locale selectedLocale, boolean isLocalesSelectVisible)
             throws InternalAuthenticationException, LoginException {
