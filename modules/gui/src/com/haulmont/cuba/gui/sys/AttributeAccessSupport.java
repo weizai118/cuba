@@ -134,17 +134,16 @@ public class AttributeAccessSupport {
 
         Entity item = entityValueSource.getItem();
         ComponentState componentState = calculateComponentState(item, propertyPath);
-        if (metadataTools.isEmbeddable(item.getMetaClass())) {
-            if (entityValueSource instanceof DatasourceValueSource) {
-                Datasource ds = ((DatasourceValueSource) entityValueSource).getDatasource();
-                if (ds instanceof EmbeddedDatasource) {
-                    Datasource masterDs = ((EmbeddedDatasource) ds).getMaster();
-                    item = masterDs.getItem();
-                    componentState = calculateComponentState(item,
-                            metadataTools.resolveMetaPropertyPath(masterDs.getMetaClass(), ((EmbeddedDatasource) ds).getProperty().getName() + "." + propertyPath));
-                }
+        if (metadataTools.isEmbeddable(item.getMetaClass()) && entityValueSource instanceof DatasourceValueSource) {
+            Datasource ds = ((DatasourceValueSource) entityValueSource).getDatasource();
+            if (ds instanceof EmbeddedDatasource) {
+                Datasource masterDs = ((EmbeddedDatasource) ds).getMaster();
+                item = masterDs.getItem();
+                componentState = calculateComponentState(item,
+                        metadataTools.resolveMetaPropertyPath(masterDs.getMetaClass(), ((EmbeddedDatasource) ds).getProperty().getName() + "." + propertyPath));
             }
         }
+
         if (componentState.hidden) {
             component.setVisible(false);
         }
@@ -162,31 +161,24 @@ public class AttributeAccessSupport {
 
     protected ComponentState calculateComponentState(Entity entity, MetaPropertyPath propertyPath) {
         ComponentState componentState = new ComponentState();
-        boolean embeddedFound = false;
         if (propertyPath == null) {
             return componentState;
         }
         MetaProperty[] metaProperties = propertyPath.getMetaProperties();
         for (int i = 0; i < metaProperties.length; i++) {
             MetaProperty metaProperty = metaProperties[i];
-            String name = metaProperty.getName();
-            if (metadataTools.isEmbedded(metaProperty)) {
-                name = getEmbeddedAttrName(metaProperties, i);
-                embeddedFound = true;
-            }
+            boolean isLastProperty = i == metaProperties.length - 1;
 
             SecurityState securityState = getSecurityState(entity);
-            if (securityState != null) {
-                componentState.hidden = test(componentState.hidden, securityState.getHiddenAttributes(), name);
-                componentState.readOnly = test(componentState.readOnly, securityState.getReadonlyAttributes(), name);
-                if (embeddedFound || i == metaProperties.length - 1) {
-                    componentState.required = test(componentState.required, securityState.getRequiredAttributes(), name);
-                }
+            String name;
+            if (metadataTools.isEmbedded(metaProperty)) {
+                name = getEmbeddedAttrName(metaProperties, i);
+                componentState = applySecurityState(componentState, securityState, name, isLastProperty);
             }
-            if (embeddedFound) {
-                break;
-            }
-            if (i != metaProperties.length - 1) {
+            name = metaProperty.getName();
+            componentState = applySecurityState(componentState, securityState, name, isLastProperty);
+
+            if (!isLastProperty) {
                 entity = entity.getValue(name);
                 if (entity == null) {
                     break;
@@ -194,6 +186,17 @@ public class AttributeAccessSupport {
             }
         }
 
+        return componentState;
+    }
+
+    protected ComponentState applySecurityState(ComponentState componentState, SecurityState securityState, String name, boolean isLastProperty) {
+        if (securityState != null) {
+            componentState.hidden = test(componentState.hidden, securityState.getHiddenAttributes(), name);
+            componentState.readOnly = test(componentState.readOnly, securityState.getReadonlyAttributes(), name);
+            if (isLastProperty) {
+                componentState.required = test(componentState.required, securityState.getRequiredAttributes(), name);
+            }
+        }
         return componentState;
     }
 
