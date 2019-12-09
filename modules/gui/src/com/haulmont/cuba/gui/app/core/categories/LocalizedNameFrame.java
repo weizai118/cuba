@@ -16,15 +16,9 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
-import com.haulmont.cuba.core.entity.AttrLocalizationNameDescr;
-import com.haulmont.cuba.core.global.GlobalConfig;
-import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.entity.AttributeLocaleData;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.data.DataGridItems;
-import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
-import com.haulmont.cuba.gui.model.impl.CollectionContainerImpl;
 
-import javax.inject.Inject;
 import java.util.*;
 
 public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
@@ -32,13 +26,14 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
-        dataGrid.setBodyRowHeight(40f);
     }
 
     @Override
-    protected void configureColumns(DataGrid<AttrLocalizationNameDescr> dataGrid) {
-        DataGrid.Column<AttrLocalizationNameDescr> langColumn = dataGrid.getColumnNN(LANGUAGE);
-        DataGrid.Column<AttrLocalizationNameDescr> nameColumn = dataGrid.getColumnNN(NAME);
+    protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
+        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
+        DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
+
+        nameColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
 
         dataGrid.removeColumn(LANGUAGE);
         dataGrid.removeColumn(NAME);
@@ -58,16 +53,16 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
     }
 
     public String getValue() {
-        return getValues(AttrLocalizationNameDescr::getName);
+        return getValues(AttributeLocaleData::getName);
     }
 
     public void setValue(String localeBundle) {
-        setValues(localeBundle, AttrLocalizationNameDescr::setName);
+        setValues(localeBundle, AttributeLocaleData::setName);
     }
 
     public void clearFields() {
-        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
-            attrLocalizationNameDescr.setName("");
+        for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
+            attributeLocaleData.setName(null);
         }
     }
 

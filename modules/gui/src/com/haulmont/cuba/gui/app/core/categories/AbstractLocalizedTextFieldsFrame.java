@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
-import com.haulmont.cuba.core.entity.AttrLocalizationNameDescr;
+import com.haulmont.cuba.core.entity.AttributeLocaleData;
 import com.haulmont.cuba.core.entity.LocaleHelper;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
@@ -42,19 +42,18 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
     @Inject
     protected UiComponents uiComponents;
     @Inject
-    private Actions actions;
+    protected Actions actions;
     @Inject
-    private Notifications notifications;
+    protected Notifications notifications;
     @Inject
     protected Metadata metadata;
 
-    protected static String LANGUAGE = "language";
+    protected static String LANGUAGE = "languageWithCode";
     protected static String NAME = "name";
     protected static String DESCRIPTION = "description";
-    protected static String DATAGRID_LOCALIZATION_HEADER_STYLENAME = "datagrid-localization-header";
 
-    protected List<AttrLocalizationNameDescr> attrLocalizationNameDescrList = new ArrayList<>();
-    DataGrid<AttrLocalizationNameDescr> dataGrid;
+    protected CollectionContainerImpl<AttributeLocaleData> collectionContainer;
+    protected DataGrid<AttributeLocaleData> dataGrid;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -63,35 +62,38 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         dataGrid = uiComponents.create(DataGrid.NAME);
         initEditAction(dataGrid);
         dataGrid.setWidth("100%");
+        dataGrid.setHeight("100%");
 
         dataGrid.setItems(getDataGridItems(map));
         dataGrid.setSortable(false);
         dataGrid.setColumnReorderingAllowed(false);
+        dataGrid.setColumnsCollapsingAllowed(false);
 
         configureColumns(dataGrid);
 
-        dataGrid.getDefaultHeaderRow().setStyleName(DATAGRID_LOCALIZATION_HEADER_STYLENAME);
         localesScrollBox.add(dataGrid);
     }
 
-    protected DataGridItems<AttrLocalizationNameDescr> getDataGridItems(Map<String, Locale> map) {
-        CollectionContainerImpl<AttrLocalizationNameDescr> collectionContainer =
-                new CollectionContainerImpl<>(metadata.getClass(AttrLocalizationNameDescr.class));
+    protected DataGridItems<AttributeLocaleData> getDataGridItems(Map<String, Locale> map) {
+        List<AttributeLocaleData> attributeLocaleDataList = new ArrayList<>();
+        collectionContainer = new CollectionContainerImpl<>(metadata.getClass(AttributeLocaleData.class));
+
         for (Map.Entry<String, Locale> entry : map.entrySet()) {
-            AttrLocalizationNameDescr attrLocalizationNameDescr = metadata.create(AttrLocalizationNameDescr.class);
-            attrLocalizationNameDescr.setLanguage(entry.getKey());
-            attrLocalizationNameDescr.setLocale(entry.getValue());
-            attrLocalizationNameDescrList.add(attrLocalizationNameDescr);
+            AttributeLocaleData attributeLocaleData = metadata.create(AttributeLocaleData.class);
+            attributeLocaleData.setLanguage(entry.getKey());
+            attributeLocaleData.setLocale(entry.getValue());
+            attributeLocaleDataList.add(attributeLocaleData);
         }
-        collectionContainer.setItems(attrLocalizationNameDescrList);
+
+        collectionContainer.setItems(attributeLocaleDataList);
         return new ContainerDataGridItems<>(collectionContainer);
     }
 
-    protected void initEditAction(DataGrid<AttrLocalizationNameDescr> dataGrid) {
+    protected void initEditAction(DataGrid<AttributeLocaleData> dataGrid) {
         dataGrid.setEditorEnabled(true);
         EditAction editAction = (EditAction) actions.create(EditAction.ID);
         editAction.withHandler(actionPerformedEvent -> {
-            AttrLocalizationNameDescr selected = dataGrid.getSingleSelected();
+            AttributeLocaleData selected = dataGrid.getSingleSelected();
             if (selected != null) {
                 dataGrid.edit(selected);
             } else {
@@ -103,23 +105,26 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         dataGrid.addAction(editAction);
     }
 
-    protected void setValues(String localeBundle, BiConsumer<AttrLocalizationNameDescr, String> reference) {
+    protected void setValues(String localeBundle, BiConsumer<AttributeLocaleData, String> reference) {
         Map<String, String> localizedNamesMap = LocaleHelper.getLocalizedValuesMap(localeBundle);
-        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
-            reference.accept(attrLocalizationNameDescr,
-                    localizedNamesMap.get(attrLocalizationNameDescr.getLocale().toString()));
+
+        for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
+            reference.accept(attributeLocaleData,
+                    localizedNamesMap.get(attributeLocaleData.getLocale().toString()));
         }
     }
 
-    protected String getValues(Function<AttrLocalizationNameDescr, String> reference) {
+    protected String getValues(Function<AttributeLocaleData, String> reference) {
         Properties properties = new Properties();
-        for (AttrLocalizationNameDescr attrLocalizationNameDescr : attrLocalizationNameDescrList) {
-            if (attrLocalizationNameDescr.getName() != null) {
-                properties.put(attrLocalizationNameDescr.getLocale().toString(), reference.apply(attrLocalizationNameDescr));
+
+        for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
+            if (attributeLocaleData.getName() != null) {
+                properties.put(attributeLocaleData.getLocale().toString(), reference.apply(attributeLocaleData));
             }
         }
+
         return LocaleHelper.convertPropertiesToString(properties);
     }
 
-    protected abstract void configureColumns(DataGrid<AttrLocalizationNameDescr> dataGrid);
+    protected abstract void configureColumns(DataGrid<AttributeLocaleData> dataGrid);
 }

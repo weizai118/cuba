@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
-import com.haulmont.cuba.core.entity.AttrLocalizationNameDescr;
+import com.haulmont.cuba.core.entity.AttributeLocaleData;
 import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.gui.components.*;
 
@@ -31,14 +31,16 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
-        dataGrid.setBodyRowHeight(60f);
     }
 
     @Override
-    protected void configureColumns(DataGrid<AttrLocalizationNameDescr> dataGrid) {
-        DataGrid.Column<AttrLocalizationNameDescr> langColumn = dataGrid.getColumnNN(LANGUAGE);
-        DataGrid.Column<AttrLocalizationNameDescr> nameColumn = dataGrid.getColumnNN(NAME);
-        DataGrid.Column<AttrLocalizationNameDescr> descColumn = dataGrid.getColumnNN(DESCRIPTION);
+    protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
+        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
+        DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
+        DataGrid.Column<AttributeLocaleData> descColumn = dataGrid.getColumnNN(DESCRIPTION);
+
+        nameColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
+        descColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -62,18 +64,18 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     }
 
     protected String getNamesValue() {
-        return getValues(AttrLocalizationNameDescr::getName);
+        return getValues(AttributeLocaleData::getName);
     }
 
     protected String getDescriptionsValue() {
-        return getValues(AttrLocalizationNameDescr::getDescription);
+        return getValues(AttributeLocaleData::getDescription);
     }
 
     protected void setNamesValue(String localeBundle) {
-        setValues(localeBundle, AttrLocalizationNameDescr::setName);
+        setValues(localeBundle, AttributeLocaleData::setName);
     }
 
     protected void setDescriptionsValue(String localeBundle) {
-        setValues(localeBundle, AttrLocalizationNameDescr::setDescription);
+        setValues(localeBundle, AttributeLocaleData::setDescription);
     }
 }

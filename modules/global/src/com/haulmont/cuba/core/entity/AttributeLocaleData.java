@@ -22,11 +22,10 @@ import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
 import java.util.Locale;
 
-@MetaClass(name = "sys$AttrLocalizationNameDescr")
+@MetaClass(name = "sys$AttributeLocaleData")
 @SystemLevel
-public class AttrLocalizationNameDescr extends StandardEntity {
-    @MetaProperty(mandatory = true)
-    private String language;
+public class AttributeLocaleData extends StandardEntity {
+
 
     @MetaProperty
     private String name;
@@ -35,13 +34,22 @@ public class AttrLocalizationNameDescr extends StandardEntity {
     private String description;
 
     private Locale locale;
+    private String language;
 
-    public AttrLocalizationNameDescr() {
+    public AttributeLocaleData() {
     }
 
-    public AttrLocalizationNameDescr(Locale locale, String language) {
+    public AttributeLocaleData(Locale locale, String language) {
         this.locale = locale;
         this.language = language;
+    }
+
+    @MetaProperty(mandatory = true)
+    public String getLanguageWithCode() {
+        if (locale != null) {
+            return language + "|" + locale.toString();
+        }
+        return language;
     }
 
     public Locale getLocale() {
@@ -53,9 +61,6 @@ public class AttrLocalizationNameDescr extends StandardEntity {
     }
 
     public String getLanguage() {
-        if (locale != null) {
-            return language + "|" + locale.toString();
-        }
         return language;
     }
 

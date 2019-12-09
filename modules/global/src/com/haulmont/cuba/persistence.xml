@@ -36,7 +36,6 @@
         <class>com.haulmont.cuba.core.entity.ScheduledTask</class>
         <class>com.haulmont.cuba.core.entity.ScheduledExecution</class>
         <class>com.haulmont.cuba.core.entity.QueryResult</class>
-        <class>com.haulmont.cuba.core.entity.AttrLocalizationNameDescr</class>
 
         <class>com.haulmont.cuba.security.entity.User</class>
         <class>com.haulmont.cuba.security.entity.Role</class>
