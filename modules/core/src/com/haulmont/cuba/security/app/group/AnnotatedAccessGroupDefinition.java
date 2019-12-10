@@ -23,27 +23,27 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Map;
 
-public abstract class AnnotationAccessGroupDefinition implements AccessGroupDefinition {
+public abstract class AnnotatedAccessGroupDefinition implements AccessGroupDefinition {
     @Inject
-    protected AnnotationGroupDefinitionBuilder annotationGroupDefinitionBuilder;
+    protected AnnotatedGroupDefinitionBuilder annotatedGroupDefinitionBuilder;
 
     @Override
     public String getName() {
-        return annotationGroupDefinitionBuilder.getNameFromAnnotation(this);
+        return annotatedGroupDefinitionBuilder.getNameFromAnnotation(this);
     }
 
     @Override
     public String getParent() {
-        return annotationGroupDefinitionBuilder.getParentFromAnnotation(this);
+        return annotatedGroupDefinitionBuilder.getParentFromAnnotation(this);
     }
 
     @Override
     public SetOfAccessConstraints accessConstraints() {
-        return annotationGroupDefinitionBuilder.buildSetOfAccessConstraints(this);
+        return annotatedGroupDefinitionBuilder.buildSetOfAccessConstraints(this);
     }
 
     @Override
     public Map<String, Serializable> sessionAttributes() {
-        return annotationGroupDefinitionBuilder.buildSessionAttributes(this);
+        return annotatedGroupDefinitionBuilder.buildSessionAttributes(this);
     }
 }

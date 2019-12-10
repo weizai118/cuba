@@ -28,6 +28,7 @@ import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.group.SetOfAccessConstraints;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -41,19 +42,16 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-@Component(AnnotationGroupDefinitionBuilder.NAME)
-public class AnnotationGroupDefinitionBuilder {
+@Component(AnnotatedGroupDefinitionBuilder.NAME)
+public class AnnotatedGroupDefinitionBuilder {
 
-    public static final String NAME = "cuba_AnnotationGroupDefinitionBuilder";
+    public static final String NAME = "cuba_AnnotatedGroupDefinitionBuilder";
 
     @Inject
     protected MetadataTools metadataTools;
 
     @Inject
     protected DatatypeRegistry datatypes;
-
-    @Inject
-    protected AccessGroupDefinitionsRepository repository;
 
     protected Map<Class<? extends Annotation>, AnnotationProcessor> processors = new HashMap<>();
 
@@ -143,11 +141,16 @@ public class AnnotationGroupDefinitionBuilder {
     }
 
     public String getNameFromAnnotation(AccessGroupDefinition group) {
-        return getGroupAnnotationNN(group.getClass()).name();
+        return getGroupAnnotation(group.getClass()).name();
     }
 
     public String getParentFromAnnotation(AccessGroupDefinition group) {
-        return getGroupAnnotationNN(group.getClass()).parent();
+        Class<? extends AccessGroupDefinition> parentClazz = getGroupAnnotation(group.getClass()).parent();
+        if (AccessGroupDefinition.class.equals(parentClazz)) {
+            return null;
+        }
+        AccessGroup ann = getGroupAnnotationOrNull(parentClazz);
+        return ann == null ? null : ann.name();
     }
 
     public SetOfAccessConstraints buildSetOfAccessConstraints(AccessGroupDefinition group) {
@@ -214,12 +217,17 @@ public class AnnotationGroupDefinitionBuilder {
         return "sessionAttributes".equals(method.getName());
     }
 
-    protected AccessGroup getGroupAnnotationNN(Class<? extends AccessGroupDefinition> clazz) {
-        AccessGroup annotation = clazz.getAnnotation(AccessGroup.class);
+    protected AccessGroup getGroupAnnotation(Class<? extends AccessGroupDefinition> clazz) {
+        AccessGroup annotation = getGroupAnnotationOrNull(clazz);
         if (annotation == null) {
             throw new IllegalStateException("The class must have @Group annotation.");
         }
         return annotation;
+    }
+
+    protected @Nullable
+    AccessGroup getGroupAnnotationOrNull(Class<? extends AccessGroupDefinition> clazz) {
+        return clazz.getAnnotation(AccessGroup.class);
     }
 
     protected class JpqlAnnotationProcessor implements AnnotationProcessor<ConstraintsAnnotationContext> {

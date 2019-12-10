@@ -16,6 +16,8 @@
 
 package com.haulmont.cuba.security.app.group.annotation;
 
+import com.haulmont.cuba.security.app.group.AnnotatedAccessGroupDefinition;
+import com.haulmont.cuba.security.group.AccessGroupDefinition;
 import com.haulmont.cuba.security.role.SecurityStorageMode;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
@@ -31,17 +33,17 @@ import java.lang.annotation.Target;
  * equals {@code SOURCE_CODE} or {@code MIXED}).
  *
  * <p>The easiest way to determine the access group in the application source code is to extend
- * your class from {@link com.haulmont.cuba.security.app.group.AnnotationAccessGroupDefinition}
+ * your class from {@link AnnotatedAccessGroupDefinition}
  * and mark it with this annotation. Usage example:
  *
  * <pre>
- * &#064;AccessGroup(name = "MyFirstAccessGroup", parent = "ParentAccessGroup")
- * public class MyFirstAccessGroup extends AnnotationAccessGroupDefinition {
+ * &#064;AccessGroup(name = "MyFirstAccessGroup", parent = ParentAccessGroup.class)
+ * public class MyFirstAccessGroup extends AnnotatedAccessGroupDefinition {
  *
  *     &#064;JpqlConstraint(target = SomeEntity.class, where = "{E}.attr = true")
  *     &#064;Override
  *     public SetOfAccessConstraints accessConstraints() {
- *         return super.entityAccess();
+ *         return super.accessConstraints();
  *     }
  *
  *     &#064;Constraint(operations = {EntityOp.READ, EntityOp.UPDATE})
@@ -77,7 +79,7 @@ public @interface AccessGroup {
     /**
      * Access group parent name
      */
-    String parent() default "";
+    Class<? extends AccessGroupDefinition> parent() default AccessGroupDefinition.class;
 
     @AliasFor(annotation = Component.class)
     String value() default "";
