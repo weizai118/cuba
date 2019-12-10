@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * INTERNAL.
@@ -92,7 +93,20 @@ public class UserSessionManager {
      * @return new session instance
      */
     public UserSession createSession(User user, Locale locale, boolean system) {
-        return createSession(uuidSource.createUuid(), user, locale, system);
+        return createSession(uuidSource.createUuid(), user, locale, system, null);
+    }
+
+    /**
+     * Create a new session and fill it with security data. Must be called inside a transaction.
+     *
+     * @param user          user instance
+     * @param locale        user locale
+     * @param system        create system session
+     * @param securityScope security scope
+     * @return new session instance
+     */
+    public UserSession createSession(User user, Locale locale, boolean system, String securityScope) {
+        return createSession(uuidSource.createUuid(), user, locale, system, securityScope);
     }
 
     /**
@@ -105,9 +119,29 @@ public class UserSessionManager {
      * @return new session instance
      */
     public UserSession createSession(UUID sessionId, User user, Locale locale, boolean system) {
+        return createSession(sessionId, user, locale, system, null);
+    }
+
+    /**
+     * Create a new session and fill it with security data. Must be called inside a transaction.
+     *
+     * @param sessionId     target session id
+     * @param user          user instance
+     * @param locale        user locale
+     * @param system        create system session
+     * @param securityScope security profile
+     * @return new session instance
+     */
+    public UserSession createSession(UUID sessionId, User user, Locale locale, boolean system, String securityScope) {
+        List<UserRole> userRoles = user.getUserRoles().stream()
+                .filter(ur ->
+                        securityScope != null ? Objects.equals(ur.getSecurityScope(), securityScope) :
+                                Strings.isNullOrEmpty(ur.getSecurityScope()))
+                .collect(Collectors.toList());
+
         List<RoleDefinition> roles = new ArrayList<>();
 
-        for (RoleDefinition role : rolesRepository.getRoleDefinitions(user.getUserRoles())) {
+        for (RoleDefinition role : rolesRepository.getRoleDefinitions(userRoles)) {
             if (role != null) {
                 roles.add(role);
             }
@@ -292,12 +326,15 @@ public class UserSessionManager {
         }
         for (User user : users) {
             if (entityStates.isDetached(user) && user.getUserRoles() != null) {
-                for (UserRole ur : user.getUserRoles()) {
-                    if (ur.getRole() != null) {
+                List<UserRole> userRoles = user.getUserRoles().stream()
+                        .filter(ur -> entityStates.isLoaded(ur, "role"))
+                        .collect(Collectors.toList());
+                for (UserRole ur : userRoles) {
+                    if (entityStates.isLoaded(ur, "role") && ur.getRole() != null) {
                         ur.getRole().setPermissions(null);
                     }
                 }
-                for (RoleDefinition role : rolesRepository.getRoleDefinitions(user.getUserRoles())) {
+                for (RoleDefinition role : rolesRepository.getRoleDefinitions(userRoles)) {
                     if (role != null) {
                         PermissionsUtils.removePermissions(role.entityPermissions());
                         PermissionsUtils.removePermissions(role.entityAttributePermissions());

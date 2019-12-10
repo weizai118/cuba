@@ -19,6 +19,7 @@ package com.haulmont.cuba.gui.app.security.user.edit;
 import com.google.common.collect.Iterables;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.chile.core.model.MetaClass;
+import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.*;
@@ -49,7 +50,6 @@ import com.haulmont.cuba.security.group.AccessGroupsService;
 import com.haulmont.cuba.security.role.RolesService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.i18nformatter.qual.I18nFormatBottom;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -78,7 +78,7 @@ public class UserEditor extends AbstractEditor<User> {
     protected CollectionDatasource<UserSubstitution, UUID> substitutionsDs;
 
     @Inject
-    protected Table<UserRole> rolesTable;
+    protected GroupTable<UserRole> rolesTable;
 
     @Inject
     protected Table<UserSubstitution> substTable;
@@ -90,7 +90,15 @@ public class UserEditor extends AbstractEditor<User> {
     protected FieldGroup fieldGroupRight;
 
     @Inject
+    protected PopupButton rolesTableAddMultiBtn;
+    @Inject
+    protected Button rolesTableAddBtn;
+
+    @Inject
     protected Icons icons;
+
+    @Inject
+    protected GlobalConfig globalConfig;
 
     protected PasswordField passwField;
     protected PasswordField confirmPasswField;
@@ -131,6 +139,9 @@ public class UserEditor extends AbstractEditor<User> {
     @Inject
     protected AccessGroupsService groupsService;
 
+    @Inject
+    protected MessageTools messageTools;
+
     @Named("fieldGroupRight.active")
     private CheckBox activeField;
 
@@ -152,9 +163,6 @@ public class UserEditor extends AbstractEditor<User> {
             }
         });
 
-        AddRoleAction addRoleAction = new AddRoleAction();
-        addRoleAction.setEnabled(security.isEntityOpPermitted(UserRole.class, EntityOp.CREATE));
-        rolesTable.addAction(addRoleAction);
         EditRoleAction editRoleAction = new EditRoleAction();
         rolesTable.addAction(editRoleAction);
 
@@ -164,6 +172,38 @@ public class UserEditor extends AbstractEditor<User> {
         removeRoleAction.setEnabled(isUserRoleDeletePermitted && isUserUpdatePermitted);
         rolesTable.addAction(removeRoleAction);
 
+        if (hasAdditionalSecurityScopes()) {
+            MetaPropertyPath propertyPath = metadata.getClassNN(UserRole.class).getPropertyPath("securityScope");
+            rolesTableAddMultiBtn.setCaption(messages.getMainMessage("actions.Add"));
+            rolesTableAddMultiBtn.setVisible(true);
+            rolesTableAddBtn.setVisible(false);
+            //noinspection ConstantConditions
+            rolesTable.addColumn(new Table.Column<>(propertyPath, messageTools.getPropertyCaption(propertyPath.getMetaProperty())));
+
+            rolesTable.groupByColumns("securityScope");
+
+            for (String scope : globalConfig.getSecurityScopes()) {
+                Action addRoleAction;
+                if (UserManagementService.DEFAULT_SECURITY_SCOPE.equals(scope)) {
+                    addRoleAction = new AddRoleAction(null);
+                } else {
+                    addRoleAction = new AddRoleAction(scope);
+                }
+                rolesTableAddMultiBtn.addAction(addRoleAction);
+                rolesTable.addAction(addRoleAction);
+            }
+        } else {
+            AddRoleAction addRoleAction = new AddRoleAction();
+            addRoleAction.setEnabled(security.isEntityOpPermitted(UserRole.class, EntityOp.CREATE));
+            rolesTable.addAction(addRoleAction);
+
+            rolesTableAddMultiBtn.setVisible(false);
+            rolesTableAddBtn.setAction(addRoleAction);
+
+            boolean isUserRoleCreatePermitted = security.isEntityOpPermitted(UserRole.class, EntityOp.CREATE);
+            addRoleAction.setEnabled(isUserRoleCreatePermitted && isUserUpdatePermitted);
+        }
+
         AddSubstitutedAction addSubstitutedAction = new AddSubstitutedAction();
         addSubstitutedAction.setEnabled(security.isEntityOpPermitted(UserSubstitution.class, EntityOp.CREATE));
 
@@ -172,9 +212,6 @@ public class UserEditor extends AbstractEditor<User> {
         substTable.addAction(editSubstitutedAction);
         RemoveAction removeSubstitutedAction = new RemoveAction(substTable, false);
         substTable.addAction(removeSubstitutedAction);
-
-        boolean isUserRoleCreatePermitted = security.isEntityOpPermitted(UserRole.class, EntityOp.CREATE);
-        addRoleAction.setEnabled(isUserRoleCreatePermitted && isUserUpdatePermitted);
 
         boolean isSubstitutedUserCreatePermitted = security.isEntityOpPermitted(UserSubstitution.class, EntityOp.CREATE);
         addSubstitutedAction.setEnabled(isSubstitutedUserCreatePermitted && isUserUpdatePermitted);
@@ -245,6 +282,7 @@ public class UserEditor extends AbstractEditor<User> {
 
         // if we add default roles, rolesDs becomes modified on setItem
         ((AbstractDatasource) rolesDs).setModified(false);
+        rolesTable.expandAll();
     }
 
     protected void filterRolesDs(List<Role> allowedRoles) {
@@ -566,24 +604,46 @@ public class UserEditor extends AbstractEditor<User> {
         events.publish(new UserPasswordChangedEvent(this, user, newPassword));
     }
 
+    protected boolean hasAdditionalSecurityScopes() {
+        List<String> scopes = globalConfig.getSecurityScopes();
+        return scopes != null && scopes.size() > 1;
+    }
+
     protected class AddRoleAction extends BaseAction {
+        protected String securityScope;
+
         public AddRoleAction() {
-            super("add");
+            this(null, true);
+        }
+
+        public AddRoleAction(String securityScope) {
+            this(securityScope, false);
+        }
+
+        protected AddRoleAction(String securityScope, boolean singleRoleScope) {
+            super(securityScope == null ? "add" : String.format("add_%s", securityScope));
+
+            this.securityScope = securityScope;
 
             icon = icons.get(CubaIcon.ADD_ACTION);
 
-            setCaption(messages.getMainMessage("actions.Add"));
+            if (singleRoleScope) {
+                setCaption(messages.getMainMessage("actions.Add"));
+            } else {
+                String name = securityScope == null ? "" : securityScope;
+                setCaption(formatMessage("addRoleCaption", name));
+            }
 
             ClientConfig clientConfig = configuration.getConfig(ClientConfig.class);
             setShortcut(clientConfig.getTableAddShortcut());
         }
 
-        protected Collection<String> getExistingRoleNames() {
+        protected Collection<String> getExistingRoleNames(String securityScope) {
             User user = userDs.getItem();
             Collection<String> existingRoleNames = new HashSet<>();
             if (user.getUserRoles() != null) {
                 for (UserRole userRole : user.getUserRoles()) {
-                    if (userRole.getRole() != null)
+                    if (userRole.getRole() != null && Objects.equals(userRole.getSecurityScope(), securityScope))
                         existingRoleNames.add(userRole.getRole().getName());
                 }
             }
@@ -593,7 +653,7 @@ public class UserEditor extends AbstractEditor<User> {
         @Override
         public void actionPerform(Component component) {
             AbstractLookup roleLookupWindow = openLookup(Role.class, items -> {
-                Collection<String> existingRoleNames = getExistingRoleNames();
+                Collection<String> existingRoleNames = getExistingRoleNames(securityScope);
                 rolesDs.suspendListeners();
                 try {
                     for (Object item : items) {
@@ -607,6 +667,7 @@ public class UserEditor extends AbstractEditor<User> {
                         UserRole userRole = dataSupplier.newInstance(metaClass);
                         userRole.setRole(role);
                         userRole.setUser(userDs.getItem());
+                        userRole.setSecurityScope(securityScope);
 
                         rolesDs.addItem(userRole);
                         existingRoleNames.add(role.getName());

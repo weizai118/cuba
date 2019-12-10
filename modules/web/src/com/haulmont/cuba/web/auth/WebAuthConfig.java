@@ -62,4 +62,11 @@ public interface WebAuthConfig extends Config {
     @Property("cuba.checkPasswordOnClient")
     @DefaultBoolean(false)
     boolean getCheckPasswordOnClient();
+
+    /**
+     * Active security scope for a WEB client.
+     * Security scope specifies which roles will be loaded for user session
+     */
+    @Property("cuba.web.securityScope")
+    String getSecurityScope();
 }
