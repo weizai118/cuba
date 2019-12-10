@@ -39,8 +39,6 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
     @Inject
     protected GlobalConfig globalConfig;
     @Inject
-    protected ScrollBoxLayout localesScrollBox;
-    @Inject
     protected UiComponents uiComponents;
     @Inject
     protected Actions actions;
@@ -66,7 +64,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         dataGrid = uiComponents.create(DataGrid.NAME);
         initEditAction(dataGrid);
         dataGrid.setWidth("100%");
-        dataGrid.setHeight(AUTO_SIZE);
+        dataGrid.setHeight("250px");
 
         createColumns(dataGrid);
 
@@ -77,7 +75,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
         configureColumns(dataGrid);
 
-        localesScrollBox.add(dataGrid);
+        add(dataGrid);
     }
 
     protected DataGridItems<AttributeLocaleData> getDataGridItems(Map<String, Locale> map) {
