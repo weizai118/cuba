@@ -29,15 +29,20 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
     }
 
     @Override
+    protected void createColumns(DataGrid<AttributeLocaleData> dataGrid) {
+        dataGrid.addColumn(LANGUAGE, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "languageWithCode"));
+        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "name"));
+    }
+
+    @Override
     protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
         DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
         DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
 
-        nameColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
+        langColumn.setCaption(LANGUAGE_CAPTION);
 
-        dataGrid.removeColumn(LANGUAGE);
-        dataGrid.removeColumn(NAME);
-        dataGrid.removeColumn(DESCRIPTION);
+        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("descriptionProviderValueEdit"));
+        nameColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getName() + "\n\n" +  getMessage("descriptionProviderValueEdit"));
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -47,9 +52,6 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
 
         langColumn.setEditable(false);
         nameColumn.setEditable(true);
-
-        dataGrid.addColumn(langColumn, 0);
-        dataGrid.addColumn(nameColumn, 1);
     }
 
     public String getValue() {
@@ -67,8 +69,6 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
     }
 
     public void setEditableFields(boolean editable) {
-        for (DataGrid.Column column : dataGrid.getColumns()) {
-            column.setEditable(editable);
-        }
+        dataGrid.getColumns().forEach(column -> column.setEditable(editable));
     }
 }

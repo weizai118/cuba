@@ -18,14 +18,13 @@ package com.haulmont.cuba.core.entity;
 
 import com.haulmont.chile.core.annotations.MetaClass;
 import com.haulmont.chile.core.annotations.MetaProperty;
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.annotation.SystemLevel;
 
-import java.util.Locale;
-
+@NamePattern("%s %s|name,languageWithCode")
 @MetaClass(name = "sys$AttributeLocaleData")
 @SystemLevel
 public class AttributeLocaleData extends StandardEntity {
-
 
     @MetaProperty
     private String name;
@@ -33,30 +32,25 @@ public class AttributeLocaleData extends StandardEntity {
     @MetaProperty
     private String description;
 
-    private Locale locale;
-    private String language;
-
-    public AttributeLocaleData() {
-    }
-
-    public AttributeLocaleData(Locale locale, String language) {
-        this.locale = locale;
-        this.language = language;
-    }
+    @MetaProperty
+    private String locale;
 
     @MetaProperty(mandatory = true)
+    private String language;
+
+    @MetaProperty
     public String getLanguageWithCode() {
         if (locale != null) {
-            return language + "|" + locale.toString();
+            return language + "|" + locale;
         }
         return language;
     }
 
-    public Locale getLocale() {
+    public String getLocale() {
         return locale;
     }
 
-    public void setLocale(Locale locale) {
+    public void setLocale(String locale) {
         this.locale = locale;
     }
 

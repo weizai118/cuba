@@ -34,13 +34,23 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
     }
 
     @Override
+    protected void createColumns(DataGrid<AttributeLocaleData> dataGrid) {
+        dataGrid.addColumn(LANGUAGE, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "languageWithCode"));
+        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "name"));
+        dataGrid.addColumn(DESCRIPTION, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "description"));
+    }
+
+    @Override
     protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
         DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
         DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
         DataGrid.Column<AttributeLocaleData> descColumn = dataGrid.getColumnNN(DESCRIPTION);
 
-        nameColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
-        descColumn.setDescriptionProvider(attributeLocaleData -> "Double click to edit the value");
+        langColumn.setCaption(LANGUAGE_CAPTION);
+
+        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("descriptionProviderValueEdit"));
+        nameColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getName() + "\n\n" + getMessage("descriptionProviderValueEdit"));
+        descColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getDescription() + "\n\n" + getMessage("descriptionProviderValueEdit"));
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -50,17 +60,9 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         nameColumn.setExpandRatio(3);
         descColumn.setExpandRatio(4);
 
-        dataGrid.removeColumn(LANGUAGE);
-        dataGrid.removeColumn(NAME);
-        dataGrid.removeColumn(DESCRIPTION);
-
         langColumn.setEditable(false);
         nameColumn.setEditable(true);
         descColumn.setEditable(true);
-
-        dataGrid.addColumn(langColumn, 0);
-        dataGrid.addColumn(nameColumn, 1);
-        dataGrid.addColumn(descColumn, 2);
     }
 
     protected String getNamesValue() {

@@ -20,6 +20,7 @@ import com.haulmont.cuba.core.entity.AttributeLocaleData;
 import com.haulmont.cuba.core.entity.LocaleHelper;
 import com.haulmont.cuba.core.global.GlobalConfig;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.MetadataTools;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.actions.list.EditAction;
@@ -47,8 +48,11 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
     protected Notifications notifications;
     @Inject
     protected Metadata metadata;
+    @Inject
+    protected MetadataTools metadataTools;
 
-    protected static String LANGUAGE = "languageWithCode";
+    protected static String LANGUAGE_CAPTION = "Language";
+    protected static String LANGUAGE = "language";
     protected static String NAME = "name";
     protected static String DESCRIPTION = "description";
 
@@ -62,7 +66,9 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         dataGrid = uiComponents.create(DataGrid.NAME);
         initEditAction(dataGrid);
         dataGrid.setWidth("100%");
-        dataGrid.setHeight("100%");
+        dataGrid.setHeight(AUTO_SIZE);
+
+        createColumns(dataGrid);
 
         dataGrid.setItems(getDataGridItems(map));
         dataGrid.setSortable(false);
@@ -81,7 +87,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         for (Map.Entry<String, Locale> entry : map.entrySet()) {
             AttributeLocaleData attributeLocaleData = metadata.create(AttributeLocaleData.class);
             attributeLocaleData.setLanguage(entry.getKey());
-            attributeLocaleData.setLocale(entry.getValue());
+            attributeLocaleData.setLocale(entry.getValue().toString());
             attributeLocaleDataList.add(attributeLocaleData);
         }
 
@@ -91,8 +97,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
     protected void initEditAction(DataGrid<AttributeLocaleData> dataGrid) {
         dataGrid.setEditorEnabled(true);
-        EditAction editAction = (EditAction) actions.create(EditAction.ID);
-        editAction.withHandler(actionPerformedEvent -> {
+        dataGrid.addAction(actions.create(EditAction.class).withHandler(actionPerformedEvent -> {
             AttributeLocaleData selected = dataGrid.getSingleSelected();
             if (selected != null) {
                 dataGrid.edit(selected);
@@ -101,8 +106,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
                         .withCaption("Item is not selected")
                         .show();
             }
-        });
-        dataGrid.addAction(editAction);
+        }));
     }
 
     protected void setValues(String localeBundle, BiConsumer<AttributeLocaleData, String> reference) {
@@ -110,7 +114,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
             reference.accept(attributeLocaleData,
-                    localizedNamesMap.get(attributeLocaleData.getLocale().toString()));
+                    localizedNamesMap.get(attributeLocaleData.getLocale()));
         }
     }
 
@@ -119,12 +123,14 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
             if (attributeLocaleData.getName() != null) {
-                properties.put(attributeLocaleData.getLocale().toString(), reference.apply(attributeLocaleData));
+                properties.put(attributeLocaleData.getLocale(), reference.apply(attributeLocaleData));
             }
         }
 
         return LocaleHelper.convertPropertiesToString(properties);
     }
+
+    protected abstract void createColumns(DataGrid<AttributeLocaleData> dataGrid);
 
     protected abstract void configureColumns(DataGrid<AttributeLocaleData> dataGrid);
 }
