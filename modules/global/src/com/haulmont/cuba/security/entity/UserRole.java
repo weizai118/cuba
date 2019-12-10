@@ -48,6 +48,9 @@ public class UserRole extends StandardEntity {
     @Column(name = "ROLE_NAME")
     private String roleName;
 
+    @Column(name = "SECURITY_SCOPE")
+    private String securityScope;
+
     @Transient
     private transient RoleDefinition roleDefinition;
 
@@ -73,6 +76,14 @@ public class UserRole extends StandardEntity {
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+    }
+
+    public String getSecurityScope() {
+        return securityScope;
+    }
+
+    public void setSecurityScope(String securityScope) {
+        this.securityScope = securityScope;
     }
 
     public RoleDefinition getRoleDefinition() {

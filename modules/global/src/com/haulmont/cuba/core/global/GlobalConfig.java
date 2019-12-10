@@ -281,4 +281,14 @@ public interface GlobalConfig extends Config {
     @Default("MIXED")
     @Factory(factory = RolesStorageModeFactory.class)
     RolesStorageMode getRolesStorageMode();
+
+    /**
+     * Represents list of all available security scopes for all client types.
+     * Allows to select security scopes from the list in a UI and
+     * associate roles with user and selected security scope
+     */
+    @Property("cuba.securityScopes")
+    @Default("DEFAULT")
+    @Factory(factory = TokenizedStringListFactory.class)
+    List<String> getSecurityScopes();
 }

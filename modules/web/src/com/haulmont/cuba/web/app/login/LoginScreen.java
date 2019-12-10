@@ -294,7 +294,9 @@ public class LoginScreen extends Screen {
 
     protected void doLogin(Credentials credentials) throws LoginException {
         if (credentials instanceof AbstractClientCredentials) {
-            ((AbstractClientCredentials) credentials).setOverrideLocale(localesSelect.isVisibleRecursive());
+            AbstractClientCredentials clientCredentials = (AbstractClientCredentials) credentials;
+            clientCredentials.setOverrideLocale(localesSelect.isVisibleRecursive());
+            clientCredentials.setSecurityScope(webAuthConfig.getSecurityScope());
         }
         connection.login(credentials);
     }
@@ -343,6 +345,7 @@ public class LoginScreen extends Screen {
         if (StringUtils.isNotEmpty(rememberMeToken)) {
             RememberMeCredentials credentials = new RememberMeCredentials(login, rememberMeToken, locale);
             credentials.setOverrideLocale(localesSelect.isVisibleRecursive());
+            credentials.setSecurityScope(webAuthConfig.getSecurityScope());
             try {
                 connection.login(credentials);
             } catch (LoginException e) {

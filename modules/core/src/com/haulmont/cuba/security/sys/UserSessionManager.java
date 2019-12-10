@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.security.sys;
 
+import com.google.common.base.Strings;
 import com.haulmont.chile.core.datatypes.Datatype;
 import com.haulmont.chile.core.datatypes.Datatypes;
 import com.haulmont.chile.core.model.MetaClass;
@@ -23,7 +24,10 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.TypedQuery;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.EntityStates;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.core.global.UuidSource;
 import com.haulmont.cuba.core.sys.DefaultPermissionValuesConfig;
 import com.haulmont.cuba.security.app.UserSessionsAPI;
 import com.haulmont.cuba.security.app.role.RoleDefinitionBuilder;
@@ -40,14 +44,12 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * INTERNAL.
- *
+ * <p>
  * System-level class managing {@link UserSession}s.
  */
 @Component(UserSessionManager.NAME)
@@ -83,28 +85,61 @@ public class UserSessionManager {
 
     /**
      * Create a new session and fill it with security data. Must be called inside a transaction.
-     * @param user      user instance
-     * @param locale    user locale
-     * @param system    create system session
-     * @return          new session instance
+     *
+     * @param user   user instance
+     * @param locale user locale
+     * @param system create system session
+     * @return new session instance
      */
     public UserSession createSession(User user, Locale locale, boolean system) {
-        return createSession(uuidSource.createUuid(), user, locale, system);
+        return createSession(uuidSource.createUuid(), user, locale, system, null);
     }
 
     /**
      * Create a new session and fill it with security data. Must be called inside a transaction.
+     *
+     * @param user            user instance
+     * @param locale          user locale
+     * @param system          create system session
+     * @param securityScope security scope
+     * @return new session instance
+     */
+    public UserSession createSession(User user, Locale locale, boolean system, String securityScope) {
+        return createSession(uuidSource.createUuid(), user, locale, system, securityScope);
+    }
+
+    /**
+     * Create a new session and fill it with security data. Must be called inside a transaction.
+     *
      * @param sessionId target session id
      * @param user      user instance
      * @param locale    user locale
      * @param system    create system session
-     * @return          new session instance
+     * @return new session instance
      */
     public UserSession createSession(UUID sessionId, User user, Locale locale, boolean system) {
-        List<RoleDefinition> roles = new ArrayList<>();
-        RoleDefinition effectiveRole;
+        return createSession(sessionId, user, locale, system, null);
+    }
 
-        for (RoleDefinition role : rolesRepository.getRoleDefinitions(user.getUserRoles())) {
+    /**
+     * Create a new session and fill it with security data. Must be called inside a transaction.
+     *
+     * @param sessionId       target session id
+     * @param user            user instance
+     * @param locale          user locale
+     * @param system          create system session
+     * @param securityScope security profile
+     * @return new session instance
+     */
+    public UserSession createSession(UUID sessionId, User user, Locale locale, boolean system, String securityScope) {
+        List<UserRole> userRoles = user.getUserRoles().stream()
+                .filter(ur ->
+                        securityScope != null ? Objects.equals(ur.getSecurityScope(), securityScope) :
+                                Strings.isNullOrEmpty(ur.getSecurityScope()))
+                .collect(Collectors.toList());
+
+        List<RoleDefinition> roles = new ArrayList<>();
+        for (RoleDefinition role : rolesRepository.getRoleDefinitions(userRoles)) {
             if (role != null) {
                 roles.add(role);
             }
@@ -121,9 +156,10 @@ public class UserSessionManager {
     /**
      * Create a new session from existing for another user and fill it with security data for that new user.
      * Must be called inside a transaction.
-     * @param src   existing session
-     * @param user  another user instance
-     * @return      new session with the same ID as existing
+     *
+     * @param src  existing session
+     * @param user another user instance
+     * @return new session with the same ID as existing
      */
     public UserSession createSession(UserSession src, User user) {
         List<RoleDefinition> roles = new ArrayList<>();
@@ -282,7 +318,7 @@ public class UserSessionManager {
         } finally {
             tx.end();
         }
-        return result; 
+        return result;
     }
 
     /**
@@ -296,12 +332,15 @@ public class UserSessionManager {
         }
         for (User user : users) {
             if (entityStates.isDetached(user) && user.getUserRoles() != null) {
-                for (UserRole ur : user.getUserRoles()) {
-                    if (ur.getRole() != null) {
+                List<UserRole> userRoles = user.getUserRoles().stream()
+                        .filter(ur -> entityStates.isLoaded(ur, "role"))
+                        .collect(Collectors.toList());
+                for (UserRole ur : userRoles) {
+                    if (entityStates.isLoaded(ur, "role") && ur.getRole() != null) {
                         ur.getRole().setPermissions(null);
                     }
                 }
-                for (RoleDefinition role : rolesRepository.getRoleDefinitions(user.getUserRoles())) {
+                for (RoleDefinition role : rolesRepository.getRoleDefinitions(userRoles)) {
                     if (role != null) {
                         PermissionsUtils.removePermissions(role.entityPermissions());
                         PermissionsUtils.removePermissions(role.entityAttributePermissions());

@@ -48,6 +48,7 @@
             <property name="defaultRole"/>
         </property>
         <property name="roleName"/>
+        <property name="securityScope"/>
     </view>
 
     <view class="com.haulmont.cuba.security.entity.UserRole" name="tmp.user.edit">

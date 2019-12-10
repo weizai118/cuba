@@ -22,10 +22,7 @@ import com.haulmont.cuba.security.entity.Role;
 import com.haulmont.cuba.security.entity.UserSubstitution;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Service providing maintenance operations on security entities.
@@ -34,6 +31,8 @@ import java.util.UUID;
 public interface UserManagementService {
 
     String NAME = "cuba_UserManagementService";
+
+    String DEFAULT_SECURITY_SCOPE = "DEFAULT";
 
     /**
      * Copy access group with all its properties and subgroups.
