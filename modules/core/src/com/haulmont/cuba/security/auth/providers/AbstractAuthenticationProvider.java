@@ -19,6 +19,9 @@ package com.haulmont.cuba.security.auth.providers;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.LocaleResolver;
+import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.auth.AbstractClientCredentials;
 import com.haulmont.cuba.security.auth.AuthenticationProvider;
@@ -86,7 +89,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
         }
         if (userLocale == null) {
             if (user.getLanguage() != null) {
-                userLocale = LocaleUtils.toLocale(user.getLanguage());
+                userLocale = LocaleResolver.resolve(user.getLanguage());
             } else {
                 userLocale = messages.getTools().trimLocale(messages.getTools().getDefaultLocale());
             }
