@@ -282,6 +282,34 @@ public class MessagesTest {
         assertEquals("Country Message fr CA", msg);
     }
 
+    @Test
+    public void testScriptAndVariant() throws Exception {
+        Messages messages = AppBeans.get(Messages.class);
+
+        Map<String, Locale> availableLocales = AppBeans.get(Configuration.class).getConfig(GlobalConfig.class).getAvailableLocales();
+        assertTrue(availableLocales.containsValue(Locale.forLanguageTag("sr")));
+        assertTrue(availableLocales.containsValue(Locale.forLanguageTag("sr-Latn")));
+        assertTrue(availableLocales.containsValue(Locale.forLanguageTag("ja")));
+        assertTrue(availableLocales.containsValue(Locale.forLanguageTag("ja_JP_JP")));
+
+        boolean localeLanguageOnly = messages.getTools().useLocaleLanguageOnly();
+        assertFalse(localeLanguageOnly);
+
+        String msg;
+
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "fullMsg", Locale.forLanguageTag("sr-Latn"));
+        assertEquals("Full Message sr-Latn", msg);
+
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", Locale.forLanguageTag("sr"));
+        assertEquals("Language Message sr", msg);
+
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "fullMsg", Locale.forLanguageTag("ja_JP_JP"));
+        assertEquals("Full Message ja_JP_JP", msg);
+
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", Locale.forLanguageTag("ja"));
+        assertEquals("Language Message ja", msg);
+    }
+
     private int getSearchMessagesCount() {
         return Iterables.size(Iterables.filter(appender.getMessages(), new Predicate<String>() {
             @Override

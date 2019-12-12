@@ -10,8 +10,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 
+/**
+ * The LocaleResolver class transforms locales to strings and vice versa to support messages localization.
+ */
 public class LocaleResolver {
 
+    /**
+     * @param localeString the locale String or language tag.
+     * @return The locale that best represents the language tag or locale string.
+     * @throws NullPointerException if {@code localeString} is {@code null}
+     */
     public static Locale resolve(String localeString) {
         Locale result;
         if (localeString.contains("-")) {
@@ -22,6 +30,10 @@ public class LocaleResolver {
         return result;
     }
 
+    /**
+     * @return A string representation of the Locale without {@code Extension}
+     * or a BCP47 language tag if locale object contains {@code Script}
+     */
     public static String localeToString(Locale locale) {
         if (locale == null) {
             return null;
