@@ -329,7 +329,7 @@ public class TestContainer extends ExternalResource implements BeforeAllCallback
             }
             TestDataSourceProvider.registerDataSource(Stores.MAIN, ds);
         } catch (ClassNotFoundException | NamingException e) {
-            throw new RuntimeException("Error initializing datasource", e);
+            throw new RuntimeException("Error initializing dataSource", e);
         }
     }
 
