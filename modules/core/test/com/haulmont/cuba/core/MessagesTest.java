@@ -307,10 +307,16 @@ public class MessagesTest {
         msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", LocaleUtils.toLocale("sr"));
         assertEquals("Language Message sr", msg);
 
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", Locale.forLanguageTag("sr-Latn"));
+        assertEquals("Language Message sr", msg);
+
         msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "fullMsg", LocaleUtils.toLocale("ja_JP_JP"));
         assertEquals("Full Message ja_JP_JP", msg);
 
         msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", LocaleUtils.toLocale("ja"));
+        assertEquals("Language Message ja", msg);
+
+        msg = messages.getMessage("com.haulmont.cuba.core.mp_test", "languageMsg", LocaleUtils.toLocale("ja_JP_JP"));
         assertEquals("Language Message ja", msg);
     }
 
