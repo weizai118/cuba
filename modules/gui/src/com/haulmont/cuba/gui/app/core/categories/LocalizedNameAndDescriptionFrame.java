@@ -16,17 +16,13 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
+import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.AttributeLocaleData;
-import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.gui.components.*;
 
-import javax.inject.Inject;
 import java.util.*;
 
 public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextFieldsFrame {
-
-    @Inject
-    protected MessageTools messageTools;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -35,34 +31,51 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
 
     @Override
     protected void createColumns(DataGrid<AttributeLocaleData> dataGrid) {
-        dataGrid.addColumn(LANGUAGE, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "languageWithCode"));
-        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "name"));
-        dataGrid.addColumn(DESCRIPTION, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "description"));
+        MetaClass metaClass = metadata.getClass(AttributeLocaleData.class);
+
+        dataGrid.addColumn(LANGUAGE_WITH_CODE, metadataTools.resolveMetaPropertyPath(metaClass, LANGUAGE_WITH_CODE))
+                .setCaption(messages.getMessage(AttributeLocaleData.class, LOCALIZATION_PREFIX + LANGUAGE_WITH_CODE));
+        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metaClass, NAME))
+                .setCaption(messages.getMessage(AttributeLocaleData.class, LOCALIZATION_PREFIX + NAME));
+        dataGrid.addColumn(DESCRIPTION, metadataTools.resolveMetaPropertyPath(metaClass, DESCRIPTION))
+                .setCaption(messages.getMessage(AttributeLocaleData.class, LOCALIZATION_PREFIX + DESCRIPTION));
     }
 
     @Override
     protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
-        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
+        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE_WITH_CODE);
         DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
-        DataGrid.Column<AttributeLocaleData> descColumn = dataGrid.getColumnNN(DESCRIPTION);
+        DataGrid.Column<AttributeLocaleData> descrColumn = dataGrid.getColumnNN(DESCRIPTION);
 
-        langColumn.setCaption(LANGUAGE_CAPTION);
-
-        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("descriptionProviderValueEdit"));
-        nameColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getName() + "\n\n" + getMessage("descriptionProviderValueEdit"));
-        descColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getDescription() + "\n\n" + getMessage("descriptionProviderValueEdit"));
+        setDescriptionProviders(langColumn, nameColumn, descrColumn);
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
-        descColumn.setResizable(false);
+        descrColumn.setResizable(false);
 
         langColumn.setExpandRatio(1);
         nameColumn.setExpandRatio(3);
-        descColumn.setExpandRatio(4);
+        descrColumn.setExpandRatio(4);
 
         langColumn.setEditable(false);
-        nameColumn.setEditable(true);
-        descColumn.setEditable(true);
+    }
+
+
+    protected void setDescriptionProviders(DataGrid.Column<AttributeLocaleData> langColumn,
+                                           DataGrid.Column<AttributeLocaleData> nameColumn,
+                                           DataGrid.Column<AttributeLocaleData> descrColumn) {
+
+        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("localeDataDescription"));
+
+        nameColumn.setDescriptionProvider(attributeLocaleData -> {
+            String nameValue = attributeLocaleData.getName() != null ? attributeLocaleData.getName() + "\n\n" : "";
+            return nameValue + getMessage("localeDataDescription");
+        });
+
+        descrColumn.setDescriptionProvider(attributeLocaleData -> {
+            String nameValue = attributeLocaleData.getDescription() != null ? attributeLocaleData.getDescription() + "\n\n" : "";
+            return nameValue + getMessage("localeDataDescription");
+        });
     }
 
     protected String getNamesValue() {

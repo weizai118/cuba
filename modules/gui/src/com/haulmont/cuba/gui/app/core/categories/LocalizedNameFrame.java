@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.app.core.categories;
 
+import com.haulmont.chile.core.model.MetaClass;
 import com.haulmont.cuba.core.entity.AttributeLocaleData;
 import com.haulmont.cuba.gui.components.*;
 
@@ -30,19 +31,20 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
 
     @Override
     protected void createColumns(DataGrid<AttributeLocaleData> dataGrid) {
-        dataGrid.addColumn(LANGUAGE, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "languageWithCode"));
-        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metadata.getClass(AttributeLocaleData.class), "name"));
+        MetaClass metaClass = metadata.getClass(AttributeLocaleData.class);
+
+        dataGrid.addColumn(LANGUAGE_WITH_CODE, metadataTools.resolveMetaPropertyPath(metaClass, LANGUAGE_WITH_CODE))
+                .setCaption(messages.getMessage(AttributeLocaleData.class, LOCALIZATION_PREFIX + LANGUAGE_WITH_CODE));
+        dataGrid.addColumn(NAME, metadataTools.resolveMetaPropertyPath(metaClass, NAME))
+                .setCaption(messages.getMessage(AttributeLocaleData.class, LOCALIZATION_PREFIX + NAME));
     }
 
     @Override
     protected void configureColumns(DataGrid<AttributeLocaleData> dataGrid) {
-        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE);
+        DataGrid.Column<AttributeLocaleData> langColumn = dataGrid.getColumnNN(LANGUAGE_WITH_CODE);
         DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
 
-        langColumn.setCaption(LANGUAGE_CAPTION);
-
-        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("descriptionProviderValueEdit"));
-        nameColumn.setDescriptionProvider(attributeLocaleData -> attributeLocaleData.getName() + "\n\n" +  getMessage("descriptionProviderValueEdit"));
+        setDescriptionProviders(langColumn, nameColumn);
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -51,7 +53,15 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
         nameColumn.setExpandRatio(3);
 
         langColumn.setEditable(false);
-        nameColumn.setEditable(true);
+    }
+
+    protected void setDescriptionProviders(DataGrid.Column<AttributeLocaleData> langColumn,
+                                           DataGrid.Column<AttributeLocaleData> nameColumn) {
+        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("localeDataDescription"));
+        nameColumn.setDescriptionProvider(attributeLocaleData -> {
+            String nameValue = attributeLocaleData.getName() != null ? attributeLocaleData.getName() + "\n\n" : "";
+            return nameValue +  getMessage("localeDataDescription");
+        });
     }
 
     public String getValue() {

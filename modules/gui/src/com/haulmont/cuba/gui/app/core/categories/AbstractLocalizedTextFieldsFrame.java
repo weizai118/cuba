@@ -49,8 +49,8 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
     @Inject
     protected MetadataTools metadataTools;
 
-    protected static String LANGUAGE_CAPTION = "Language";
-    protected static String LANGUAGE = "language";
+    protected static String LOCALIZATION_PREFIX = "AttributeLocaleData.";
+    protected static String LANGUAGE_WITH_CODE = "languageWithCode";
     protected static String NAME = "name";
     protected static String DESCRIPTION = "description";
 
@@ -120,8 +120,9 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         Properties properties = new Properties();
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
-            if (attributeLocaleData.getName() != null) {
-                properties.put(attributeLocaleData.getLocale(), reference.apply(attributeLocaleData));
+            String value = reference.apply(attributeLocaleData);
+            if (attributeLocaleData.getName() != null && value != null) {
+                properties.put(attributeLocaleData.getLocale(), value);
             }
         }
 
