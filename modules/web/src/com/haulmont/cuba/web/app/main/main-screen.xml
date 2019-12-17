@@ -52,10 +52,10 @@
                                 stylename="c-sidemenu-collapse"/>
                         <userIndicator id="userIndicator"
                                        align="MIDDLE_CENTER"/>
-                        <newWindowButton id="newWindowButton"
-                                         description="mainMsg://newWindowBtnDescription"
-                                         icon="app/images/new-window.png"/>
-                        <userActionsButton id="userActionsButton"/>
+                        <button id="settingsButton"
+                                icon="GEAR"
+                                description="mainMsg://settings"
+                                stylename="c-settings-button"/>
                         <logoutButton id="logoutButton"
                                       icon="app/images/exit.png"
                                       description="msg://logoutBtnDescription"/>

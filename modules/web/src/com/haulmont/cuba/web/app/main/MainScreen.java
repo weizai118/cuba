@@ -29,6 +29,7 @@ import com.haulmont.cuba.gui.components.dev.LayoutAnalyzerContextMenuProvider;
 import com.haulmont.cuba.gui.components.mainwindow.*;
 import com.haulmont.cuba.gui.events.UserRemovedEvent;
 import com.haulmont.cuba.gui.events.UserSubstitutionsChangedEvent;
+import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -197,6 +198,14 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
 
             userSettings.saveSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE, String.valueOf(collapsed));
         }
+    }
+
+    @Subscribe("settingsButton")
+    protected void onSettingsButtonClick(Button.ClickEvent e) {
+        UiControllerUtils.getScreenContext(this)
+                .getScreens()
+                .create("settings", OpenMode.NEW_TAB)
+                .show();
     }
 
     protected void setSideMenuCollapsed(boolean collapsed) {

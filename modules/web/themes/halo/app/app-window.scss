@@ -445,7 +445,7 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       }
     }
 
-    .c-sidemenu-controls .c-newwindow-button,
+    .c-sidemenu-controls .c-settings-button,
     .c-sidemenu-controls .c-logout-button {
       width: $cuba-sidemenu-layout-collapsed-width;
       height: $cuba-sidemenu-layout-collapsed-width;
@@ -458,30 +458,16 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       }
     }
 
-    .c-sidemenu-controls .c-useractions-button {
-      width: $cuba-sidemenu-layout-collapsed-width;
-      height: $cuba-sidemenu-layout-collapsed-width;
+    .c-sidemenu-controls .c-settings-button {
+      color: $cuba-menubar-text-color;
 
-      & .v-menubar-menuitem {
-        width: $cuba-sidemenu-layout-collapsed-width;
-        height: $cuba-sidemenu-layout-collapsed-width;
+      background: none;
+      border: none;
+      box-shadow: none;
 
-        line-height: $cuba-sidemenu-layout-collapsed-width;
-
-        border-radius: 0;
+      &:hover {
+        color: $cuba-menubar-menuitem-text-selected-color;
       }
-    }
-
-    .c-sidemenu-controls .c-logout-button {
-      display: none;
-    }
-
-    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-userindicator ~ .c-logout-button {
-      display: block;
-    }
-
-    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-userindicator ~ .c-useractions-button {
-      display: none;
     }
   }
 }
