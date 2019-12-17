@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.web.app.main;
 
+import com.haulmont.cuba.core.global.ClientType;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.FtsConfigHelper;
@@ -33,6 +34,7 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.app.UserSettingService;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.WebConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +53,7 @@ import static com.haulmont.cuba.gui.ComponentsHelper.setStyleName;
 @UiController("main")
 public class MainScreen extends Screen implements Window.HasWorkArea, Window.HasUserIndicator {
 
+    public static final String SIDEMENU_COLLAPSED_STATE = "sidemenuCollapsed";
     public static final String SIDEMENU_COLLAPSED_STYLENAME = "collapsed";
     public static final String SIDEMENU_COLLAPSE_ICON = "«";
     public static final String SIDEMENU_EXPAND_ICON = "»";
@@ -116,7 +119,18 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
             ((Component.Focusable) menu).focus();
         }
 
+        initCollapsibleMenu();
         initCollapseMenuButton();
+    }
+
+    protected void initCollapsibleMenu() {
+        Component sideMenuContainer = getWindow().getComponent("sideMenuContainer");
+        if (sideMenuContainer instanceof CssLayout) {
+            String menuCollapsedSetting = getBeanLocator().get(UserSettingService.class)
+                    .loadSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE);
+
+            setSideMenuCollapsed(Boolean.parseBoolean(menuCollapsedSetting));
+        }
     }
 
     protected void initCollapseMenuButton() {
@@ -164,6 +178,8 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
     }
 
     protected void setSideMenuCollapsed(boolean collapsed) {
+        UserSettingService userSettings = getBeanLocator().get(UserSettingService.class);
+
         CssLayout sideMenuPanel = getSideMenuPanel();
         Button collapseMenuButton = getMenuCollapseButton();
         Component sideMenuContainer = getWindow().getComponent("sideMenuContainer");
@@ -181,6 +197,8 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
                 collapseMenuButton.setDescription(messages.getMainMessage("sideMenuCollapse"));
             }
         }
+
+        userSettings.saveSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE, String.valueOf(collapsed));
     }
 
     protected boolean isMenuCollapsed() {

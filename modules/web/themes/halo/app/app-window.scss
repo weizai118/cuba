@@ -362,12 +362,22 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       flex-wrap: nowrap;
       align-items: center;
 
-      min-height: round($v-unit-size * 1.5);
+      height: $cuba-sidemenu-layout-collapsed-width;
+      padding: 0 round($v-unit-size / 3);
 
       text-align: left;
     }
 
-    .c-sidemenu-title .c-app-icon {
+    .c-app-title {
+      width: $cuba-sidemenu-layout-expanded-width -
+        3 * $v-layout-spacing-horizontal -
+        round($cuba-sidemenu-layout-collapsed-width / 2);
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .c-app-icon {
       height: round($cuba-sidemenu-layout-collapsed-width / 2);
       width: round($cuba-sidemenu-layout-collapsed-width / 2);
 
@@ -375,22 +385,31 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
     }
 
     .c-sidemenu-controls {
-      height: $v-unit-size;
+      display: flex;
+      align-items: center;
+
+      overflow: hidden;
+
+      height: $cuba-sidemenu-layout-collapsed-width;
       background-color: #3b3b3b;
 
       @if $cuba-sidemenu-layout-collapse-enabled == false {
         display: none;
       }
-    }
 
-    .c-sidemenu-controls .c-userindicator .v-label {
-      text-align: center;
+      & > * {
+        flex-shrink: 0;
+
+        border-radius: 0;
+      }
     }
 
     .c-sidemenu-collapse {
       $bg-color: #2b2b2b;
 
       width: $cuba-sidemenu-layout-collapsed-width;
+      height: $cuba-sidemenu-layout-collapsed-width;
+      margin-right: auto;
       padding: 0;
 
       font-size: 2em;
@@ -400,6 +419,69 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       border-radius: 0;
       background: $bg-color;
       box-shadow: none;
+
+      &:hover {
+        color: $cuba-menubar-menuitem-text-selected-color;
+      }
+
+      &::after {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    }
+
+    .c-sidemenu-controls .c-userindicator {
+      width: $cuba-sidemenu-layout-expanded-width - 3 * $cuba-sidemenu-layout-collapsed-width;
+      padding: 0 $v-layout-spacing-horizontal;
+
+      font-size: 1.1em;
+      text-align: center;
+
+      & > .v-label {
+        width: 100%;
+        overflow: hidden;
+      }
+    }
+
+    .c-sidemenu-controls .c-newwindow-button,
+    .c-sidemenu-controls .c-logout-button {
+      width: $cuba-sidemenu-layout-collapsed-width;
+      height: $cuba-sidemenu-layout-collapsed-width;
+
+      &::after {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    }
+
+    .c-sidemenu-controls .c-useractions-button {
+      width: $cuba-sidemenu-layout-collapsed-width;
+      height: $cuba-sidemenu-layout-collapsed-width;
+
+      & .v-menubar-menuitem {
+        width: $cuba-sidemenu-layout-collapsed-width;
+        height: $cuba-sidemenu-layout-collapsed-width;
+
+        line-height: $cuba-sidemenu-layout-collapsed-width;
+
+        border-radius: 0;
+      }
+    }
+
+    .c-sidemenu-controls .c-logout-button {
+      display: none;
+    }
+
+    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-logout-button {
+      display: block;
+    }
+
+    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-useractions-button {
+      display: none;
     }
   }
 }
@@ -439,13 +521,6 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       }
     }
 
-    .c-sidemenu-title {
-      padding: round($v-unit-size / 3);
-      @if $v-animations-enabled {
-        transition: padding-left $cuba-sidemenu-layout-collapse-animation-time cubic-bezier(.25, .1, .24, 1);
-      }
-    }
-
     .c-sidemenu-title .v-label {
       display: none;
     }
@@ -482,13 +557,6 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
 
       @if $v-animations-enabled {
         @include transition (max-height .9s ease-in-out);
-      }
-    }
-
-    .c-sidemenu-title {
-      padding: round($v-unit-size / 3) round($v-unit-size / 2);
-      @if $v-animations-enabled {
-        transition: padding-left $cuba-sidemenu-layout-collapse-animation-time cubic-bezier(.25, .1, .24, 1);
       }
     }
 

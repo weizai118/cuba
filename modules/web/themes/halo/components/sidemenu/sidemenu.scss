@@ -282,6 +282,7 @@ $cuba-sidemenu-userindicator-font-weight: $v-font-weight !default;
     }
     color: $font-color;
     font-size: $cuba-sidemenu-title-font-size;
+    line-height: $cuba-sidemenu-title-font-size * 1.4;
     font-weight: $cuba-sidemenu-title-font-weight;
 
     text-shadow: valo-text-shadow($font-color: $font-color, $background-color: $v-selection-color);
