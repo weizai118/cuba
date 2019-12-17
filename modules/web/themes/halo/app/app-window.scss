@@ -476,11 +476,11 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
       display: none;
     }
 
-    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-logout-button {
+    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-userindicator ~ .c-logout-button {
       display: block;
     }
 
-    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-useractions-button {
+    .c-sidemenu-panel.collapsed .c-sidemenu-controls .c-userindicator ~ .c-useractions-button {
       display: none;
     }
   }
