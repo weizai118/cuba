@@ -37,6 +37,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.app.UserSettingService;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.WebConfig;
+import com.vaadin.server.WebBrowser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -120,17 +121,25 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
         }
 
         initCollapsibleMenu();
-        initCollapseMenuButton();
     }
 
     protected void initCollapsibleMenu() {
         Component sideMenuContainer = getWindow().getComponent("sideMenuContainer");
         if (sideMenuContainer instanceof CssLayout) {
-            String menuCollapsedSetting = getBeanLocator().get(UserSettingService.class)
-                    .loadSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE);
+            if (isMobileDevice()) {
+                setSideMenuCollapsed(true);
+            } else {
+                String menuCollapsedSetting = getBeanLocator()
+                        .get(UserSettingService.class)
+                        .loadSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE);
 
-            setSideMenuCollapsed(Boolean.parseBoolean(menuCollapsedSetting));
+                boolean menuCollapsed = Boolean.parseBoolean(menuCollapsedSetting);
+
+                setSideMenuCollapsed(menuCollapsed);
+            }
         }
+
+        initCollapseMenuButton();
     }
 
     protected void initCollapseMenuButton() {
@@ -177,9 +186,20 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
                 .openDefaultScreen(screens);
     }
 
-    protected void setSideMenuCollapsed(boolean collapsed) {
-        UserSettingService userSettings = getBeanLocator().get(UserSettingService.class);
+    @Subscribe
+    public void onAfterDetach(AfterDetachEvent event) {
+        CssLayout sideMenuPanel = getSideMenuPanel();
+        if (sideMenuPanel != null) {
+            boolean collapsed = sideMenuPanel.getStyleName().contains(SIDEMENU_COLLAPSED_STYLENAME);
 
+            UserSettingService userSettings = getBeanLocator()
+                    .get(UserSettingService.class);
+
+            userSettings.saveSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE, String.valueOf(collapsed));
+        }
+    }
+
+    protected void setSideMenuCollapsed(boolean collapsed) {
         CssLayout sideMenuPanel = getSideMenuPanel();
         Button collapseMenuButton = getMenuCollapseButton();
         Component sideMenuContainer = getWindow().getComponent("sideMenuContainer");
@@ -197,8 +217,6 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
                 collapseMenuButton.setDescription(messages.getMainMessage("sideMenuCollapse"));
             }
         }
-
-        userSettings.saveSetting(ClientType.WEB, SIDEMENU_COLLAPSED_STATE, String.valueOf(collapsed));
     }
 
     protected boolean isMenuCollapsed() {
@@ -257,5 +275,14 @@ public class MainScreen extends Screen implements Window.HasWorkArea, Window.Has
     @Nullable
     protected UserActionsButton getUserActionsButton() {
         return (UserActionsButton) getWindow().getComponent("userActionsButton");
+    }
+
+    protected boolean isMobileDevice() {
+        WebBrowser browser = AppUI.getCurrent()
+                .getPage()
+                .getWebBrowser();
+
+        return browser.getScreenWidth() < 500
+                || browser.getScreenHeight() < 800;
     }
 }
