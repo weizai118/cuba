@@ -171,7 +171,7 @@ create table SEC_ROLE (
     primary key (ID)
 )^
 
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID, NAME, DELETE_TS)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME, SYS_TENANT_ID, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID, NAME, DELETE_TS)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME, SYS_TENANT_ID, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -249,7 +249,7 @@ create table SEC_USER (
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID, LOGIN_LC, DELETE_TS)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, SYS_TENANT_ID, DELETE_TS)^
 
 create clustered index IDX_SEC_USER_LOGIN on SEC_USER (LOGIN_LC)^
 

@@ -170,7 +170,7 @@ create table SEC_ROLE (
     primary key (ID)
 )^
 
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_ROLE
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
@@ -208,7 +208,7 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_GROUP_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_GROUP
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
@@ -277,7 +277,7 @@ create table SEC_USER (
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID_NN, LOGIN_LC, DELETE_TS_NN)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_USER_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_USER
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^

@@ -19,7 +19,7 @@ alter table SYS_ENTITY_SNAPSHOT add SYS_TENANT_ID varchar(255)^
 alter table SEC_SESSION_LOG add SYS_TENANT_ID varchar(255)^
 
 drop index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER^
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (SYS_TENANT_ID_NN, LOGIN_LC, DELETE_TS_NN)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_USER_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_USER
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
@@ -37,7 +37,7 @@ begin
 end^
 
 drop index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE^
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_ROLE
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
@@ -55,7 +55,7 @@ begin
 end^
 
 drop index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP^
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (SYS_TENANT_ID_NN, NAME, DELETE_TS_NN)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME, SYS_TENANT_ID_NN, DELETE_TS_NN)^
 
 create trigger SEC_GROUP_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_GROUP
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^

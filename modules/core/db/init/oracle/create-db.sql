@@ -484,7 +484,7 @@ create table SEC_GROUP (
     PARENT_ID varchar2(32),
     primary key(ID)
 )^
-create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP(SYS_TENANT_ID, NAME, DELETE_TS)^
+create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP(NAME, SYS_TENANT_ID, DELETE_TS)^
 
 create table SEC_GROUP_HIERARCHY (
     ID varchar2(32) not null,
@@ -569,7 +569,7 @@ create table SEC_ROLE (
     ROLE_TYPE integer,
     primary key(ID)
 )^
-create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE(SYS_TENANT_ID, NAME, DELETE_TS)^
+create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE(NAME, SYS_TENANT_ID, DELETE_TS)^
 
 create table SEC_SCREEN_HISTORY (
     ID varchar2(32) not null,
@@ -653,7 +653,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON char(1),
     primary key(ID)
 )^
-create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(SYS_TENANT_ID, LOGIN_LC, DELETE_TS)^
+create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER(LOGIN_LC, SYS_TENANT_ID, DELETE_TS)^
 
 create table SEC_USER_ROLE (
     ID varchar2(32) not null,

@@ -169,7 +169,7 @@ create table SEC_ROLE (
 )^
 
 create unique index IDX_SEC_ROLE_UNIQ_NAME on SEC_ROLE (NAME) where DELETE_TS is null and SYS_TENANT_ID is null^
-create unique index IDX_SEC_ROLE_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_ROLE (SYS_TENANT_ID, NAME)
+create unique index IDX_SEC_ROLE_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_ROLE (NAME, SYS_TENANT_ID)
     where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 create unique index IDX_SEC_GROUP_UNIQ_NAME on SEC_GROUP (NAME) where DELETE_TS is null and SYS_TENANT_ID is null^
-create unique index IDX_SEC_GROUP_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_GROUP (SYS_TENANT_ID, NAME)
+create unique index IDX_SEC_GROUP_UNIQ_NAME_SYS_TENANT_ID_NN on SEC_GROUP (NAME, SYS_TENANT_ID)
     where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ create table SEC_USER (
 )^
 
 create unique index IDX_SEC_USER_UNIQ_LOGIN on SEC_USER (LOGIN_LC) where DELETE_TS is null and SYS_TENANT_ID is null^
-create unique index IDX_SEC_USER_UNIQ_LOGIN_SYS_TENANT_ID_NN on SEC_USER (SYS_TENANT_ID, LOGIN_LC)
+create unique index IDX_SEC_USER_UNIQ_LOGIN_SYS_TENANT_ID_NN on SEC_USER (LOGIN_LC, SYS_TENANT_ID)
     where DELETE_TS is null and SYS_TENANT_ID is not null^
 
 ------------------------------------------------------------------------------------------------------------

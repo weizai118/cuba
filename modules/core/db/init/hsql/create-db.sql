@@ -184,7 +184,7 @@ create table SEC_ROLE (
 --	end if;
 --end;^
 
-alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
+alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (NAME, SYS_TENANT_ID, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -206,7 +206,7 @@ create table SEC_GROUP (
     constraint SEC_GROUP_PARENT foreign key (PARENT_ID) references SEC_GROUP(ID)
 )^
 
-alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
+alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (NAME, SYS_TENANT_ID, DELETE_TS)^
 
 ------------------------------------------------------------------------------------------------------------
 
@@ -257,7 +257,7 @@ create table SEC_USER (
     CHANGE_PASSWORD_AT_LOGON boolean,
     --
     primary key (ID),
-    constraint IDX_SEC_USER_UNIQ_LOGIN unique (SYS_TENANT_ID, LOGIN_LC, DELETE_TS),
+    constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, SYS_TENANT_ID, DELETE_TS),
     constraint SEC_USER_GROUP foreign key (GROUP_ID) references SEC_GROUP(ID)
 )^
 

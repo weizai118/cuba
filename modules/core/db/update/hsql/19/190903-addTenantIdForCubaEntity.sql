@@ -19,10 +19,10 @@ alter table SYS_ENTITY_SNAPSHOT add SYS_TENANT_ID varchar(255)^
 alter table SEC_SESSION_LOG add SYS_TENANT_ID varchar(255)^
 
 alter table SEC_USER drop constraint IDX_SEC_USER_UNIQ_LOGIN^
-alter table SEC_USER add constraint IDX_SEC_USER_UNIQ_LOGIN unique (SYS_TENANT_ID, LOGIN_LC, DELETE_TS)^
+alter table SEC_USER add constraint IDX_SEC_USER_UNIQ_LOGIN unique (LOGIN_LC, SYS_TENANT_ID, DELETE_TS)^
 
 alter table SEC_ROLE drop constraint IDX_SEC_ROLE_UNIQ_NAME^
-alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
+alter table SEC_ROLE add constraint IDX_SEC_ROLE_UNIQ_NAME unique (NAME, SYS_TENANT_ID, DELETE_TS)^
 
 alter table SEC_GROUP drop constraint IDX_SEC_GROUP_UNIQ_NAME^
-alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (SYS_TENANT_ID, NAME, DELETE_TS)^
+alter table SEC_GROUP add constraint IDX_SEC_GROUP_UNIQ_NAME unique (NAME, SYS_TENANT_ID, DELETE_TS)^
