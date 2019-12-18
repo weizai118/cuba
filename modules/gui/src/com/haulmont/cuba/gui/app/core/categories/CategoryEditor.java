@@ -76,7 +76,7 @@ public class CategoryEditor extends AbstractEditor<Category> {
             localizedFrame = (LocalizedNameFrame) openFrame(localizedGroupBox, "localizedNameFrame");
             localizedFrame.setWidth("100%");
             localizedFrame.setHeight(AUTO_SIZE);
-            localizedFrame.setValue(category.getLocaleNames());
+            localizedFrame.loadNamesValue(category.getLocaleNames());
         }
     }
 
@@ -140,7 +140,7 @@ public class CategoryEditor extends AbstractEditor<Category> {
     @Override
     protected boolean preCommit() {
         if (localizedFrame != null) {
-            category.setLocaleNames(localizedFrame.getValue());
+            category.setLocaleNames(localizedFrame.collectNamesValue());
         }
         return super.preCommit();
     }

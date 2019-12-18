@@ -41,8 +41,8 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         DataGrid.Column<AttributeLocaleData> descriptionColumn = dataGrid.getColumnNN(DESCRIPTION);
 
         setColumnDescriptionProvider(langColumn, null);
-        setColumnDescriptionProvider(nameColumn, AttributeLocaleData::getName);
-        setColumnDescriptionProvider(descriptionColumn, AttributeLocaleData::getDescription);
+        setColumnDescriptionProvider(nameColumn, NAME);
+        setColumnDescriptionProvider(descriptionColumn, DESCRIPTION);
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -55,37 +55,19 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         langColumn.setEditable(false);
     }
 
-
-    protected void setDescriptionProviders(DataGrid.Column<AttributeLocaleData> langColumn,
-                                           DataGrid.Column<AttributeLocaleData> nameColumn,
-                                           DataGrid.Column<AttributeLocaleData> descrColumn) {
-
-        langColumn.setDescriptionProvider(attributeLocaleData -> getMessage("localeDataDescription"));
-
-        nameColumn.setDescriptionProvider(attributeLocaleData -> {
-            String nameValue = attributeLocaleData.getName() != null ? attributeLocaleData.getName() + "\n\n" : "";
-            return nameValue + getMessage("localeDataDescription");
-        });
-
-        descrColumn.setDescriptionProvider(attributeLocaleData -> {
-            String nameValue = attributeLocaleData.getDescription() != null ? attributeLocaleData.getDescription() + "\n\n" : "";
-            return nameValue + getMessage("localeDataDescription");
-        });
+    protected String collectNamesValue() {
+        return collectLocaleValues(NAME);
     }
 
-    protected String getNamesValue() {
-        return storeLocaleValues(AttributeLocaleData::getName);
+    protected String collectDescriptionsValue() {
+        return collectLocaleValues(DESCRIPTION);
     }
 
-    protected String getDescriptionsValue() {
-        return storeLocaleValues(AttributeLocaleData::getDescription);
+    protected void loadNamesValue(String localeBundle) {
+        loadLocaleValues(localeBundle, NAME);
     }
 
-    protected void setNamesValue(String localeBundle) {
-        loadLocaleValues(localeBundle, AttributeLocaleData::setName);
-    }
-
-    protected void setDescriptionsValue(String localeBundle) {
-        loadLocaleValues(localeBundle, AttributeLocaleData::setDescription);
+    protected void loadDescriptionsValue(String localeBundle) {
+        loadLocaleValues(localeBundle, DESCRIPTION);
     }
 }

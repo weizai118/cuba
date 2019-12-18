@@ -30,11 +30,10 @@ import com.haulmont.cuba.gui.components.data.DataGridItems;
 import com.haulmont.cuba.gui.components.data.datagrid.ContainerDataGridItems;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataComponents;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
 
@@ -113,34 +112,33 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         }));
     }
 
-    protected void setColumnDescriptionProvider(DataGrid.Column<AttributeLocaleData> column,
-                                                Function<AttributeLocaleData, String> getterMethod) {
+    protected void setColumnDescriptionProvider(DataGrid.Column<AttributeLocaleData> column, String paramName) {
         String localeDescription = getMessage("localeDataDescription");
 
         column.setDescriptionProvider(attributeLocaleData -> {
-            if (getterMethod != null) {
-                String value = getterMethod.apply(attributeLocaleData) != null ?
-                        getterMethod.apply(attributeLocaleData) + "\n\n" : "";
-                return value + localeDescription;
+            if (StringUtils.isNotEmpty(paramName)) {
+                String paramValue = attributeLocaleData.getValue(paramName);
+                if (StringUtils.isNotEmpty(paramValue)) {
+                    return formatMessage("localeDataDescriptionWithValue", paramValue);
+                }
             }
             return localeDescription;
         });
     }
 
-    protected void loadLocaleValues(String localeBundle, BiConsumer<AttributeLocaleData, String> setterMethod) {
+    protected void loadLocaleValues(String localeBundle, String paramName) {
         Map<String, String> localizedNamesMap = LocaleHelper.getLocalizedValuesMap(localeBundle);
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
-            setterMethod.accept(attributeLocaleData,
-                    localizedNamesMap.get(attributeLocaleData.getLocale()));
+            attributeLocaleData.setValue(paramName, localizedNamesMap.get(attributeLocaleData.getLocale()));
         }
     }
 
-    protected String storeLocaleValues(Function<AttributeLocaleData, String> getterMethod) {
+    protected String collectLocaleValues(String paramName) {
         Properties properties = new Properties();
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
-            String value = getterMethod.apply(attributeLocaleData);
+            String value = attributeLocaleData.getValue(paramName);
             if (attributeLocaleData.getName() != null && value != null) {
                 properties.put(attributeLocaleData.getLocale(), value);
             }

@@ -38,7 +38,7 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
         DataGrid.Column<AttributeLocaleData> nameColumn = dataGrid.getColumnNN(NAME);
 
         setColumnDescriptionProvider(langColumn, null);
-        setColumnDescriptionProvider(nameColumn, AttributeLocaleData::getName);
+        setColumnDescriptionProvider(nameColumn, NAME);
 
         langColumn.setResizable(false);
         nameColumn.setResizable(false);
@@ -49,12 +49,12 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
         langColumn.setEditable(false);
     }
 
-    public String getValue() {
-        return storeLocaleValues(AttributeLocaleData::getName);
+    public String collectNamesValue() {
+        return collectLocaleValues(NAME);
     }
 
-    public void setValue(String localeBundle) {
-        loadLocaleValues(localeBundle, AttributeLocaleData::setName);
+    public void loadNamesValue(String localeBundle) {
+        loadLocaleValues(localeBundle, NAME);
     }
 
     public void clearFields() {
