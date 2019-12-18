@@ -49,12 +49,12 @@ public class LocalizedNameFrame extends AbstractLocalizedTextFieldsFrame {
         langColumn.setEditable(false);
     }
 
-    public String collectNamesValue() {
-        return collectLocaleValues(NAME);
+    public String getValue() {
+        return getValues(NAME);
     }
 
-    public void loadNamesValue(String localeBundle) {
-        loadLocaleValues(localeBundle, NAME);
+    public void setValue(String localeBundle) {
+        setValues(localeBundle, NAME);
     }
 
     public void clearFields() {

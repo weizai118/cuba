@@ -55,19 +55,19 @@ public class LocalizedNameAndDescriptionFrame extends AbstractLocalizedTextField
         langColumn.setEditable(false);
     }
 
-    protected String collectNamesValue() {
-        return collectLocaleValues(NAME);
+    protected String getNamesValue() {
+        return getValues(NAME);
     }
 
-    protected String collectDescriptionsValue() {
-        return collectLocaleValues(DESCRIPTION);
+    protected String getDescriptionsValue() {
+        return getValues(DESCRIPTION);
     }
 
-    protected void loadNamesValue(String localeBundle) {
-        loadLocaleValues(localeBundle, NAME);
+    protected void setNamesValue(String localeBundle) {
+        setValues(localeBundle, NAME);
     }
 
-    protected void loadDescriptionsValue(String localeBundle) {
-        loadLocaleValues(localeBundle, DESCRIPTION);
+    protected void setDescriptionsValue(String localeBundle) {
+        setValues(localeBundle, DESCRIPTION);
     }
 }

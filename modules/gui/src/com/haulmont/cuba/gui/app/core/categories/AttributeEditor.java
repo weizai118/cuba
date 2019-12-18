@@ -252,8 +252,8 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         }
 
         if (localizedFrame != null) {
-            localizedFrame.loadNamesValue(attribute.getLocaleNames());
-            localizedFrame.loadDescriptionsValue(attribute.getLocaleDescriptions());
+            localizedFrame.setNamesValue(attribute.getLocaleNames());
+            localizedFrame.setDescriptionsValue(attribute.getLocaleDescriptions());
         }
 
         dependsOnAttributesListEditor.setOptionsList(getAttributesOptions());
@@ -604,8 +604,8 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         attribute.setTargetScreens(stringBuilder.toString());
 
         if (localizedFrame != null) {
-            attribute.setLocaleNames(localizedFrame.collectNamesValue());
-            attribute.setLocaleDescriptions(localizedFrame.collectDescriptionsValue());
+            attribute.setLocaleNames(localizedFrame.getNamesValue());
+            attribute.setLocaleDescriptions(localizedFrame.getDescriptionsValue());
         }
 
         if (getDsContext().isModified()) {

@@ -32,6 +32,7 @@ import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.DataComponents;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.*;
 
@@ -112,11 +113,11 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         }));
     }
 
-    protected void setColumnDescriptionProvider(DataGrid.Column<AttributeLocaleData> column, String paramName) {
+    protected void setColumnDescriptionProvider(DataGrid.Column<AttributeLocaleData> column, @Nullable String paramName) {
         String localeDescription = getMessage("localeDataDescription");
 
         column.setDescriptionProvider(attributeLocaleData -> {
-            if (StringUtils.isNotEmpty(paramName)) {
+            if (paramName != null) {
                 String paramValue = attributeLocaleData.getValue(paramName);
                 if (StringUtils.isNotEmpty(paramValue)) {
                     return formatMessage("localeDataDescriptionWithValue", paramValue);
@@ -126,7 +127,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         });
     }
 
-    protected void loadLocaleValues(String localeBundle, String paramName) {
+    protected void setValues(String localeBundle, String paramName) {
         Map<String, String> localizedNamesMap = LocaleHelper.getLocalizedValuesMap(localeBundle);
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {
@@ -134,7 +135,7 @@ public abstract class AbstractLocalizedTextFieldsFrame extends AbstractFrame {
         }
     }
 
-    protected String collectLocaleValues(String paramName) {
+    protected String getValues(String paramName) {
         Properties properties = new Properties();
 
         for (AttributeLocaleData attributeLocaleData : collectionContainer.getItems()) {

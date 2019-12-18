@@ -82,7 +82,7 @@ public class LocalizedEnumerationWindow extends AbstractWindow implements ListEd
             } else {
                 CategoryAttributeEnumValue prevItem = e.getPrevItem();
 
-                String changedValues = LocaleHelper.convertFromSimpleKeyLocales(prevItem.getValue(), localizedFrame.collectNamesValue());
+                String changedValues = LocaleHelper.convertFromSimpleKeyLocales(prevItem.getValue(), localizedFrame.getValue());
                 Map<String, String> changedValuesMap = LocaleHelper.getLocalizedValuesMap(changedValues);
                 Map<String, String> itemValuesMap = LocaleHelper.getLocalizedValuesMap(prevItem.getLocalizedValues());
 
@@ -97,7 +97,7 @@ public class LocalizedEnumerationWindow extends AbstractWindow implements ListEd
                 String localizedValues =
                         e.getItem().getLocalizedValues() == null ?
                                 "" : LocaleHelper.convertToSimpleKeyLocales(e.getItem().getLocalizedValues());
-                localizedFrame.loadNamesValue(localizedValues);
+                localizedFrame.setValue(localizedValues);
             }
         });
 
@@ -189,7 +189,7 @@ public class LocalizedEnumerationWindow extends AbstractWindow implements ListEd
         if (!enumValuesTable.getSelected().isEmpty()) {
             CategoryAttributeEnumValue enumValue = enumValuesTable.getSelected().iterator().next();
             enumValue.setLocalizedValues(
-                    LocaleHelper.convertFromSimpleKeyLocales(enumValue.getValue(), localizedFrame.collectNamesValue())
+                    LocaleHelper.convertFromSimpleKeyLocales(enumValue.getValue(), localizedFrame.getValue())
             );
         }
         enumValuesDs.commit();
