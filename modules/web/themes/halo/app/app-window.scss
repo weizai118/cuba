@@ -424,6 +424,10 @@ $cuba-sidemenu-layout-collapse-animation-time: .3s !default;
         color: $cuba-menubar-menuitem-text-selected-color;
       }
 
+      &::before {
+        height: 100%;
+      }
+
       &::after {
         top: 0;
         right: 0;
