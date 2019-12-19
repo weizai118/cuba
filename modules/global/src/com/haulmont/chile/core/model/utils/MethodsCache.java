@@ -23,10 +23,13 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class MethodsCache {
 
@@ -81,16 +84,27 @@ public class MethodsCache {
 
     protected Function createGetter(Class clazz, Method method) {
         Function getter;
+        MethodHandles.Lookup caller = MethodHandles.lookup();
         try {
-            MethodHandles.Lookup caller = MethodHandles.lookup();
-            CallSite site = LambdaMetafactory.metafactory(caller,
-                    "apply",
-                    MethodType.methodType(Function.class),
-                    MethodType.methodType(Object.class, Object.class),
-                    caller.findVirtual(clazz, method.getName(), MethodType.methodType(method.getReturnType())),
-                    MethodType.methodType(method.getReturnType(), clazz));
-            MethodHandle factory = site.getTarget();
-            getter = (Function) factory.invoke();
+            if (Modifier.isStatic(method.getModifiers())) {
+                CallSite site = LambdaMetafactory.metafactory(caller,
+                        "apply",
+                        MethodType.methodType(Supplier.class),
+                        MethodType.methodType(Object.class),
+                        caller.findStatic(clazz, method.getName(), MethodType.methodType(method.getReturnType())),
+                        MethodType.methodType(method.getReturnType()));
+                MethodHandle factory = site.getTarget();
+                getter =  new StaticMethodGetter<>((Supplier) factory.invoke());
+            } else {
+                CallSite site = LambdaMetafactory.metafactory(caller,
+                        "apply",
+                        MethodType.methodType(Function.class),
+                        MethodType.methodType(Object.class, Object.class),
+                        caller.findVirtual(clazz, method.getName(), MethodType.methodType(method.getReturnType())),
+                        MethodType.methodType(method.getReturnType(), clazz));
+                MethodHandle factory = site.getTarget();
+                getter = (Function) factory.invoke();
+            }
         } catch (Throwable t) {
             throw new RuntimeException("Can not create getter", t);
         }
@@ -101,20 +115,44 @@ public class MethodsCache {
     protected BiConsumer createSetter(Class clazz, Method method) {
         Class valueType = method.getParameterTypes()[0];
         BiConsumer setter;
+        MethodHandles.Lookup caller = MethodHandles.lookup();
         try {
-            MethodHandles.Lookup caller = MethodHandles.lookup();
-            CallSite site = LambdaMetafactory.metafactory(caller,
-                    "accept",
-                    MethodType.methodType(BiConsumer.class),
-                    MethodType.methodType(void.class, Object.class, Object.class),
-                    caller.findVirtual(clazz, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()[0])),
-                    MethodType.methodType(void.class, clazz, valueType.isPrimitive() ? primitivesToObjects.get(valueType) : valueType));
-            MethodHandle factory = site.getTarget();
-            setter = (BiConsumer) factory.invoke();
+            if (Modifier.isStatic(method.getModifiers())) {
+                MethodHandle target = caller.findStatic(clazz,
+                        method.getName(),
+                        MethodType.methodType(method.getReturnType(), method.getParameterTypes()[0]));
+                MethodType instantiatedMethodType =
+                        MethodType.methodType(void.class,
+                                valueType.isPrimitive() ?
+                                        primitivesToObjects.get(valueType) : valueType);
+                CallSite site = LambdaMetafactory.metafactory(caller,
+                        "accept",
+                        MethodType.methodType(Consumer.class),
+                        MethodType.methodType(void.class, Object.class),
+                        target,
+                        instantiatedMethodType);
+                MethodHandle factory = site.getTarget();
+                setter = new StaticMethodSetter<>((Consumer<Object>) factory.invoke());
+            } else {
+                MethodHandle target = caller.findVirtual(clazz,
+                        method.getName(),
+                        MethodType.methodType(method.getReturnType(), method.getParameterTypes()[0]));
+                MethodType instantiatedMethodType = MethodType.methodType(void.class,
+                        clazz,
+                        valueType.isPrimitive() ?
+                                primitivesToObjects.get(valueType) : valueType);
+                CallSite site = LambdaMetafactory.metafactory(caller,
+                        "accept",
+                        MethodType.methodType(BiConsumer.class),
+                        MethodType.methodType(void.class, Object.class, Object.class),
+                        target,
+                        instantiatedMethodType);
+                MethodHandle factory = site.getTarget();
+                setter = (BiConsumer) factory.invoke();
+            }
         } catch (Throwable t) {
             throw new RuntimeException("Can not create setter", t);
         }
-
         return setter;
     }
 
@@ -154,5 +192,31 @@ public class MethodsCache {
                     String.format("Can't find setter for property '%s' at %s", property, className));
         }
         return setter;
+    }
+
+    protected class StaticMethodSetter<T, U> implements BiConsumer<T, U> {
+        protected Consumer<U> consumer;
+
+        StaticMethodSetter(Consumer<U> consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void accept(T t, U u) {
+            consumer.accept(u);
+        }
+    }
+
+    protected class StaticMethodGetter<T, R> implements Function<T, R> {
+        protected Supplier<R> supplier;
+
+        StaticMethodGetter(Supplier<R> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public R apply(T t) {
+            return supplier.get();
+        }
     }
 }
