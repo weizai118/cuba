@@ -23,6 +23,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -50,11 +51,13 @@ public class MethodsCache {
         final Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             String name = method.getName();
-            if (name.startsWith("get") && method.getParameterTypes().length == 0) {
+            if (name.startsWith("get") && method.getParameterTypes().length == 0
+                    && !Modifier.isStatic(method.getModifiers())) {
                 Function getter = createGetter(clazz, method);
                 name = StringUtils.uncapitalize(name.substring(3));
                 getters.put(name, getter);
-            } else if (name.startsWith("is") && method.getParameterTypes().length == 0) {
+            } else if (name.startsWith("is") && method.getParameterTypes().length == 0
+                    && !Modifier.isStatic(method.getModifiers())) {
                 Function getter = createGetter(clazz, method);
                 Field isField = ReflectionUtils.findField(clazz, name);
                 if (isField != null) {
@@ -65,7 +68,8 @@ public class MethodsCache {
                     name = StringUtils.uncapitalize(name.substring(2));
                     getters.put(name, getter);
                 }
-            } else if (name.startsWith("set") && method.getParameterTypes().length == 1) {
+            } else if (name.startsWith("set") && method.getParameterTypes().length == 1
+                    && !Modifier.isStatic(method.getModifiers())) {
                 BiConsumer setter = createSetter(clazz, method);
                 Field isField = ReflectionUtils.findField(clazz, "is" + name.substring(3));
                 if (isField != null) {
