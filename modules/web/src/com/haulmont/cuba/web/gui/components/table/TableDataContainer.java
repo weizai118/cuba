@@ -226,7 +226,8 @@ public class TableDataContainer<I> implements Container, ItemSetChangeNotifier {
         if (tableItems.supportsProperty(propertyId)) {
             return this.properties.add(propertyId);
         }
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(String.format("Unsupported column id '%s'. " +
+                "Table only supports MetaPropertyPath as a column id", propertyId));
     }
 
     @Override
