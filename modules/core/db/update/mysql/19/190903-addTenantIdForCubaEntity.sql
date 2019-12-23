@@ -2,9 +2,12 @@ alter table SYS_FILE add SYS_TENANT_ID varchar(255)^
 alter table SYS_SCHEDULED_TASK add SYS_TENANT_ID varchar(255)^
 alter table SYS_SCHEDULED_EXECUTION add SYS_TENANT_ID varchar(255)^
 alter table SEC_ROLE add SYS_TENANT_ID varchar(255)^
+alter table SEC_ROLE add SYS_TENANT_ID_NN varchar(255)^
 alter table SEC_GROUP add SYS_TENANT_ID varchar(255)^
+alter table SEC_GROUP add SYS_TENANT_ID_NN varchar(255)^
 alter table SEC_GROUP_HIERARCHY add SYS_TENANT_ID varchar(255)^
 alter table SEC_USER add SYS_TENANT_ID varchar(255)^
+alter table SEC_USER add SYS_TENANT_ID_NN varchar(255)^
 alter table SEC_CONSTRAINT add SYS_TENANT_ID varchar(255)^
 alter table SEC_SESSION_ATTR add SYS_TENANT_ID varchar(255)^
 alter table SEC_USER_SUBSTITUTION add SYS_TENANT_ID varchar(255)^
@@ -25,7 +28,7 @@ create trigger SEC_USER_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_USE
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
 
 drop trigger SEC_USER_DELETE_TS_NN_TRIGGER on SEC_USER^
-create trigger SEC_USER_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_USER
+create trigger SEC_USER_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_USER
 for each row
 begin
     if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
@@ -43,7 +46,7 @@ create trigger SEC_ROLE_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_ROL
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
 
 drop trigger SEC_ROLE_DELETE_TS_NN_TRIGGER on SEC_ROLE^
-create trigger SEC_ROLE_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_ROLE
+create trigger SEC_ROLE_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_ROLE
 for each row
 begin
     if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
@@ -61,7 +64,7 @@ create trigger SEC_GROUP_SYS_TENANT_ID_NN_INSERT_TRIGGER before insert on SEC_GR
 for each row set NEW.SYS_TENANT_ID_NN = if (NEW.SYS_TENANT_ID is null, 'no_tenant', NEW.SYS_TENANT_ID)^
 
 drop trigger SEC_GROUP_DELETE_TS_NN_TRIGGER on SEC_GROUP^
-create trigger SEC_GROUP_DELETE_TS_NN_AND_SYS_TENANT_ID_NN_TRIGGER before update on SEC_GROUP
+create trigger SEC_GROUP_SYS_TENANT_ID_NN_AND_DELETE_TS_NN_UPDATE_TRIGGER before update on SEC_GROUP
 for each row
 begin
     if not(NEW.SYS_TENANT_ID <=> OLD.SYS_TENANT_ID) then
